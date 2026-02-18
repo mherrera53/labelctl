@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TSC Bridge — Dashboard</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect x='8' y='16' width='48' height='36' rx='4' fill='%231a1d27' stroke='%236c72ff' stroke-width='2.5'/%3E%3Crect x='14' y='22' width='36' height='8' rx='2' fill='%23232736' stroke='%236c72ff' stroke-width='1.5'/%3E%3Crect x='14' y='34' width='36' height='4' rx='1' fill='%236c72ff' opacity='.3'/%3E%3Crect x='14' y='40' width='36' height='4' rx='1' fill='%236c72ff' opacity='.2'/%3E%3Ccircle cx='46' cy='25' r='2' fill='%2334d399'/%3E%3Cpath d='M44 10a12 12 0 0 1 12 0' stroke='%2360a5fa' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3Cpath d='M46 13a7 7 0 0 1 7 0' stroke='%2360a5fa' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E">
+<style>
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d27;
+    --surface-2: #232736;
+    --border: #2e3348;
+    --text: #e4e6f0;
+    --text-dim: #8b8fa3;
+    --accent: #6c72ff;
+    --accent-hover: #8186ff;
+    --green: #34d399;
+    --red: #f87171;
+    --orange: #fbbf24;
+    --radius: 8px;
+    --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    --mono: 'SF Mono', 'Cascadia Code', 'Consolas', monospace;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: var(--font);
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.5;
+    min-height: 100vh;
+  }
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+  }
+  header h1 {
+    font-size: 18px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+  header h1 span { color: var(--accent); }
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+  }
+  .badge-green { background: rgba(52,211,153,0.15); color: var(--green); }
+  .badge-red { background: rgba(248,113,113,0.15); color: var(--red); }
+  .badge-orange { background: rgba(251,191,36,0.15); color: var(--orange); }
+  .badge-blue { background: rgba(96,165,250,0.15); color: #60a5fa; }
+  .badge-purple { background: rgba(167,139,250,0.15); color: #a78bfa; }
+
+  main { max-width: 960px; margin: 0 auto; padding: 24px; }
+
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+  @media (max-width: 640px) { .grid { grid-template-columns: 1fr; } }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+  }
+  .card-full { grid-column: 1 / -1; }
+  .card h2 {
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-dim);
+    margin-bottom: 12px;
+  }
+
+  .stat-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 0;
+    font-size: 14px;
+  }
+  .stat-row .label { color: var(--text-dim); }
+
+  .printer-list { list-style: none; }
+  .printer-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 12px;
+    border-radius: 6px;
+    margin-bottom: 6px;
+    background: var(--surface-2);
+    font-size: 14px;
+  }
+  .printer-item .name { font-family: var(--mono); font-size: 13px; }
+  .printer-actions { display: flex; gap: 6px; }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--surface-2);
+    color: var(--text);
+    font-size: 13px;
+    font-family: var(--font);
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .btn:hover { background: var(--border); }
+  .btn-primary {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+  }
+  .btn-primary:hover { background: var(--accent-hover); }
+  .btn-sm { padding: 4px 10px; font-size: 12px; }
+  .btn[disabled] { opacity: 0.5; cursor: not-allowed; }
+
+  select, input[type="number"], input[type="text"] {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text);
+    padding: 8px 12px;
+    font-size: 14px;
+    font-family: var(--font);
+    width: 100%;
+  }
+  select:focus, input:focus, textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+  }
+
+  .form-group { margin-bottom: 12px; }
+  .form-group label {
+    display: block;
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-bottom: 4px;
+    font-weight: 500;
+  }
+
+  textarea {
+    width: 100%;
+    min-height: 140px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text);
+    padding: 12px;
+    font-family: var(--mono);
+    font-size: 13px;
+    resize: vertical;
+  }
+
+  .preview-label {
+    background: #fff;
+    border-radius: 4px;
+    position: relative;
+    margin: 12px auto;
+    border: 1px solid var(--border);
+  }
+  .preview-label .col {
+    position: absolute;
+    top: 10%;
+    height: 80%;
+    border: 1px dashed rgba(108,114,255,0.5);
+    border-radius: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    color: var(--accent);
+    font-weight: 600;
+  }
+
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    transform: translateY(100px);
+    opacity: 0;
+    transition: transform 0.3s, opacity 0.3s;
+    z-index: 100;
+  }
+  .toast.show { transform: translateY(0); opacity: 1; }
+  .toast.success { border-color: var(--green); color: var(--green); }
+  .toast.error { border-color: var(--red); color: var(--red); }
+
+  .inline-flex { display: flex; gap: 8px; align-items: center; }
+  .flex-between { display: flex; align-items: center; justify-content: space-between; }
+  .mt-12 { margin-top: 12px; }
+  .mt-8 { margin-top: 8px; }
+  .text-sm { font-size: 12px; color: var(--text-dim); }
+
+  .toggle {
+    position: relative;
+    width: 44px;
+    height: 24px;
+    background: var(--border);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: background 0.2s;
+    border: none;
+    flex-shrink: 0;
+  }
+  .toggle.active { background: var(--green); }
+  .toggle::after {
+    content: '';
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 18px;
+    height: 18px;
+    background: #fff;
+    border-radius: 50%;
+    transition: transform 0.2s;
+  }
+  .toggle.active::after { transform: translateX(20px); }
+
+  .share-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 12px;
+    border-radius: 6px;
+    background: var(--surface-2);
+    font-size: 13px;
+  }
+  .share-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .share-dot.on { background: var(--green); box-shadow: 0 0 6px var(--green); }
+  .share-dot.off { background: var(--text-dim); }
+
+  .section-divider {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-dim);
+    padding: 8px 0 4px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 8px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1 style="display:flex;align-items:center;gap:10px;">
+    <svg width="28" height="28" viewBox="0 0 64 64" style="flex-shrink:0">
+      <rect x="8" y="16" width="48" height="36" rx="4" fill="var(--surface-2)" stroke="var(--accent)" stroke-width="2.5"/>
+      <rect x="14" y="22" width="36" height="8" rx="2" fill="var(--bg)" stroke="var(--accent)" stroke-width="1.5"/>
+      <rect x="14" y="34" width="36" height="4" rx="1" fill="var(--accent)" opacity=".3"/>
+      <rect x="14" y="40" width="36" height="4" rx="1" fill="var(--accent)" opacity=".2"/>
+      <circle cx="46" cy="25" r="2" fill="var(--green)"/>
+      <path d="M44 10a12 12 0 0 1 12 0" stroke="#60a5fa" stroke-width="2" fill="none" stroke-linecap="round"/>
+      <path d="M46 13a7 7 0 0 1 7 0" stroke="#60a5fa" stroke-width="2" fill="none" stroke-linecap="round"/>
+    </svg>
+    TSC <span>Bridge</span>
+  </h1>
+  <div id="statusBadge" class="badge badge-green">Conectado</div>
+</header>
+
+<main>
+  <!-- Status + Local Printers -->
+  <div class="grid">
+    <div class="card" id="statusCard">
+      <h2>Estado</h2>
+      <div class="stat-row"><span class="label">Version</span> <span id="sVersion">—</span></div>
+      <div class="stat-row"><span class="label">OS</span> <span id="sOS">—</span></div>
+      <div class="stat-row"><span class="label">Puerto API</span> <span id="sPort">—</span></div>
+      <div class="stat-row"><span class="label">Preset activo</span> <span id="sPreset">—</span></div>
+      <div class="stat-row"><span class="label">Impresora</span> <span id="sPrinter">—</span></div>
+    </div>
+
+    <div class="card">
+      <h2>Impresoras Locales</h2>
+      <ul class="printer-list" id="localPrinterList">
+        <li class="printer-item"><span style="color:var(--text-dim)">Buscando...</span></li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Network Discovery + Sharing -->
+  <div class="grid">
+    <div class="card">
+      <h2 class="flex-between">
+        Impresoras en Red
+        <button class="btn btn-sm" id="scanNetBtn" onclick="scanNetwork()">Escanear Red</button>
+      </h2>
+      <ul class="printer-list" id="netPrinterList">
+        <li class="printer-item"><span style="color:var(--text-dim)">Sin escanear</span></li>
+      </ul>
+      <div class="mt-8 text-sm" id="scanInfo"></div>
+      <div class="mt-12 inline-flex">
+        <input type="text" id="manualIp" placeholder="IP manual (ej: 192.168.1.50)" style="flex:1;">
+        <button class="btn btn-sm" onclick="probeManualIp()">Agregar</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Compartir Impresora USB</h2>
+      <p class="text-sm" style="margin-bottom:12px;">Expone una impresora USB local en la red via puerto TCP. Otras PCs pueden imprimir enviando TSPL2 directo.</p>
+      <div class="share-status" id="shareStatus">
+        <div class="share-dot off" id="shareDot"></div>
+        <span id="shareLabel">Desactivado</span>
+      </div>
+      <div class="mt-12 flex-between">
+        <div>
+          <span class="text-sm">Puerto: </span>
+          <span id="sharePort" style="font-family:var(--mono);font-size:13px;">9100</span>
+          <span class="text-sm" style="margin-left:12px;">Jobs: </span>
+          <span id="shareJobs" style="font-family:var(--mono);font-size:13px;">0</span>
+        </div>
+        <button class="toggle" id="shareToggle" onclick="toggleShareBtn()"></button>
+      </div>
+      <div class="form-group mt-12">
+        <label>Impresora a compartir</label>
+        <select id="sharePrinterSelect"></select>
+      </div>
+    </div>
+  </div>
+
+  <!-- Autostart + Download -->
+  <div class="grid">
+    <div class="card">
+      <h2>Auto-inicio</h2>
+      <p class="text-sm" style="margin-bottom:12px;">Inicia TSC Bridge automaticamente al encender el equipo.</p>
+      <div class="flex-between">
+        <div>
+          <div class="share-status" id="autostartStatus">
+            <div class="share-dot off" id="autostartDot"></div>
+            <span id="autostartLabel">Verificando...</span>
+          </div>
+        </div>
+        <button class="toggle" id="autostartToggle" onclick="toggleAutoStart()"></button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Descargar Instalador</h2>
+      <p class="text-sm" style="margin-bottom:12px;">Descarga el binario para instalar en otra PC.</p>
+      <div class="inline-flex">
+        <a class="btn" href="/download?os=mac" download>macOS (arm64)</a>
+        <a class="btn" href="/download?os=windows" download>Windows (x64)</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Preset selector + preview -->
+  <div class="grid">
+    <div class="card">
+      <h2>Preset de Etiqueta</h2>
+      <div class="form-group">
+        <label>Preset activo</label>
+        <select id="presetSelect"></select>
+      </div>
+      <div id="presetInfo" style="font-size:13px; color:var(--text-dim)"></div>
+      <div class="mt-12">
+        <button class="btn btn-primary btn-sm" onclick="savePreset()">Guardar como predeterminado</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Preview del Layout</h2>
+      <div id="presetPreview" style="display:flex;align-items:center;justify-content:center;min-height:100px;"></div>
+    </div>
+  </div>
+
+  <!-- Config -->
+  <div class="grid">
+    <div class="card card-full">
+      <h2>Configuracion</h2>
+      <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px;">
+        <div class="form-group">
+          <label>Puerto</label>
+          <input type="number" id="cfgPort" value="9271">
+        </div>
+        <div class="form-group">
+          <label>Impresora predeterminada</label>
+          <select id="cfgPrinter"></select>
+        </div>
+        <div class="form-group">
+          <label>Preset predeterminado</label>
+          <select id="cfgPreset"></select>
+        </div>
+      </div>
+      <div class="mt-12">
+        <button class="btn btn-primary" onclick="saveConfig()">Guardar configuracion</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Test Print -->
+  <div class="grid">
+    <div class="card card-full">
+      <h2>Test de Impresion</h2>
+      <div class="form-group">
+        <label>Comandos TSPL2 (editables)</label>
+        <textarea id="tsplInput"></textarea>
+      </div>
+      <div class="inline-flex mt-12">
+        <button class="btn btn-primary" onclick="sendTestPrint()">Enviar a impresora</button>
+        <button class="btn" onclick="loadTestTemplate()">Cargar template de prueba</button>
+        <select id="testPrinter" style="width:auto;min-width:180px;"></select>
+      </div>
+    </div>
+  </div>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const API = window.location.origin;
+
+// --- State ---
+let printers = [];
+let presets = [];
+let config = {};
+let shareStatus = {};
+
+// --- Init ---
+document.addEventListener('DOMContentLoaded', () => {
+  refresh();
+  setInterval(() => { refreshStatus(); refreshShare(); }, 10000);
+});
+
+async function refresh() {
+  await Promise.all([refreshStatus(), refreshPrinters(), refreshPresets(), refreshConfig(), refreshShare(), refreshAutoStart()]);
+}
+
+// --- Status ---
+async function refreshStatus() {
+  try {
+    const r = await fetch(API + '/status');
+    const d = await r.json();
+    document.getElementById('sVersion').textContent = d.version || '—';
+    document.getElementById('sOS').textContent = d.os || '—';
+    document.getElementById('sPort').textContent = d.port || location.port || '—';
+    document.getElementById('sPreset').textContent = d.default_preset || '—';
+    document.getElementById('sPrinter').textContent = d.default_printer || '(auto)';
+    document.getElementById('statusBadge').className = 'badge badge-green';
+    document.getElementById('statusBadge').textContent = 'Conectado';
+  } catch {
+    document.getElementById('statusBadge').className = 'badge badge-red';
+    document.getElementById('statusBadge').textContent = 'Desconectado';
+  }
+}
+
+// --- Printers ---
+async function refreshPrinters() {
+  try {
+    const r = await fetch(API + '/printers');
+    const d = await r.json();
+    printers = d.printers || [];
+    renderLocalPrinters();
+    renderNetPrinters();
+    populatePrinterSelects();
+  } catch { printers = []; }
+}
+
+function typeBadge(type_) {
+  const m = {
+    usb:     { cls: 'badge-green',  label: 'USB' },
+    cups:    { cls: 'badge-orange', label: 'CUPS' },
+    spooler: { cls: 'badge-purple', label: 'Spooler' },
+    network: { cls: 'badge-blue',   label: 'RED' },
+  };
+  const t = m[type_] || { cls: 'badge-green', label: type_ || '?' };
+  return `<span class="badge ${t.cls}" style="font-size:11px;padding:2px 8px;">${t.label}</span>`;
+}
+
+function printerItem(p) {
+  const name = typeof p === 'string' ? p : p.name;
+  const type_ = typeof p === 'string' ? '' : p.type;
+  const addr = (p.address || '');
+  const addrHtml = addr ? `<span class="text-sm" style="margin-left:6px;">${esc(addr)}</span>` : '';
+  return `
+  <li class="printer-item">
+    <span class="name">${esc(name)} ${typeBadge(type_)}${addrHtml}</span>
+    <div class="printer-actions">
+      <button class="btn btn-sm" onclick="setDefaultPrinter('${esc(name)}')">Predeterminar</button>
+      <button class="btn btn-sm btn-primary" onclick="testPrintOnPrinter('${esc(name)}')">Test</button>
+    </div>
+  </li>`;
+}
+
+function renderLocalPrinters() {
+  const ul = document.getElementById('localPrinterList');
+  const local = printers.filter(p => (typeof p === 'string') || p.type !== 'network');
+  if (!local.length) {
+    ul.innerHTML = '<li class="printer-item"><span style="color:var(--text-dim)">No se detectaron impresoras locales</span></li>';
+    return;
+  }
+  ul.innerHTML = local.map(printerItem).join('');
+}
+
+function renderNetPrinters() {
+  const ul = document.getElementById('netPrinterList');
+  const net = printers.filter(p => typeof p !== 'string' && p.type === 'network');
+  if (!net.length) {
+    ul.innerHTML = '<li class="printer-item"><span style="color:var(--text-dim)">No se encontraron impresoras en red</span></li>';
+    return;
+  }
+  ul.innerHTML = net.map(printerItem).join('');
+  document.getElementById('scanInfo').textContent = net.length + ' impresora(s) en red';
+}
+
+function populatePrinterSelects() {
+  ['cfgPrinter', 'testPrinter', 'sharePrinterSelect'].forEach(id => {
+    const sel = document.getElementById(id);
+    if (!sel) return;
+    const isShare = id === 'sharePrinterSelect';
+    const list = isShare ? printers.filter(p => typeof p !== 'string' && p.type !== 'network') : printers;
+    sel.innerHTML = '<option value="">(auto-detectar)</option>' +
+      list.map(p => {
+        const name = typeof p === 'string' ? p : p.name;
+        const type_ = typeof p === 'string' ? '' : (p.type || '').toUpperCase();
+        const label = type_ ? `${name} [${type_}]` : name;
+        return `<option value="${esc(name)}">${esc(label)}</option>`;
+      }).join('');
+    if (id === 'sharePrinterSelect') {
+      sel.value = config.share_printer || '';
+    } else {
+      if (config.default_printer) sel.value = config.default_printer;
+    }
+  });
+}
+
+// --- Share ---
+async function refreshShare() {
+  try {
+    const r = await fetch(API + '/share');
+    shareStatus = await r.json();
+    renderShare();
+  } catch { shareStatus = {}; }
+}
+
+function renderShare() {
+  const dot = document.getElementById('shareDot');
+  const label = document.getElementById('shareLabel');
+  const toggle = document.getElementById('shareToggle');
+  const port = document.getElementById('sharePort');
+  const jobs = document.getElementById('shareJobs');
+
+  if (shareStatus.running) {
+    dot.className = 'share-dot on';
+    label.textContent = 'Activo — escuchando en ' + (shareStatus.address || '0.0.0.0:' + shareStatus.port);
+    toggle.className = 'toggle active';
+  } else {
+    dot.className = 'share-dot off';
+    label.textContent = shareStatus.enabled ? 'Habilitado (sin iniciar)' : 'Desactivado';
+    toggle.className = shareStatus.enabled ? 'toggle active' : 'toggle';
+  }
+  port.textContent = shareStatus.port || 9100;
+  jobs.textContent = shareStatus.jobs_served || 0;
+}
+
+async function toggleShareBtn() {
+  const newState = !shareStatus.running && !shareStatus.enabled;
+  try {
+    const r = await fetch(API + '/share', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ enabled: !shareStatus.enabled })
+    });
+    if (r.ok) {
+      shareStatus = await r.json();
+      renderShare();
+      toast(shareStatus.running ? 'Impresora compartida en red' : 'Sharing desactivado', 'success');
+    }
+  } catch { toast('Error de conexion', 'error'); }
+}
+
+// --- Network Scan ---
+async function scanNetwork() {
+  const btn = document.getElementById('scanNetBtn');
+  btn.disabled = true;
+  btn.textContent = 'Escaneando...';
+  try {
+    const r = await fetch(API + '/discover', { method: 'POST' });
+    const d = await r.json();
+    if (r.ok) {
+      toast(`Red escaneada: ${d.count} impresora(s) encontrada(s)`, 'success');
+      await refreshPrinters();
+    } else {
+      toast(d.error || 'Error al escanear', 'error');
+    }
+  } catch { toast('Error de conexion', 'error'); }
+  btn.disabled = false;
+  btn.textContent = 'Escanear Red';
+}
+
+async function probeManualIp() {
+  const input = document.getElementById('manualIp');
+  const ip = input.value.trim();
+  if (!ip) { toast('Ingresa una IP', 'error'); return; }
+
+  // Add to manual printers via config and trigger discover
+  const manuals = config.manual_printers || [];
+  if (!manuals.includes(ip)) {
+    manuals.push(ip);
+    const body = { ...config, manual_printers: manuals };
+    try {
+      await fetch(API + '/config', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+      config.manual_printers = manuals;
+    } catch { toast('Error guardando config', 'error'); return; }
+  }
+
+  toast('Probando ' + ip + '...', 'success');
+  input.value = '';
+  // Trigger rescan to pick up the manual printer
+  await scanNetwork();
+}
+
+// --- Presets ---
+async function refreshPresets() {
+  try {
+    const r = await fetch(API + '/presets');
+    const d = await r.json();
+    presets = d.presets || [];
+    renderPresetSelects();
+    renderPresetPreview();
+  } catch { presets = []; }
+}
+
+function renderPresetSelects() {
+  ['presetSelect', 'cfgPreset'].forEach(id => {
+    const sel = document.getElementById(id);
+    sel.innerHTML = presets.map(p =>
+      `<option value="${p.id}" ${p.builtin ? '' : 'style="color:var(--orange)"'}>${esc(p.name)}${p.builtin ? '' : ' (custom)'}</option>`
+    ).join('');
+    sel.value = config.default_preset || 'matrix-3x1-30x22';
+  });
+  document.getElementById('presetSelect').onchange = () => {
+    renderPresetInfo();
+    renderPresetPreview();
+  };
+  renderPresetInfo();
+}
+
+function renderPresetInfo() {
+  const id = document.getElementById('presetSelect').value;
+  const p = presets.find(x => x.id === id);
+  if (!p) return;
+  document.getElementById('presetInfo').innerHTML =
+    `${p.columns} columna(s) &middot; ${p.label_width}x${p.label_height}mm &middot; Total: ${p.total_width}mm &middot; Dir: ${p.direction}`;
+}
+
+function renderPresetPreview() {
+  const id = document.getElementById('presetSelect').value;
+  const p = presets.find(x => x.id === id);
+  if (!p) return;
+  const container = document.getElementById('presetPreview');
+  const scale = 2.5;
+  const w = p.total_width * scale;
+  const h = p.label_height * scale;
+  let html = `<div class="preview-label" style="width:${w}px;height:${h}px;">`;
+  for (let i = 0; i < p.columns; i++) {
+    const colW = p.label_width * scale;
+    html += `<div class="col" style="left:${i * (w/p.columns) + 4}px;width:${colW - 8}px;">${i+1}</div>`;
+  }
+  html += '</div>';
+  container.innerHTML = html;
+}
+
+// --- Config ---
+async function refreshConfig() {
+  try {
+    const r = await fetch(API + '/config');
+    config = await r.json();
+    document.getElementById('cfgPort').value = config.port || 9271;
+  } catch { config = {}; }
+}
+
+async function saveConfig() {
+  const body = {
+    ...config,
+    port: parseInt(document.getElementById('cfgPort').value) || 9271,
+    default_printer: document.getElementById('cfgPrinter').value,
+    default_preset: document.getElementById('cfgPreset').value,
+    auto_start: true,
+    share_printer: document.getElementById('sharePrinterSelect').value,
+  };
+  try {
+    const r = await fetch(API + '/config', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    if (r.ok) {
+      toast('Configuracion guardada', 'success');
+      config = { ...config, ...body };
+      refreshStatus();
+    } else {
+      const d = await r.json();
+      toast(d.error || 'Error al guardar', 'error');
+    }
+  } catch (e) { toast('Error de conexion', 'error'); }
+}
+
+async function savePreset() {
+  const presetId = document.getElementById('presetSelect').value;
+  const body = { ...config, default_preset: presetId };
+  try {
+    const r = await fetch(API + '/config', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    if (r.ok) {
+      toast('Preset predeterminado: ' + presetId, 'success');
+      config.default_preset = presetId;
+      document.getElementById('cfgPreset').value = presetId;
+      refreshStatus();
+    }
+  } catch { toast('Error de conexion', 'error'); }
+}
+
+async function setDefaultPrinter(name) {
+  const body = { ...config, default_printer: name };
+  try {
+    await fetch(API + '/config', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    config.default_printer = name;
+    toast('Impresora predeterminada: ' + name, 'success');
+    populatePrinterSelects();
+    refreshStatus();
+  } catch { toast('Error de conexion', 'error'); }
+}
+
+// --- Test Print ---
+function loadTestTemplate() {
+  const id = document.getElementById('presetSelect').value;
+  const p = presets.find(x => x.id === id);
+  if (!p) return;
+  let cmds = `SIZE ${p.total_width} mm, ${p.label_height} mm\r\n`;
+  cmds += `GAP ${p.gap_row} mm, 0 mm\r\n`;
+  cmds += `DIRECTION ${p.direction}\r\n`;
+  cmds += `SPEED ${p.speed}\r\n`;
+  cmds += `DENSITY ${p.density}\r\n`;
+  cmds += `SET TEAR ON\r\nCLS\r\n`;
+  for (let i = 0; i < p.columns; i++) {
+    const x = p.col_offsets[i] || 0;
+    cmds += `TEXT ${x},16,"3",0,1,1,"TEST COL ${i+1}"\r\n`;
+    cmds += `BARCODE ${x},48,"128",40,1,0,2,2,"12345${i}"\r\n`;
+  }
+  cmds += `PRINT 1\r\n`;
+  document.getElementById('tsplInput').value = cmds;
+}
+
+async function sendTestPrint() {
+  const tspl = document.getElementById('tsplInput').value;
+  if (!tspl.trim()) { toast('Escribe comandos TSPL primero', 'error'); return; }
+  const printer = document.getElementById('testPrinter').value;
+  let url = API + '/print';
+  if (printer) url += '?printer=' + encodeURIComponent(printer);
+  try {
+    const r = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/octet-stream' },
+      body: tspl
+    });
+    const d = await r.json();
+    if (r.ok) toast(`Impreso: ${d.bytes} bytes en ${d.printer}`, 'success');
+    else toast(d.error || 'Error de impresion', 'error');
+  } catch { toast('Error de conexion', 'error'); }
+}
+
+async function testPrintOnPrinter(name) {
+  const id = document.getElementById('presetSelect').value;
+  const p = presets.find(x => x.id === id);
+  let tspl;
+  if (p) {
+    tspl = `SIZE ${p.total_width} mm, ${p.label_height} mm\r\n`;
+    tspl += `GAP ${p.gap_row} mm, 0 mm\r\n`;
+    tspl += `DIRECTION ${p.direction}\r\n`;
+    tspl += `SPEED ${p.speed}\r\n`;
+    tspl += `DENSITY ${p.density}\r\n`;
+    tspl += `SET TEAR ON\r\nCLS\r\n`;
+    for (let i = 0; i < p.columns; i++) {
+      const x = p.col_offsets[i] || 0;
+      tspl += `TEXT ${x},16,"3",0,1,1,"TEST COL ${i+1}"\r\n`;
+      tspl += `BARCODE ${x},48,"128",40,1,0,2,2,"12345${i}"\r\n`;
+    }
+    tspl += `PRINT 1\r\n`;
+  } else {
+    tspl = 'SIZE 40 mm, 25 mm\r\nGAP 3 mm, 0 mm\r\nDIRECTION 0,0\r\nSPEED 4\r\nDENSITY 8\r\nCLS\r\nTEXT 8,8,"3",0,1,1,"TEST PRINT"\r\nBARCODE 8,40,"128",40,1,0,2,2,"TSC-BRIDGE-OK"\r\nPRINT 1\r\n';
+  }
+  try {
+    const r = await fetch(API + '/print?printer=' + encodeURIComponent(name), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/octet-stream' },
+      body: tspl
+    });
+    const d = await r.json();
+    if (r.ok) toast(`Test OK (${p ? p.name : 'single'}): ` + name, 'success');
+    else toast(d.error || 'Error', 'error');
+  } catch { toast('Error de conexion', 'error'); }
+}
+
+// --- AutoStart ---
+let autostartEnabled = false;
+async function refreshAutoStart() {
+  try {
+    const r = await fetch(API + '/autostart');
+    const d = await r.json();
+    autostartEnabled = d.enabled;
+    renderAutoStart();
+  } catch { autostartEnabled = false; }
+}
+
+function renderAutoStart() {
+  const dot = document.getElementById('autostartDot');
+  const label = document.getElementById('autostartLabel');
+  const toggle = document.getElementById('autostartToggle');
+  if (autostartEnabled) {
+    dot.className = 'share-dot on';
+    label.textContent = 'Activado — inicia al login';
+    toggle.className = 'toggle active';
+  } else {
+    dot.className = 'share-dot off';
+    label.textContent = 'Desactivado';
+    toggle.className = 'toggle';
+  }
+}
+
+async function toggleAutoStart() {
+  try {
+    const r = await fetch(API + '/autostart', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ enabled: !autostartEnabled })
+    });
+    if (r.ok) {
+      const d = await r.json();
+      autostartEnabled = d.enabled;
+      renderAutoStart();
+      toast(autostartEnabled ? 'Auto-inicio activado' : 'Auto-inicio desactivado', 'success');
+    }
+  } catch { toast('Error de conexion', 'error'); }
+}
+
+// --- Utilities ---
+function esc(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+
+function toast(msg, type) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show ' + (type || '');
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => { t.className = 'toast'; }, 3000);
+}
+</script>
+</body>
+</html>

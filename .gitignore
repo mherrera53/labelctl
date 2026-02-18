@@ -1,0 +1,6 @@
+dist/
+tsc-bridge
+tsc-bridge.exe
+*.exe
+.DS_Store
+.ai-sessions/
