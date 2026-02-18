@@ -18,7 +18,7 @@ jobs:
             goarch: arm64
             binary: tsc-bridge-mac
             cgo: 1
-          - os: macos-latest
+          - os: macos-13
             goos: darwin
             goarch: amd64
             binary: tsc-bridge-mac-intel
@@ -38,12 +38,20 @@ jobs:
         with:
           go-version-file: go.mod
 
+      - name: Install libusb (macOS)
+        if: runner.os == 'macOS'
+        run: brew install libusb
+
       - name: Build binary
         env:
           GOOS: ${{ matrix.goos }}
           GOARCH: ${{ matrix.goarch }}
           CGO_ENABLED: ${{ matrix.cgo }}
         run: |
+          if [ "$CGO_ENABLED" = "1" ] && command -v pkg-config &>/dev/null; then
+            export CGO_CFLAGS="$(pkg-config --cflags libusb-1.0)"
+            export CGO_LDFLAGS="$(pkg-config --libs libusb-1.0)"
+          fi
           go build -ldflags="-s -w" -o ${{ matrix.binary }} .
 
       - name: Upload artifact
