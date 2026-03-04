@@ -66,6 +66,21 @@ var builtinPresets = []LabelPreset{
 		ColOffsets:  []int{8, 280, 552},
 		Builtin:     true,
 	},
+	{
+		ID:          "single-76x51",
+		Name:        "Individual 3\"x2\" (76x51mm)",
+		Columns:     1,
+		LabelWidth:  76.2,
+		LabelHeight: 50.8,
+		GapRow:      3,
+		GapCol:      0,
+		TotalWidth:  76.2,
+		Direction:   "0,0",
+		Speed:       4,
+		Density:     8,
+		ColOffsets:  []int{8},
+		Builtin:     true,
+	},
 }
 
 // getPresetByID returns a preset by ID from built-in + custom presets.
