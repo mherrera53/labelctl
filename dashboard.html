@@ -560,16 +560,16 @@
 <!-- ═══ Tab Navigation ═══ -->
 <nav class="tab-nav">
   <button class="tab-btn active" data-tab="printers" onclick="switchTab('printers')">
-    🖨 Impresoras<span class="tab-count" id="printerCount">0</span>
+    Impresoras<span class="tab-count" id="printerCount">0</span>
   </button>
   <button class="tab-btn" data-tab="templates" onclick="switchTab('templates')">
-    📄 Plantillas<span class="tab-count" id="templateCount">0</span>
+    Plantillas<span class="tab-count" id="templateCount">0</span>
   </button>
   <button class="tab-btn" data-tab="batch" onclick="switchTab('batch')">
-    📦 Batch
+    Batch
   </button>
   <button class="tab-btn" data-tab="settings" onclick="switchTab('settings')">
-    ⚙ Config
+    Config
   </button>
 </nav>
 
@@ -608,7 +608,7 @@
       <h2>Impresoras en Red</h2>
       <ul class="printer-list" id="netPrinterList"><li class="text-dim text-sm">Ninguna</li></ul>
       <div class="mt-3">
-        <button class="btn btn-sm" onclick="scanNetwork()">🔍 Escanear red</button>
+        <button class="btn btn-sm" onclick="scanNetwork()">Escanear red</button>
       </div>
       <div class="mt-3">
         <h2>Impresora Manual</h2>
@@ -649,8 +649,8 @@
     <div class="card">
       <h2>Descargar Bridge</h2>
       <div class="flex gap-2">
-        <a href="/download?os=mac" class="btn btn-sm">🍎 macOS</a>
-        <a href="/download?os=windows" class="btn btn-sm">🪟 Windows</a>
+        <a href="/download?os=mac" class="btn btn-sm">macOS</a>
+        <a href="/download?os=windows" class="btn btn-sm">Windows</a>
       </div>
     </div>
   </div>
@@ -738,7 +738,7 @@
     <!-- Step 1: Upload -->
     <div class="wizard-panel active" id="ws1">
       <div class="drop-zone" id="dropZone" onclick="document.getElementById('excelFile').click()">
-        <div class="drop-zone-icon">📊</div>
+        <div class="drop-zone-icon" style="font-size:32px;color:var(--text-muted)">XLS</div>
         <p><strong>Arrastra tu archivo Excel aquí</strong></p>
         <p class="text-xs text-dim">.xlsx / .xls</p>
       </div>
@@ -784,8 +784,8 @@
       <!-- Output toggle: Print vs PDF -->
       <label>Tipo de salida</label>
       <div class="output-toggle">
-        <button class="output-toggle-btn active" id="outPrint" onclick="setOutputMode('print')">🖨 Imprimir etiquetas (TSPL)</button>
-        <button class="output-toggle-btn" id="outPdf" onclick="setOutputMode('pdf')">📄 Generar PDF</button>
+        <button class="output-toggle-btn active" id="outPrint" onclick="setOutputMode('print')">Imprimir etiquetas (TSPL)</button>
+        <button class="output-toggle-btn" id="outPdf" onclick="setOutputMode('pdf')">Generar PDF</button>
       </div>
 
       <div class="form-row">
@@ -1404,7 +1404,7 @@ function renderBackendTemplateGrid() {
     `<div class="template-card ${selectedTemplateId===t.id?'selected':''}" onclick="selectBackendTemplate('${t.id}')">
       <h3>${esc(t.name)}</h3>
       <p>${esc(t.description||'')}</p>
-      <div class="template-source">Backend ${t.thermal_printable ? '🔥' : ''}</div>
+      <div class="template-source">Backend ${t.thermal_printable ? '(thermal)' : ''}</div>
     </div>`
   ).join('');
 }
