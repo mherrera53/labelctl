@@ -4,23 +4,39 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>TSC Bridge — Dashboard</title>
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect x='8' y='16' width='48' height='36' rx='4' fill='%231a1d27' stroke='%236c72ff' stroke-width='2.5'/%3E%3Crect x='14' y='22' width='36' height='8' rx='2' fill='%23232736' stroke='%236c72ff' stroke-width='1.5'/%3E%3Crect x='14' y='34' width='36' height='4' rx='1' fill='%236c72ff' opacity='.3'/%3E%3Crect x='14' y='40' width='36' height='4' rx='1' fill='%236c72ff' opacity='.2'/%3E%3Ccircle cx='46' cy='25' r='2' fill='%2334d399'/%3E%3Cpath d='M44 10a12 12 0 0 1 12 0' stroke='%2360a5fa' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3Cpath d='M46 13a7 7 0 0 1 7 0' stroke='%2360a5fa' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect x='8' y='16' width='48' height='36' rx='4' fill='%23141620' stroke='%236366f1' stroke-width='2.5'/%3E%3Crect x='14' y='22' width='36' height='8' rx='2' fill='%230a0b10' stroke='%236366f1' stroke-width='1.5'/%3E%3Crect x='14' y='34' width='36' height='4' rx='1' fill='%236366f1' opacity='.3'/%3E%3Crect x='14' y='40' width='36' height='4' rx='1' fill='%236366f1' opacity='.2'/%3E%3Ccircle cx='46' cy='25' r='2' fill='%2334d399'/%3E%3C/svg%3E">
 <style>
   :root {
-    --bg: #0f1117;
-    --surface: #1a1d27;
-    --surface-2: #232736;
-    --border: #2e3348;
-    --text: #e4e6f0;
-    --text-dim: #8b8fa3;
-    --accent: #6c72ff;
-    --accent-hover: #8186ff;
-    --green: #34d399;
-    --red: #f87171;
-    --orange: #fbbf24;
-    --radius: 8px;
-    --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-    --mono: 'SF Mono', 'Cascadia Code', 'Consolas', monospace;
+    --bg: #f8f9fc;
+    --surface: #ffffff;
+    --surface-2: #f1f3f8;
+    --surface-3: #e8ebf2;
+    --border: #e2e5ee;
+    --border-light: #d0d4e0;
+    --text: #1a1d2e;
+    --text-dim: #6b7084;
+    --text-muted: #9499b0;
+    --primary: #4f46e5;
+    --primary-hover: #4338ca;
+    --primary-light: rgba(79,70,229,0.08);
+    --primary-glow: rgba(79,70,229,0.12);
+    --accent: #4f46e5;
+    --green: #10b981;
+    --green-dim: rgba(16,185,129,0.10);
+    --red: #ef4444;
+    --red-dim: rgba(239,68,68,0.08);
+    --orange: #f59e0b;
+    --orange-dim: rgba(245,158,11,0.10);
+    --blue: #3b82f6;
+    --purple: #8b5cf6;
+    --radius: 12px;
+    --radius-sm: 8px;
+    --radius-xs: 6px;
+    --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    --mono: 'SF Mono', 'JetBrains Mono', 'Cascadia Code', 'Consolas', monospace;
+    --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+    --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+    --shadow-md: 0 4px 6px rgba(0,0,0,0.06), 0 2px 4px rgba(0,0,0,0.04);
   }
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body {
@@ -29,312 +45,592 @@
     color: var(--text);
     line-height: 1.5;
     min-height: 100vh;
+    font-size: 14px;
+    display: flex;
+    flex-direction: column;
   }
+
+  /* ── Header ── */
   header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 16px 24px;
-    border-bottom: 1px solid var(--border);
+    padding: 12px 24px;
     background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    box-shadow: var(--shadow-sm);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .header-logo {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    object-fit: contain;
+  }
+  .header-logo-default {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: var(--primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-weight: 800;
+    font-size: 14px;
   }
   header h1 {
-    font-size: 18px;
-    font-weight: 600;
+    font-size: 16px;
+    font-weight: 700;
     letter-spacing: -0.02em;
+    color: var(--text);
   }
-  header h1 span { color: var(--accent); }
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .version-badge {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-muted);
+    padding: 3px 8px;
+    background: var(--surface-2);
+    border-radius: 20px;
+  }
+
+  /* ── Badges ── */
   .badge {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
-    padding: 4px 10px;
+    gap: 5px;
+    padding: 3px 10px;
     border-radius: 20px;
-    font-size: 12px;
-    font-weight: 500;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.01em;
   }
-  .badge-green { background: rgba(52,211,153,0.15); color: var(--green); }
-  .badge-red { background: rgba(248,113,113,0.15); color: var(--red); }
-  .badge-orange { background: rgba(251,191,36,0.15); color: var(--orange); }
-  .badge-blue { background: rgba(96,165,250,0.15); color: #60a5fa; }
-  .badge-purple { background: rgba(167,139,250,0.15); color: #a78bfa; }
+  .badge-green { background: var(--green-dim); color: var(--green); }
+  .badge-red { background: var(--red-dim); color: var(--red); }
+  .badge-orange { background: var(--orange-dim); color: var(--orange); }
+  .badge-blue { background: rgba(59,130,246,0.08); color: var(--blue); }
+  .badge-purple { background: rgba(139,92,246,0.08); color: var(--purple); }
+  .dot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; }
+  .dot-green { background: var(--green); }
+  .dot-red { background: var(--red); }
+  .dot-orange { background: var(--orange); }
 
-  main { max-width: 960px; margin: 0 auto; padding: 24px; }
+  /* ── Tab Navigation ── */
+  .tab-nav {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    padding: 6px 24px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+  }
+  .tab-btn {
+    padding: 10px 20px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-dim);
+    border: none;
+    background: none;
+    cursor: pointer;
+    border-radius: var(--radius-sm);
+    transition: all 0.15s;
+    position: relative;
+  }
+  .tab-btn:hover { color: var(--text); background: var(--surface-2); }
+  .tab-btn.active {
+    color: var(--primary);
+    background: var(--primary-light);
+  }
+  .tab-btn.active::after {
+    content: '';
+    position: absolute;
+    bottom: -7px;
+    left: 20%;
+    right: 20%;
+    height: 2px;
+    background: var(--primary);
+    border-radius: 2px;
+  }
+  .tab-count {
+    font-size: 10px;
+    font-weight: 700;
+    background: var(--surface-3);
+    color: var(--text-dim);
+    padding: 1px 6px;
+    border-radius: 10px;
+    margin-left: 6px;
+  }
+  .tab-btn.active .tab-count {
+    background: var(--primary);
+    color: #fff;
+  }
 
-  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
-  @media (max-width: 640px) { .grid { grid-template-columns: 1fr; } }
+  /* ── Main Content ── */
+  main {
+    flex: 1;
+    max-width: 1000px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 20px 24px 80px;
+  }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
 
+  /* ── Cards ── */
   .card {
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: var(--radius);
     padding: 20px;
+    box-shadow: var(--shadow-sm);
+    margin-bottom: 16px;
   }
-  .card-full { grid-column: 1 / -1; }
   .card h2 {
-    font-size: 13px;
-    font-weight: 600;
+    font-size: 11px;
+    font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
+    letter-spacing: 0.06em;
     color: var(--text-dim);
-    margin-bottom: 12px;
-  }
-
-  .stat-row {
+    margin-bottom: 14px;
     display: flex;
-    justify-content: space-between;
-    padding: 6px 0;
-    font-size: 14px;
+    align-items: center;
+    gap: 8px;
   }
-  .stat-row .label { color: var(--text-dim); }
+  .card h2 .dot { width: 6px; height: 6px; }
 
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+  @media (max-width: 640px) { .grid { grid-template-columns: 1fr; } }
+  .grid .card { margin-bottom: 0; }
+
+  /* ── Buttons ── */
+  .btn {
+    padding: 7px 14px;
+    border-radius: var(--radius-xs);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+    transition: all 0.15s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .btn:hover { border-color: var(--border-light); background: var(--surface-2); }
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .btn-primary {
+    background: var(--primary);
+    color: #fff;
+    border-color: var(--primary);
+  }
+  .btn-primary:hover { background: var(--primary-hover); border-color: var(--primary-hover); }
+  .btn-sm { padding: 4px 10px; font-size: 11px; }
+  .btn-danger { color: var(--red); border-color: rgba(239,68,68,0.3); }
+  .btn-danger:hover { background: var(--red-dim); }
+  .btn-success { color: var(--green); border-color: rgba(16,185,129,0.3); }
+  .btn-success:hover { background: var(--green-dim); }
+
+  /* ── Forms ── */
+  input, select, textarea {
+    font-family: var(--font);
+    font-size: 13px;
+    padding: 7px 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-xs);
+    background: var(--surface);
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.15s;
+    width: 100%;
+  }
+  input:focus, select:focus, textarea:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px var(--primary-light);
+  }
+  select { cursor: pointer; }
+  label { font-size: 12px; font-weight: 600; color: var(--text-dim); margin-bottom: 4px; display: block; }
+  .form-row { display: flex; gap: 12px; align-items: end; margin-bottom: 12px; }
+  .form-group { flex: 1; }
+
+  /* ── Lists ── */
   .printer-list { list-style: none; }
   .printer-item {
     display: flex;
     align-items: center;
     justify-content: space-between;
     padding: 10px 12px;
-    border-radius: 6px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-xs);
     margin-bottom: 6px;
-    background: var(--surface-2);
-    font-size: 14px;
+    font-size: 13px;
+    transition: background 0.1s;
   }
-  .printer-item .name { font-family: var(--mono); font-size: 13px; }
+  .printer-item:hover { background: var(--surface-2); }
+  .printer-name { font-weight: 600; display: flex; align-items: center; gap: 8px; }
   .printer-actions { display: flex; gap: 6px; }
 
-  .btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 6px 14px;
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    background: var(--surface-2);
-    color: var(--text);
+  /* ── Info rows ── */
+  .info-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 0;
     font-size: 13px;
-    font-family: var(--font);
-    cursor: pointer;
-    transition: background 0.15s, border-color 0.15s;
+    border-bottom: 1px solid var(--surface-2);
   }
-  .btn:hover { background: var(--border); }
-  .btn-primary {
-    background: var(--accent);
-    border-color: var(--accent);
-    color: #fff;
-  }
-  .btn-primary:hover { background: var(--accent-hover); }
-  .btn-sm { padding: 4px 10px; font-size: 12px; }
-  .btn[disabled] { opacity: 0.5; cursor: not-allowed; }
+  .info-row:last-child { border-bottom: none; }
+  .info-label { color: var(--text-dim); }
+  .info-value { font-weight: 600; }
 
-  select, input[type="number"], input[type="text"] {
-    background: var(--surface-2);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    color: var(--text);
-    padding: 8px 12px;
-    font-size: 14px;
-    font-family: var(--font);
-    width: 100%;
-  }
-  select:focus, input:focus, textarea:focus {
-    outline: none;
-    border-color: var(--accent);
-  }
-
-  .form-group { margin-bottom: 12px; }
-  .form-group label {
-    display: block;
-    font-size: 12px;
-    color: var(--text-dim);
-    margin-bottom: 4px;
-    font-weight: 500;
-  }
-
-  textarea {
-    width: 100%;
-    min-height: 140px;
-    background: var(--surface-2);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    color: var(--text);
-    padding: 12px;
-    font-family: var(--mono);
-    font-size: 13px;
-    resize: vertical;
-  }
-
-  .preview-label {
-    background: #fff;
-    border-radius: 4px;
-    position: relative;
-    margin: 12px auto;
-    border: 1px solid var(--border);
-  }
-  .preview-label .col {
-    position: absolute;
-    top: 10%;
-    height: 80%;
-    border: 1px dashed rgba(108,114,255,0.5);
-    border-radius: 2px;
+  /* ── Toggle ── */
+  .toggle-row {
     display: flex;
     align-items: center;
-    justify-content: center;
-    font-size: 10px;
-    color: var(--accent);
-    font-weight: 600;
+    justify-content: space-between;
+    padding: 8px 0;
   }
+  .toggle-label { font-size: 13px; display: flex; align-items: center; gap: 8px; }
 
-  .toast {
-    position: fixed;
-    bottom: 24px;
-    right: 24px;
-    padding: 12px 20px;
-    border-radius: 8px;
-    font-size: 14px;
-    font-weight: 500;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    transform: translateY(100px);
-    opacity: 0;
-    transition: transform 0.3s, opacity 0.3s;
-    z-index: 100;
+  /* ── Template grid ── */
+  .template-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 12px;
+    margin-top: 12px;
   }
-  .toast.show { transform: translateY(0); opacity: 1; }
-  .toast.success { border-color: var(--green); color: var(--green); }
-  .toast.error { border-color: var(--red); color: var(--red); }
-
-  .inline-flex { display: flex; gap: 8px; align-items: center; }
-  .flex-between { display: flex; align-items: center; justify-content: space-between; }
-  .mt-12 { margin-top: 12px; }
-  .mt-8 { margin-top: 8px; }
-  .text-sm { font-size: 12px; color: var(--text-dim); }
-
-  .toggle {
-    position: relative;
-    width: 44px;
-    height: 24px;
-    background: var(--border);
-    border-radius: 12px;
+  .template-card {
+    border: 2px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px;
     cursor: pointer;
-    transition: background 0.2s;
-    border: none;
-    flex-shrink: 0;
+    transition: all 0.15s;
+    background: var(--surface);
   }
-  .toggle.active { background: var(--green); }
-  .toggle::after {
-    content: '';
-    position: absolute;
-    top: 3px;
-    left: 3px;
-    width: 18px;
-    height: 18px;
-    background: #fff;
-    border-radius: 50%;
-    transition: transform 0.2s;
+  .template-card:hover { border-color: var(--border-light); box-shadow: var(--shadow); }
+  .template-card.selected { border-color: var(--primary); background: var(--primary-light); }
+  .template-card h3 { font-size: 13px; font-weight: 700; margin-bottom: 4px; }
+  .template-card p { font-size: 11px; color: var(--text-dim); }
+  .template-source {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--text-muted);
+    margin-top: 8px;
   }
-  .toggle.active::after { transform: translateX(20px); }
 
-  .share-status {
+  /* ── Wizard steps ── */
+  .wizard-steps {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    margin-bottom: 24px;
+  }
+  .step-indicator {
     display: flex;
     align-items: center;
     gap: 8px;
-    padding: 10px 12px;
-    border-radius: 6px;
-    background: var(--surface-2);
-    font-size: 13px;
+    cursor: pointer;
+    padding: 6px 12px;
+    border-radius: var(--radius-sm);
+    transition: background 0.15s;
   }
-  .share-dot {
-    width: 8px;
-    height: 8px;
+  .step-indicator:hover { background: var(--surface-2); }
+  .step-circle {
+    width: 28px;
+    height: 28px;
     border-radius: 50%;
-    flex-shrink: 0;
-  }
-  .share-dot.on { background: var(--green); box-shadow: 0 0 6px var(--green); }
-  .share-dot.off { background: var(--text-dim); }
-
-  .section-divider {
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
+    border: 2px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
     color: var(--text-dim);
-    padding: 8px 0 4px;
-    border-bottom: 1px solid var(--border);
-    margin-bottom: 8px;
+    background: var(--surface);
+    transition: all 0.15s;
   }
+  .step-indicator.active .step-circle {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: #fff;
+  }
+  .step-indicator.completed .step-circle {
+    background: var(--green);
+    border-color: var(--green);
+    color: #fff;
+  }
+  .step-indicator.locked .step-circle { opacity: 0.4; }
+  .step-label { font-size: 12px; font-weight: 600; color: var(--text-dim); }
+  .step-indicator.active .step-label { color: var(--text); }
+  .step-connector { flex: 1; height: 2px; background: var(--border); margin: 0 4px; }
+  .step-connector.completed { background: var(--green); }
+
+  .wizard-panel { display: none; }
+  .wizard-panel.active { display: block; }
+
+  /* ── Drop zone ── */
+  .drop-zone {
+    border: 2px dashed var(--border);
+    border-radius: var(--radius);
+    padding: 40px 20px;
+    text-align: center;
+    color: var(--text-dim);
+    transition: all 0.2s;
+    cursor: pointer;
+  }
+  .drop-zone:hover, .drop-zone.dragging {
+    border-color: var(--primary);
+    background: var(--primary-light);
+    color: var(--primary);
+  }
+  .drop-zone-icon { font-size: 32px; margin-bottom: 8px; }
+
+  /* ── Preview ── */
+  .preview-container { margin-top: 16px; }
+  .label-preview {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-xs);
+    padding: 8px;
+    display: inline-block;
+    margin: 4px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+  }
+  .mapping-grid {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 8px;
+    align-items: center;
+    margin: 12px 0;
+  }
+  .mapping-arrow { color: var(--text-muted); font-size: 16px; text-align: center; }
+
+  /* ── Progress ── */
+  .progress-bar {
+    width: 100%;
+    height: 6px;
+    background: var(--surface-2);
+    border-radius: 3px;
+    overflow: hidden;
+    margin: 12px 0;
+    display: none;
+  }
+  .progress-fill {
+    height: 100%;
+    background: var(--primary);
+    border-radius: 3px;
+    transition: width 0.3s;
+    width: 0;
+  }
+
+  /* ── Footer ── */
+  footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 24px;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    font-size: 11px;
+    color: var(--text-dim);
+    z-index: 100;
+  }
+  .footer-left, .footer-right { display: flex; align-items: center; gap: 12px; }
+
+  /* ── Toast ── */
+  .toast {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 12px 20px;
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    font-weight: 600;
+    z-index: 9999;
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: all 0.3s;
+    pointer-events: none;
+    box-shadow: var(--shadow-md);
+  }
+  .toast.show { opacity: 1; transform: translateY(0); pointer-events: auto; }
+  .toast-success { background: #ecfdf5; color: #065f46; border: 1px solid #a7f3d0; }
+  .toast-error { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
+
+  /* ── Data table ── */
+  .data-table { width: 100%; border-collapse: collapse; font-size: 12px; margin: 12px 0; }
+  .data-table th { background: var(--surface-2); font-weight: 700; text-align: left; padding: 8px 10px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-dim); }
+  .data-table td { padding: 6px 10px; border-bottom: 1px solid var(--surface-2); }
+  .data-table tr:hover td { background: var(--surface-2); }
+
+  /* ── Empty state ── */
+  .empty-state { text-align: center; padding: 40px 20px; color: var(--text-dim); }
+  .empty-state-icon { font-size: 40px; margin-bottom: 8px; opacity: 0.3; }
+  .empty-state p { font-size: 13px; }
+
+  /* ── Output toggle ── */
+  .output-toggle { display: flex; gap: 0; border: 1px solid var(--border); border-radius: var(--radius-sm); overflow: hidden; margin: 12px 0; }
+  .output-toggle-btn {
+    flex: 1;
+    padding: 10px 16px;
+    font-size: 13px;
+    font-weight: 600;
+    border: none;
+    background: var(--surface);
+    color: var(--text-dim);
+    cursor: pointer;
+    transition: all 0.15s;
+    text-align: center;
+  }
+  .output-toggle-btn:not(:last-child) { border-right: 1px solid var(--border); }
+  .output-toggle-btn.active {
+    background: var(--primary);
+    color: #fff;
+  }
+
+  /* ── TSPL visual ── */
+  .tspl-visual {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-xs);
+    padding: 16px;
+    position: relative;
+    overflow: hidden;
+    min-height: 80px;
+    margin: 12px 0;
+  }
+
+  /* ── Misc ── */
+  .text-dim { color: var(--text-dim); }
+  .text-sm { font-size: 12px; }
+  .text-xs { font-size: 11px; }
+  .mt-2 { margin-top: 8px; }
+  .mt-3 { margin-top: 12px; }
+  .mt-4 { margin-top: 16px; }
+  .mb-2 { margin-bottom: 8px; }
+  .mb-3 { margin-bottom: 12px; }
+  .flex { display: flex; }
+  .flex-between { display: flex; justify-content: space-between; align-items: center; }
+  .gap-2 { gap: 8px; }
+  .gap-3 { gap: 12px; }
+  details summary { cursor: pointer; font-size: 12px; color: var(--text-dim); font-weight: 600; padding: 6px 0; }
+  details summary:hover { color: var(--text); }
+  textarea.mono { font-family: var(--mono); font-size: 11px; resize: vertical; }
+
+  /* ── Scrollbar ── */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--border-light); }
 </style>
 </head>
 <body>
 
+<!-- ═══ Header ═══ -->
 <header>
-  <h1 style="display:flex;align-items:center;gap:10px;">
-    <svg width="28" height="28" viewBox="0 0 64 64" style="flex-shrink:0">
-      <rect x="8" y="16" width="48" height="36" rx="4" fill="var(--surface-2)" stroke="var(--accent)" stroke-width="2.5"/>
-      <rect x="14" y="22" width="36" height="8" rx="2" fill="var(--bg)" stroke="var(--accent)" stroke-width="1.5"/>
-      <rect x="14" y="34" width="36" height="4" rx="1" fill="var(--accent)" opacity=".3"/>
-      <rect x="14" y="40" width="36" height="4" rx="1" fill="var(--accent)" opacity=".2"/>
-      <circle cx="46" cy="25" r="2" fill="var(--green)"/>
-      <path d="M44 10a12 12 0 0 1 12 0" stroke="#60a5fa" stroke-width="2" fill="none" stroke-linecap="round"/>
-      <path d="M46 13a7 7 0 0 1 7 0" stroke="#60a5fa" stroke-width="2" fill="none" stroke-linecap="round"/>
-    </svg>
-    TSC <span>Bridge</span>
-  </h1>
-  <div id="statusBadge" class="badge badge-green">Conectado</div>
+  <div class="header-left">
+    <div id="headerLogo" class="header-logo-default">TB</div>
+    <h1 id="headerTitle">TSC Bridge</h1>
+  </div>
+  <div class="header-right">
+    <span class="version-badge" id="versionBadge">v--</span>
+    <span class="badge badge-green" id="connBadge"><span class="dot dot-green"></span> Conectado</span>
+  </div>
 </header>
 
-<main>
-  <!-- Status + Local Printers -->
-  <div class="grid">
-    <div class="card" id="statusCard">
-      <h2>Estado</h2>
-      <div class="stat-row"><span class="label">Version</span> <span id="sVersion">—</span></div>
-      <div class="stat-row"><span class="label">OS</span> <span id="sOS">—</span></div>
-      <div class="stat-row"><span class="label">Puerto API</span> <span id="sPort">—</span></div>
-      <div class="stat-row"><span class="label">Preset activo</span> <span id="sPreset">—</span></div>
-      <div class="stat-row"><span class="label">Impresora</span> <span id="sPrinter">—</span></div>
-    </div>
+<!-- ═══ Tab Navigation ═══ -->
+<nav class="tab-nav">
+  <button class="tab-btn active" data-tab="printers" onclick="switchTab('printers')">
+    🖨 Impresoras<span class="tab-count" id="printerCount">0</span>
+  </button>
+  <button class="tab-btn" data-tab="templates" onclick="switchTab('templates')">
+    📄 Plantillas<span class="tab-count" id="templateCount">0</span>
+  </button>
+  <button class="tab-btn" data-tab="batch" onclick="switchTab('batch')">
+    📦 Batch
+  </button>
+  <button class="tab-btn" data-tab="settings" onclick="switchTab('settings')">
+    ⚙ Config
+  </button>
+</nav>
 
+<!-- ═══ Main Content ═══ -->
+<main>
+
+<!-- ────── Tab: Impresoras ────── -->
+<div class="tab-panel active" id="panel-printers">
+
+  <!-- Status + Printers -->
+  <div class="grid">
     <div class="card">
-      <h2>Impresoras Locales</h2>
-      <ul class="printer-list" id="localPrinterList">
-        <li class="printer-item"><span style="color:var(--text-dim)">Buscando...</span></li>
-      </ul>
+      <h2>Estado</h2>
+      <div class="info-row"><span class="info-label">Version</span><span class="info-value" id="infoVersion">--</span></div>
+      <div class="info-row"><span class="info-label">SO</span><span class="info-value" id="infoOS">--</span></div>
+      <div class="info-row"><span class="info-label">Puerto</span><span class="info-value" id="infoPort">--</span></div>
+      <div class="info-row"><span class="info-label">Preset</span><span class="info-value" id="infoPreset">--</span></div>
+      <div class="info-row"><span class="info-label">Impresora</span><span class="info-value" id="infoPrinter">--</span></div>
+    </div>
+    <div class="card">
+      <h2>Impresoras del Sistema</h2>
+      <ul class="printer-list" id="localPrinterList"><li class="text-dim text-sm">Cargando...</li></ul>
     </div>
   </div>
 
-  <!-- Network Discovery + Sharing -->
+  <!-- Driver Card -->
+  <div class="card" id="driverCard" style="display:none;">
+    <h2>Drivers TSC</h2>
+    <div id="driverContent"></div>
+    <div class="progress-bar" id="driverProgress"><div class="progress-fill"></div></div>
+  </div>
+
+  <!-- Network + Sharing -->
   <div class="grid">
     <div class="card">
-      <h2 class="flex-between">
-        Impresoras en Red
-        <button class="btn btn-sm" id="scanNetBtn" onclick="scanNetwork()">Escanear Red</button>
-      </h2>
-      <ul class="printer-list" id="netPrinterList">
-        <li class="printer-item"><span style="color:var(--text-dim)">Sin escanear</span></li>
-      </ul>
-      <div class="mt-8 text-sm" id="scanInfo"></div>
-      <div class="mt-12 inline-flex">
-        <input type="text" id="manualIp" placeholder="IP manual (ej: 192.168.1.50)" style="flex:1;">
-        <button class="btn btn-sm" onclick="probeManualIp()">Agregar</button>
+      <h2>Impresoras en Red</h2>
+      <ul class="printer-list" id="netPrinterList"><li class="text-dim text-sm">Ninguna</li></ul>
+      <div class="mt-3">
+        <button class="btn btn-sm" onclick="scanNetwork()">🔍 Escanear red</button>
+      </div>
+      <div class="mt-3">
+        <h2>Impresora Manual</h2>
+        <div id="manualPrintersList" class="mb-2"></div>
+        <div class="form-row">
+          <div class="form-group">
+            <input type="text" id="manualIp" placeholder="192.168.1.100:9100">
+          </div>
+          <button class="btn btn-sm" onclick="probeManualIp()">Agregar</button>
+        </div>
       </div>
     </div>
-
     <div class="card">
-      <h2>Compartir Impresora USB</h2>
-      <p class="text-sm" style="margin-bottom:12px;">Expone una impresora USB local en la red via puerto TCP. Otras PCs pueden imprimir enviando TSPL2 directo.</p>
-      <div class="share-status" id="shareStatus">
-        <div class="share-dot off" id="shareDot"></div>
-        <span id="shareLabel">Desactivado</span>
+      <h2>Compartir USB</h2>
+      <div class="toggle-row">
+        <span class="toggle-label"><span class="dot" id="shareDot"></span> <span id="shareLabel">--</span></span>
+        <button class="btn btn-sm" id="shareToggle" onclick="toggleShareBtn()">--</button>
       </div>
-      <div class="mt-12 flex-between">
-        <div>
-          <span class="text-sm">Puerto: </span>
-          <span id="sharePort" style="font-family:var(--mono);font-size:13px;">9100</span>
-          <span class="text-sm" style="margin-left:12px;">Jobs: </span>
-          <span id="shareJobs" style="font-family:var(--mono);font-size:13px;">0</span>
-        </div>
-        <button class="toggle" id="shareToggle" onclick="toggleShareBtn()"></button>
-      </div>
-      <div class="form-group mt-12">
+      <div class="info-row"><span class="info-label">Puerto</span><span class="info-value" id="sharePort">--</span></div>
+      <div class="info-row"><span class="info-label">Jobs</span><span class="info-value" id="shareJobs">--</span></div>
+      <div class="mt-2 text-xs text-dim" id="shareAddresses"></div>
+      <div class="mt-3">
         <label>Impresora a compartir</label>
         <select id="sharePrinterSelect"></select>
       </div>
@@ -344,539 +640,1309 @@
   <!-- Autostart + Download -->
   <div class="grid">
     <div class="card">
-      <h2>Auto-inicio</h2>
-      <p class="text-sm" style="margin-bottom:12px;">Inicia TSC Bridge automaticamente al encender el equipo.</p>
-      <div class="flex-between">
-        <div>
-          <div class="share-status" id="autostartStatus">
-            <div class="share-dot off" id="autostartDot"></div>
-            <span id="autostartLabel">Verificando...</span>
-          </div>
-        </div>
-        <button class="toggle" id="autostartToggle" onclick="toggleAutoStart()"></button>
+      <h2>Inicio Automático</h2>
+      <div class="toggle-row">
+        <span class="toggle-label"><span class="dot" id="autostartDot"></span> <span id="autostartLabel">--</span></span>
+        <button class="btn btn-sm" id="autostartToggle" onclick="toggleAutoStart()">--</button>
       </div>
     </div>
-
     <div class="card">
-      <h2>Descargar Instalador</h2>
-      <p class="text-sm" style="margin-bottom:12px;">Descarga el binario para instalar en otra PC.</p>
-      <div class="inline-flex">
-        <a class="btn" href="/download?os=mac" download>macOS (arm64)</a>
-        <a class="btn" href="/download?os=windows" download>Windows (x64)</a>
-      </div>
-    </div>
-  </div>
-
-  <!-- Preset selector + preview -->
-  <div class="grid">
-    <div class="card">
-      <h2>Preset de Etiqueta</h2>
-      <div class="form-group">
-        <label>Preset activo</label>
-        <select id="presetSelect"></select>
-      </div>
-      <div id="presetInfo" style="font-size:13px; color:var(--text-dim)"></div>
-      <div class="mt-12">
-        <button class="btn btn-primary btn-sm" onclick="savePreset()">Guardar como predeterminado</button>
-      </div>
-    </div>
-
-    <div class="card">
-      <h2>Preview del Layout</h2>
-      <div id="presetPreview" style="display:flex;align-items:center;justify-content:center;min-height:100px;"></div>
-    </div>
-  </div>
-
-  <!-- Config -->
-  <div class="grid">
-    <div class="card card-full">
-      <h2>Configuracion</h2>
-      <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px;">
-        <div class="form-group">
-          <label>Puerto</label>
-          <input type="number" id="cfgPort" value="9271">
-        </div>
-        <div class="form-group">
-          <label>Impresora predeterminada</label>
-          <select id="cfgPrinter"></select>
-        </div>
-        <div class="form-group">
-          <label>Preset predeterminado</label>
-          <select id="cfgPreset"></select>
-        </div>
-      </div>
-      <div class="mt-12">
-        <button class="btn btn-primary" onclick="saveConfig()">Guardar configuracion</button>
+      <h2>Descargar Bridge</h2>
+      <div class="flex gap-2">
+        <a href="/download?os=mac" class="btn btn-sm">🍎 macOS</a>
+        <a href="/download?os=windows" class="btn btn-sm">🪟 Windows</a>
       </div>
     </div>
   </div>
 
   <!-- Test Print -->
-  <div class="grid">
-    <div class="card card-full">
-      <h2>Test de Impresion</h2>
+  <div class="card">
+    <h2>Prueba de Impresión</h2>
+    <div class="form-row">
       <div class="form-group">
-        <label>Comandos TSPL2 (editables)</label>
-        <textarea id="tsplInput"></textarea>
+        <label>Preset</label>
+        <select id="presetSelect" onchange="renderPresetInfo();renderPresetPreview();loadTestTemplate()"></select>
       </div>
-      <div class="inline-flex mt-12">
-        <button class="btn btn-primary" onclick="sendTestPrint()">Enviar a impresora</button>
-        <button class="btn" onclick="loadTestTemplate()">Cargar template de prueba</button>
-        <select id="testPrinter" style="width:auto;min-width:180px;"></select>
+      <div class="form-group">
+        <label>Impresora</label>
+        <select id="testPrinter"></select>
+      </div>
+    </div>
+    <div class="flex gap-2 mb-3">
+      <div id="presetInfo" class="text-xs text-dim"></div>
+    </div>
+    <div id="presetPreview" class="mb-3"></div>
+    <textarea id="tsplInput" rows="6" class="mono" placeholder="TSPL2 commands..."></textarea>
+    <div class="flex gap-2 mt-2">
+      <button class="btn btn-sm" onclick="loadTestTemplate()">Cargar template</button>
+      <button class="btn btn-sm btn-primary" onclick="sendTestPrint()">Enviar a impresora</button>
+    </div>
+  </div>
+</div>
+
+<!-- ────── Tab: Plantillas ────── -->
+<div class="tab-panel" id="panel-templates">
+
+  <!-- API Connection -->
+  <div class="card">
+    <h2><span class="dot" id="apiDot"></span> Conexión Backend</h2>
+    <div id="apiStatus" class="text-sm text-dim">Verificando...</div>
+    <button class="btn btn-sm mt-2" onclick="testApiConnection()">Probar conexión</button>
+  </div>
+
+  <!-- Backend Templates -->
+  <div class="card">
+    <h2>Plantillas del Backend</h2>
+    <div id="backendTemplateGrid" class="template-grid">
+      <div class="empty-state"><p>Cargando plantillas...</p></div>
+    </div>
+  </div>
+
+  <!-- Local Templates -->
+  <div class="card">
+    <h2>Plantillas Locales</h2>
+    <div id="localTemplateGrid" class="template-grid">
+      <div class="empty-state"><p>Cargando...</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- ────── Tab: Batch ────── -->
+<div class="tab-panel" id="panel-batch">
+  <div class="card">
+    <h2>Impresión / PDF por Lote</h2>
+
+    <!-- Wizard Steps -->
+    <div class="wizard-steps">
+      <div class="step-indicator active" onclick="goToWizardStep(1)">
+        <div class="step-circle" id="sc1">1</div>
+        <span class="step-label">Datos</span>
+      </div>
+      <div class="step-connector" id="conn12"></div>
+      <div class="step-indicator locked" onclick="goToWizardStep(2)">
+        <div class="step-circle" id="sc2">2</div>
+        <span class="step-label">Plantilla</span>
+      </div>
+      <div class="step-connector" id="conn23"></div>
+      <div class="step-indicator locked" onclick="goToWizardStep(3)">
+        <div class="step-circle" id="sc3">3</div>
+        <span class="step-label">Mapeo</span>
+      </div>
+      <div class="step-connector" id="conn34"></div>
+      <div class="step-indicator locked" onclick="goToWizardStep(4)">
+        <div class="step-circle" id="sc4">4</div>
+        <span class="step-label">Ejecutar</span>
+      </div>
+    </div>
+
+    <!-- Step 1: Upload -->
+    <div class="wizard-panel active" id="ws1">
+      <div class="drop-zone" id="dropZone" onclick="document.getElementById('excelFile').click()">
+        <div class="drop-zone-icon">📊</div>
+        <p><strong>Arrastra tu archivo Excel aquí</strong></p>
+        <p class="text-xs text-dim">.xlsx / .xls</p>
+      </div>
+      <input type="file" id="excelFile" accept=".xlsx,.xls" style="display:none" onchange="handleExcelUpload(event)">
+      <div id="excelPreview" class="mt-3"></div>
+      <div class="flex-between mt-3">
+        <button class="btn btn-sm btn-danger" id="clearExcelBtn" onclick="clearExcel()" style="display:none">Limpiar datos</button>
+        <button class="btn btn-primary" id="nextStep1" onclick="goToWizardStep(2)" disabled>Siguiente →</button>
+      </div>
+    </div>
+
+    <!-- Step 2: Template -->
+    <div class="wizard-panel" id="ws2">
+      <div id="wizardTemplateGrid"></div>
+      <div class="mt-3">
+        <label>Preset de etiqueta</label>
+        <select id="batchPreset"></select>
+      </div>
+      <div class="flex-between mt-3">
+        <button class="btn" onclick="goToWizardStep(1)">← Atrás</button>
+        <button class="btn btn-primary" id="nextStep2" onclick="goToWizardStep(3)" disabled>Siguiente →</button>
+      </div>
+    </div>
+
+    <!-- Step 3: Mapping + Preview -->
+    <div class="wizard-panel" id="ws3">
+      <div id="mappingContainer"></div>
+      <div id="mappingInfo" class="text-xs text-dim mt-2"></div>
+      <div id="visualPreview" class="preview-container"></div>
+      <details class="mt-3">
+        <summary>Vista previa TSPL</summary>
+        <div id="tsplPreviewVisual" class="tspl-visual"></div>
+        <textarea id="tsplPreviewRaw" rows="8" class="mono mt-2" readonly></textarea>
+      </details>
+      <div class="flex-between mt-3">
+        <button class="btn" onclick="goToWizardStep(2)">← Atrás</button>
+        <button class="btn btn-primary" onclick="goToWizardStep(4)">Siguiente →</button>
+      </div>
+    </div>
+
+    <!-- Step 4: Execute -->
+    <div class="wizard-panel" id="ws4">
+      <!-- Output toggle: Print vs PDF -->
+      <label>Tipo de salida</label>
+      <div class="output-toggle">
+        <button class="output-toggle-btn active" id="outPrint" onclick="setOutputMode('print')">🖨 Imprimir etiquetas (TSPL)</button>
+        <button class="output-toggle-btn" id="outPdf" onclick="setOutputMode('pdf')">📄 Generar PDF</button>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Fila inicio</label>
+          <input type="number" id="rowStart" value="1" min="1">
+        </div>
+        <div class="form-group">
+          <label>Fila fin</label>
+          <input type="number" id="rowEnd" value="1" min="1">
+        </div>
+        <div class="form-group">
+          <label>Copias</label>
+          <input type="number" id="batchCopies" value="1" min="1" max="99">
+        </div>
+      </div>
+
+      <!-- Print-only options -->
+      <div id="printOptions">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Impresora</label>
+            <select id="batchPrinter"></select>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex-between mb-3">
+        <span class="text-sm" id="batchSummary">--</span>
+      </div>
+
+      <div class="progress-bar" id="batchProgress"><div class="progress-fill" id="batchProgressFill"></div></div>
+      <div id="batchResult" class="mt-2"></div>
+
+      <div class="flex-between mt-3">
+        <button class="btn" onclick="goToWizardStep(3)">← Atrás</button>
+        <div class="flex gap-2">
+          <button class="btn" onclick="executeBatchPreview()">Solo Preview</button>
+          <button class="btn btn-primary" id="executeBtn" onclick="executeBatch()">Ejecutar</button>
+        </div>
       </div>
     </div>
   </div>
+</div>
+
+<!-- ────── Tab: Settings ────── -->
+<div class="tab-panel" id="panel-settings">
+  <div class="card">
+    <h2>Configuración</h2>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Puerto HTTP</label>
+        <input type="number" id="cfgPort" value="9638">
+      </div>
+      <div class="form-group">
+        <label>Impresora por defecto</label>
+        <select id="cfgPrinter"></select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Preset por defecto</label>
+        <select id="cfgPreset"></select>
+      </div>
+    </div>
+    <button class="btn btn-primary" onclick="saveConfig()">Guardar configuración</button>
+  </div>
+</div>
+
 </main>
 
+<!-- ═══ Footer ═══ -->
+<footer>
+  <div class="footer-left">
+    <span><span class="dot dot-green" id="footerDot"></span> TSC Bridge</span>
+    <span id="footerPrinters">0 impresoras</span>
+  </div>
+  <div class="footer-right">
+    <span id="footerUptime">--</span>
+  </div>
+</footer>
+
+<!-- Toast -->
 <div class="toast" id="toast"></div>
 
 <script>
-const API = window.location.origin;
-
-// --- State ---
+// ═══════════════════════════════════════════════════
+// State
+// ═══════════════════════════════════════════════════
 let printers = [];
 let presets = [];
 let config = {};
 let shareStatus = {};
+let autostartEnabled = false;
+let excelData = null;
+let localTemplates = [];
+let backendTemplates = [];
+let selectedTemplateId = null;
+let selectedTemplateMode = '';
+let selectedTemplateFields = [];
+let selectedTemplateFieldTypes = {};
+let allTemplateFields = [];
+let columnMapping = {};
+let currentWizardStep = 1;
+let templateSchema = null;
+let templateFieldDetails = [];
+let outputMode = 'print'; // 'print' or 'pdf'
 
-// --- Init ---
+// ═══════════════════════════════════════════════════
+// Init
+// ═══════════════════════════════════════════════════
 document.addEventListener('DOMContentLoaded', () => {
   refresh();
   setInterval(() => { refreshStatus(); refreshShare(); }, 10000);
+  setupDropZone();
+  setTimeout(() => {
+    refreshLabelTemplates();
+    refreshBackendTemplates();
+    testApiConnection();
+  }, 500);
+  applyWhitelabel();
 });
 
 async function refresh() {
-  await Promise.all([refreshStatus(), refreshPrinters(), refreshPresets(), refreshConfig(), refreshShare(), refreshAutoStart()]);
+  refreshStatus();
+  refreshPrinters();
+  refreshPresets();
+  refreshConfig();
+  refreshShare();
+  refreshAutoStart();
+  checkDriverStatus();
 }
 
-// --- Status ---
-async function refreshStatus() {
+// ═══════════════════════════════════════════════════
+// Whitelabel
+// ═══════════════════════════════════════════════════
+async function applyWhitelabel() {
   try {
-    const r = await fetch(API + '/status');
-    const d = await r.json();
-    document.getElementById('sVersion').textContent = d.version || '—';
-    document.getElementById('sOS').textContent = d.os || '—';
-    document.getElementById('sPort').textContent = d.port || location.port || '—';
-    document.getElementById('sPreset').textContent = d.default_preset || '—';
-    document.getElementById('sPrinter').textContent = d.default_printer || '(auto)';
-    document.getElementById('statusBadge').className = 'badge badge-green';
-    document.getElementById('statusBadge').textContent = 'Conectado';
-  } catch {
-    document.getElementById('statusBadge').className = 'badge badge-red';
-    document.getElementById('statusBadge').textContent = 'Desconectado';
+    const r = await fetch('/whitelabel');
+    const wl = await r.json();
+    if (wl.name) {
+      document.getElementById('headerTitle').textContent = wl.name;
+      document.title = wl.name + ' — Dashboard';
+    }
+    if (wl.logo_url) {
+      const logo = document.getElementById('headerLogo');
+      logo.outerHTML = `<img src="${esc(wl.logo_url)}" class="header-logo" id="headerLogo" onerror="this.style.display='none'">`;
+    }
+    if (wl.primary_color) {
+      document.documentElement.style.setProperty('--primary', wl.primary_color);
+      document.documentElement.style.setProperty('--primary-hover', wl.primary_color);
+      document.documentElement.style.setProperty('--accent', wl.primary_color);
+    }
+    if (wl.accent_color) {
+      document.documentElement.style.setProperty('--accent', wl.accent_color);
+    }
+  } catch(e) {}
+}
+
+// ═══════════════════════════════════════════════════
+// Tab switching
+// ═══════════════════════════════════════════════════
+function switchTab(tab) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelector(`[data-tab="${tab}"]`).classList.add('active');
+  document.getElementById('panel-' + tab).classList.add('active');
+  if (tab === 'templates') {
+    refreshBackendTemplates();
+    refreshLabelTemplates();
   }
 }
 
-// --- Printers ---
+// ═══════════════════════════════════════════════════
+// Status
+// ═══════════════════════════════════════════════════
+async function refreshStatus() {
+  try {
+    const r = await fetch('/status');
+    const d = await r.json();
+    document.getElementById('infoVersion').textContent = d.version || '--';
+    document.getElementById('infoOS').textContent = d.os || '--';
+    document.getElementById('infoPort').textContent = d.port || '--';
+    document.getElementById('infoPreset').textContent = d.default_preset || '--';
+    document.getElementById('infoPrinter').textContent = d.default_printer || '(auto)';
+    document.getElementById('versionBadge').textContent = 'v' + (d.version || '--');
+    document.getElementById('footerUptime').textContent = d.uptime || '--';
+    const badge = document.getElementById('connBadge');
+    badge.className = 'badge badge-green';
+    badge.innerHTML = '<span class="dot dot-green"></span> Conectado';
+    document.getElementById('footerDot').className = 'dot dot-green';
+  } catch(e) {
+    const badge = document.getElementById('connBadge');
+    badge.className = 'badge badge-red';
+    badge.innerHTML = '<span class="dot dot-red"></span> Desconectado';
+    document.getElementById('footerDot').className = 'dot dot-red';
+  }
+}
+
+// ═══════════════════════════════════════════════════
+// Printers
+// ═══════════════════════════════════════════════════
 async function refreshPrinters() {
   try {
-    const r = await fetch(API + '/printers');
+    const r = await fetch('/printers');
     const d = await r.json();
     printers = d.printers || [];
     renderLocalPrinters();
     renderNetPrinters();
     populatePrinterSelects();
-  } catch { printers = []; }
+    document.getElementById('printerCount').textContent = printers.length;
+    document.getElementById('footerPrinters').textContent = printers.length + ' impresora' + (printers.length !== 1 ? 's' : '');
+  } catch(e) {}
 }
 
-function typeBadge(type_) {
-  const m = {
-    usb:     { cls: 'badge-green',  label: 'USB' },
-    cups:    { cls: 'badge-orange', label: 'CUPS' },
-    spooler: { cls: 'badge-purple', label: 'Spooler' },
-    network: { cls: 'badge-blue',   label: 'RED' },
-  };
-  const t = m[type_] || { cls: 'badge-green', label: type_ || '?' };
-  return `<span class="badge ${t.cls}" style="font-size:11px;padding:2px 8px;">${t.label}</span>`;
+function typeBadge(t) {
+  const map = {usb:'badge-blue',cups:'badge-purple',spooler:'badge-purple',network:'badge-green',manual:'badge-orange',raw:'badge-orange'};
+  return `<span class="badge ${map[t]||'badge-blue'}">${t}</span>`;
+}
+
+function onlineDot(p) {
+  if (p.type === 'network' || p.type === 'manual' || p.type === 'raw') {
+    return p.online ? '<span class="dot dot-green"></span>' : '<span class="dot dot-red"></span>';
+  }
+  return '';
 }
 
 function printerItem(p) {
-  const name = typeof p === 'string' ? p : p.name;
-  const type_ = typeof p === 'string' ? '' : p.type;
-  const addr = (p.address || '');
-  const addrHtml = addr ? `<span class="text-sm" style="margin-left:6px;">${esc(addr)}</span>` : '';
-  return `
-  <li class="printer-item">
-    <span class="name">${esc(name)} ${typeBadge(type_)}${addrHtml}</span>
+  return `<li class="printer-item">
+    <div class="printer-name">${onlineDot(p)} ${esc(p.name)} ${typeBadge(p.type)}</div>
     <div class="printer-actions">
-      <button class="btn btn-sm" onclick="setDefaultPrinter('${esc(name)}')">Predeterminar</button>
-      <button class="btn btn-sm btn-primary" onclick="testPrintOnPrinter('${esc(name)}')">Test</button>
+      <button class="btn btn-sm" onclick="setDefaultPrinter('${esc(p.name)}')">Default</button>
+      <button class="btn btn-sm" onclick="testPrintOnPrinter('${esc(p.name)}')">Test</button>
     </div>
   </li>`;
 }
 
 function renderLocalPrinters() {
-  const ul = document.getElementById('localPrinterList');
-  const local = printers.filter(p => (typeof p === 'string') || p.type !== 'network');
-  if (!local.length) {
-    ul.innerHTML = '<li class="printer-item"><span style="color:var(--text-dim)">No se detectaron impresoras locales</span></li>';
-    return;
-  }
-  ul.innerHTML = local.map(printerItem).join('');
+  const el = document.getElementById('localPrinterList');
+  const local = printers.filter(p => p.type !== 'network' && p.type !== 'manual' && p.type !== 'raw');
+  el.innerHTML = local.length ? local.map(printerItem).join('') : '<li class="text-dim text-sm">Ninguna detectada</li>';
 }
 
 function renderNetPrinters() {
-  const ul = document.getElementById('netPrinterList');
-  const net = printers.filter(p => typeof p !== 'string' && p.type === 'network');
-  if (!net.length) {
-    ul.innerHTML = '<li class="printer-item"><span style="color:var(--text-dim)">No se encontraron impresoras en red</span></li>';
-    return;
-  }
-  ul.innerHTML = net.map(printerItem).join('');
-  document.getElementById('scanInfo').textContent = net.length + ' impresora(s) en red';
+  const el = document.getElementById('netPrinterList');
+  const net = printers.filter(p => p.type === 'network' || p.type === 'manual' || p.type === 'raw');
+  el.innerHTML = net.length ? net.map(printerItem).join('') : '<li class="text-dim text-sm">Ninguna</li>';
 }
 
 function populatePrinterSelects() {
-  ['cfgPrinter', 'testPrinter', 'sharePrinterSelect'].forEach(id => {
-    const sel = document.getElementById(id);
-    if (!sel) return;
-    const isShare = id === 'sharePrinterSelect';
-    const list = isShare ? printers.filter(p => typeof p !== 'string' && p.type !== 'network') : printers;
-    sel.innerHTML = '<option value="">(auto-detectar)</option>' +
-      list.map(p => {
-        const name = typeof p === 'string' ? p : p.name;
-        const type_ = typeof p === 'string' ? '' : (p.type || '').toUpperCase();
-        const label = type_ ? `${name} [${type_}]` : name;
-        return `<option value="${esc(name)}">${esc(label)}</option>`;
-      }).join('');
-    if (id === 'sharePrinterSelect') {
-      sel.value = config.share_printer || '';
-    } else {
-      if (config.default_printer) sel.value = config.default_printer;
-    }
+  const opts = printers.map(p => `<option value="${esc(p.name)}">${esc(p.name)} (${p.type})</option>`).join('');
+  ['cfgPrinter','testPrinter','batchPrinter'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.innerHTML = '<option value="">Auto</option>' + opts;
   });
+  // Share only local printers
+  const localOpts = printers.filter(p => p.type !== 'network' && p.type !== 'manual' && p.type !== 'raw')
+    .map(p => `<option value="${esc(p.name)}">${esc(p.name)}</option>`).join('');
+  const sp = document.getElementById('sharePrinterSelect');
+  if (sp) sp.innerHTML = '<option value="">Auto</option>' + localOpts;
+  // Restore selections
+  if (config.default_printer) {
+    const cp = document.getElementById('cfgPrinter');
+    if (cp) cp.value = config.default_printer;
+  }
 }
 
-// --- Share ---
+async function setDefaultPrinter(name) {
+  try {
+    await fetch('/config', {method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify({...config, default_printer:name})});
+    config.default_printer = name;
+    populatePrinterSelects();
+    toast('Impresora por defecto: ' + name, 'success');
+    refreshStatus();
+  } catch(e) { toast('Error al guardar', 'error'); }
+}
+
+// ═══════════════════════════════════════════════════
+// Sharing
+// ═══════════════════════════════════════════════════
 async function refreshShare() {
   try {
-    const r = await fetch(API + '/share');
+    const r = await fetch('/share');
     shareStatus = await r.json();
     renderShare();
-  } catch { shareStatus = {}; }
+  } catch(e) {}
 }
 
 function renderShare() {
+  const s = shareStatus;
   const dot = document.getElementById('shareDot');
   const label = document.getElementById('shareLabel');
   const toggle = document.getElementById('shareToggle');
-  const port = document.getElementById('sharePort');
-  const jobs = document.getElementById('shareJobs');
-
-  if (shareStatus.running) {
-    dot.className = 'share-dot on';
-    label.textContent = 'Activo — escuchando en ' + (shareStatus.address || '0.0.0.0:' + shareStatus.port);
-    toggle.className = 'toggle active';
-  } else {
-    dot.className = 'share-dot off';
-    label.textContent = shareStatus.enabled ? 'Habilitado (sin iniciar)' : 'Desactivado';
-    toggle.className = shareStatus.enabled ? 'toggle active' : 'toggle';
+  dot.className = 'dot ' + (s.enabled ? 'dot-green' : 'dot-red');
+  label.textContent = s.enabled ? 'Compartiendo' : 'Desactivado';
+  toggle.textContent = s.enabled ? 'Desactivar' : 'Activar';
+  document.getElementById('sharePort').textContent = s.port || '--';
+  document.getElementById('shareJobs').textContent = s.total_jobs || '0';
+  const addrs = document.getElementById('shareAddresses');
+  if (s.local_addresses && s.local_addresses.length) {
+    addrs.innerHTML = s.local_addresses.map(a => `${a}:${s.port}`).join(', ');
   }
-  port.textContent = shareStatus.port || 9100;
-  jobs.textContent = shareStatus.jobs_served || 0;
 }
 
 async function toggleShareBtn() {
-  const newState = !shareStatus.running && !shareStatus.enabled;
   try {
-    const r = await fetch(API + '/share', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ enabled: !shareStatus.enabled })
-    });
-    if (r.ok) {
-      shareStatus = await r.json();
-      renderShare();
-      toast(shareStatus.running ? 'Impresora compartida en red' : 'Sharing desactivado', 'success');
-    }
-  } catch { toast('Error de conexion', 'error'); }
+    await fetch('/share', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({enabled:!shareStatus.enabled})});
+    refreshShare();
+  } catch(e) { toast('Error', 'error'); }
 }
 
-// --- Network Scan ---
-async function scanNetwork() {
-  const btn = document.getElementById('scanNetBtn');
-  btn.disabled = true;
-  btn.textContent = 'Escaneando...';
+// ═══════════════════════════════════════════════════
+// Manual printers
+// ═══════════════════════════════════════════════════
+function renderManualPrintersList() {
+  const el = document.getElementById('manualPrintersList');
+  if (!config.manual_printers || !config.manual_printers.length) { el.innerHTML = ''; return; }
+  el.innerHTML = config.manual_printers.map(ip =>
+    `<div class="flex-between" style="padding:4px 0;font-size:12px">
+      <span>${esc(ip)}</span>
+      <button class="btn btn-sm btn-danger" onclick="removeManualPrinter('${esc(ip)}')">✕</button>
+    </div>`
+  ).join('');
+}
+
+async function removeManualPrinter(ip) {
   try {
-    const r = await fetch(API + '/discover', { method: 'POST' });
-    const d = await r.json();
-    if (r.ok) {
-      toast(`Red escaneada: ${d.count} impresora(s) encontrada(s)`, 'success');
-      await refreshPrinters();
-    } else {
-      toast(d.error || 'Error al escanear', 'error');
-    }
-  } catch { toast('Error de conexion', 'error'); }
-  btn.disabled = false;
-  btn.textContent = 'Escanear Red';
+    await fetch('/manual-printers?ip=' + encodeURIComponent(ip), {method:'DELETE'});
+    refreshConfig();
+    refreshPrinters();
+  } catch(e) {}
 }
 
 async function probeManualIp() {
-  const input = document.getElementById('manualIp');
-  const ip = input.value.trim();
-  if (!ip) { toast('Ingresa una IP', 'error'); return; }
-
-  // Add to manual printers via config and trigger discover
-  const manuals = config.manual_printers || [];
-  if (!manuals.includes(ip)) {
-    manuals.push(ip);
-    const body = { ...config, manual_printers: manuals };
-    try {
-      await fetch(API + '/config', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body)
-      });
-      config.manual_printers = manuals;
-    } catch { toast('Error guardando config', 'error'); return; }
-  }
-
-  toast('Probando ' + ip + '...', 'success');
-  input.value = '';
-  // Trigger rescan to pick up the manual printer
-  await scanNetwork();
+  const ip = document.getElementById('manualIp').value.trim();
+  if (!ip) return;
+  const mp = config.manual_printers || [];
+  if (!mp.includes(ip)) mp.push(ip);
+  try {
+    await fetch('/config', {method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify({...config, manual_printers:mp})});
+    document.getElementById('manualIp').value = '';
+    scanNetwork();
+    refreshConfig();
+  } catch(e) { toast('Error', 'error'); }
 }
 
-// --- Presets ---
+async function scanNetwork() {
+  try {
+    await fetch('/discover', {method:'POST'});
+    toast('Escaneo completado', 'success');
+    refreshPrinters();
+  } catch(e) { toast('Error al escanear', 'error'); }
+}
+
+// ═══════════════════════════════════════════════════
+// Presets
+// ═══════════════════════════════════════════════════
 async function refreshPresets() {
   try {
-    const r = await fetch(API + '/presets');
+    const r = await fetch('/presets');
     const d = await r.json();
     presets = d.presets || [];
     renderPresetSelects();
+    renderPresetInfo();
     renderPresetPreview();
-  } catch { presets = []; }
+  } catch(e) {}
 }
 
 function renderPresetSelects() {
-  ['presetSelect', 'cfgPreset'].forEach(id => {
-    const sel = document.getElementById(id);
-    sel.innerHTML = presets.map(p =>
-      `<option value="${p.id}" ${p.builtin ? '' : 'style="color:var(--orange)"'}>${esc(p.name)}${p.builtin ? '' : ' (custom)'}</option>`
-    ).join('');
-    sel.value = config.default_preset || 'matrix-3x1-30x22';
+  const opts = presets.map(p => `<option value="${p.id}" ${p.id===config.default_preset?'selected':''}>${p.name} (${p.label_width_mm}×${p.label_height_mm}mm)</option>`).join('');
+  ['presetSelect','cfgPreset','batchPreset'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.innerHTML = opts;
   });
-  document.getElementById('presetSelect').onchange = () => {
-    renderPresetInfo();
-    renderPresetPreview();
-  };
-  renderPresetInfo();
 }
 
 function renderPresetInfo() {
-  const id = document.getElementById('presetSelect').value;
-  const p = presets.find(x => x.id === id);
-  if (!p) return;
-  document.getElementById('presetInfo').innerHTML =
-    `${p.columns} columna(s) &middot; ${p.label_width}x${p.label_height}mm &middot; Total: ${p.total_width}mm &middot; Dir: ${p.direction}`;
+  const sel = document.getElementById('presetSelect');
+  if (!sel) return;
+  const p = presets.find(x => x.id === sel.value);
+  const el = document.getElementById('presetInfo');
+  if (!p) { el.textContent = ''; return; }
+  el.textContent = `${p.columns} col × ${p.label_width_mm}×${p.label_height_mm}mm | Total: ${p.total_width_mm}mm`;
 }
 
 function renderPresetPreview() {
-  const id = document.getElementById('presetSelect').value;
-  const p = presets.find(x => x.id === id);
-  if (!p) return;
-  const container = document.getElementById('presetPreview');
-  const scale = 2.5;
-  const w = p.total_width * scale;
-  const h = p.label_height * scale;
-  let html = `<div class="preview-label" style="width:${w}px;height:${h}px;">`;
+  const sel = document.getElementById('presetSelect');
+  if (!sel) return;
+  const p = presets.find(x => x.id === sel.value);
+  const el = document.getElementById('presetPreview');
+  if (!p) { el.innerHTML = ''; return; }
+  const scale = 2;
+  const tw = (p.total_width_mm || p.label_width_mm * p.columns) * scale;
+  const th = p.label_height_mm * scale;
+  let html = `<div style="display:inline-flex;gap:2px;padding:8px;background:var(--surface-2);border-radius:var(--radius-xs)">`;
   for (let i = 0; i < p.columns; i++) {
-    const colW = p.label_width * scale;
-    html += `<div class="col" style="left:${i * (w/p.columns) + 4}px;width:${colW - 8}px;">${i+1}</div>`;
+    html += `<div style="width:${p.label_width_mm*scale}px;height:${th}px;border:1px dashed var(--border-light);border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--text-muted)">Col ${i+1}</div>`;
   }
   html += '</div>';
-  container.innerHTML = html;
+  el.innerHTML = html;
 }
 
-// --- Config ---
+// ═══════════════════════════════════════════════════
+// Config
+// ═══════════════════════════════════════════════════
 async function refreshConfig() {
   try {
-    const r = await fetch(API + '/config');
+    const r = await fetch('/config');
     config = await r.json();
-    document.getElementById('cfgPort').value = config.port || 9271;
-  } catch { config = {}; }
+    document.getElementById('cfgPort').value = config.port || 9638;
+    renderManualPrintersList();
+  } catch(e) {}
 }
 
 async function saveConfig() {
   const body = {
     ...config,
-    port: parseInt(document.getElementById('cfgPort').value) || 9271,
+    port: parseInt(document.getElementById('cfgPort').value) || 9638,
     default_printer: document.getElementById('cfgPrinter').value,
     default_preset: document.getElementById('cfgPreset').value,
     auto_start: true,
-    share_printer: document.getElementById('sharePrinterSelect').value,
+    share_printer: document.getElementById('sharePrinterSelect')?.value || ''
   };
   try {
-    const r = await fetch(API + '/config', {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body)
-    });
-    if (r.ok) {
-      toast('Configuracion guardada', 'success');
-      config = { ...config, ...body };
-      refreshStatus();
-    } else {
-      const d = await r.json();
-      toast(d.error || 'Error al guardar', 'error');
-    }
-  } catch (e) { toast('Error de conexion', 'error'); }
+    await fetch('/config', {method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body)});
+    Object.assign(config, body);
+    toast('Configuración guardada', 'success');
+    refreshStatus();
+  } catch(e) { toast('Error al guardar', 'error'); }
 }
 
 async function savePreset() {
-  const presetId = document.getElementById('presetSelect').value;
-  const body = { ...config, default_preset: presetId };
+  const body = {...config, default_preset: document.getElementById('presetSelect').value};
   try {
-    const r = await fetch(API + '/config', {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body)
-    });
-    if (r.ok) {
-      toast('Preset predeterminado: ' + presetId, 'success');
-      config.default_preset = presetId;
-      document.getElementById('cfgPreset').value = presetId;
-      refreshStatus();
-    }
-  } catch { toast('Error de conexion', 'error'); }
+    await fetch('/config', {method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body)});
+    config.default_preset = body.default_preset;
+    toast('Preset guardado', 'success');
+  } catch(e) {}
 }
 
-async function setDefaultPrinter(name) {
-  const body = { ...config, default_printer: name };
-  try {
-    await fetch(API + '/config', {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body)
-    });
-    config.default_printer = name;
-    toast('Impresora predeterminada: ' + name, 'success');
-    populatePrinterSelects();
-    refreshStatus();
-  } catch { toast('Error de conexion', 'error'); }
-}
-
-// --- Test Print ---
+// ═══════════════════════════════════════════════════
+// Test print
+// ═══════════════════════════════════════════════════
 function loadTestTemplate() {
-  const id = document.getElementById('presetSelect').value;
-  const p = presets.find(x => x.id === id);
+  const sel = document.getElementById('presetSelect');
+  const p = presets.find(x => x.id === sel?.value);
   if (!p) return;
-  let cmds = `SIZE ${p.total_width} mm, ${p.label_height} mm\r\n`;
-  cmds += `GAP ${p.gap_row} mm, 0 mm\r\n`;
-  cmds += `DIRECTION ${p.direction}\r\n`;
-  cmds += `SPEED ${p.speed}\r\n`;
-  cmds += `DENSITY ${p.density}\r\n`;
-  cmds += `SET TEAR ON\r\nCLS\r\n`;
+  let tspl = `SIZE ${p.label_width_mm} mm, ${p.label_height_mm} mm\r\nGAP ${p.gap_mm || 3} mm, 0 mm\r\nDIRECTION 1,0\r\nCLS\r\n`;
   for (let i = 0; i < p.columns; i++) {
-    const x = p.col_offsets[i] || 0;
-    cmds += `TEXT ${x},16,"3",0,1,1,"TEST COL ${i+1}"\r\n`;
-    cmds += `BARCODE ${x},48,"128",40,1,0,2,2,"12345${i}"\r\n`;
+    const x = p.col_offsets && p.col_offsets[i] ? p.col_offsets[i] : 8;
+    tspl += `TEXT ${x},16,"3",0,1,1,"TEST COL ${i+1}"\r\n`;
+    tspl += `BARCODE ${x},48,"128",40,1,0,2,2,"12345${i}"\r\n`;
   }
-  cmds += `PRINT 1\r\n`;
-  document.getElementById('tsplInput').value = cmds;
+  tspl += 'PRINT 1\r\n';
+  document.getElementById('tsplInput').value = tspl;
 }
 
 async function sendTestPrint() {
   const tspl = document.getElementById('tsplInput').value;
-  if (!tspl.trim()) { toast('Escribe comandos TSPL primero', 'error'); return; }
+  if (!tspl.trim()) return toast('Sin comandos TSPL', 'error');
   const printer = document.getElementById('testPrinter').value;
-  let url = API + '/print';
-  if (printer) url += '?printer=' + encodeURIComponent(printer);
   try {
-    const r = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/octet-stream' },
-      body: tspl
-    });
+    const url = '/print' + (printer ? '?printer=' + encodeURIComponent(printer) : '');
+    const r = await fetch(url, {method:'POST', headers:{'Content-Type':'application/octet-stream'}, body:tspl});
     const d = await r.json();
-    if (r.ok) toast(`Impreso: ${d.bytes} bytes en ${d.printer}`, 'success');
-    else toast(d.error || 'Error de impresion', 'error');
-  } catch { toast('Error de conexion', 'error'); }
-}
-
-async function testPrintOnPrinter(name) {
-  const id = document.getElementById('presetSelect').value;
-  const p = presets.find(x => x.id === id);
-  let tspl;
-  if (p) {
-    tspl = `SIZE ${p.total_width} mm, ${p.label_height} mm\r\n`;
-    tspl += `GAP ${p.gap_row} mm, 0 mm\r\n`;
-    tspl += `DIRECTION ${p.direction}\r\n`;
-    tspl += `SPEED ${p.speed}\r\n`;
-    tspl += `DENSITY ${p.density}\r\n`;
-    tspl += `SET TEAR ON\r\nCLS\r\n`;
-    for (let i = 0; i < p.columns; i++) {
-      const x = p.col_offsets[i] || 0;
-      tspl += `TEXT ${x},16,"3",0,1,1,"TEST COL ${i+1}"\r\n`;
-      tspl += `BARCODE ${x},48,"128",40,1,0,2,2,"12345${i}"\r\n`;
-    }
-    tspl += `PRINT 1\r\n`;
-  } else {
-    tspl = 'SIZE 40 mm, 25 mm\r\nGAP 3 mm, 0 mm\r\nDIRECTION 0,0\r\nSPEED 4\r\nDENSITY 8\r\nCLS\r\nTEXT 8,8,"3",0,1,1,"TEST PRINT"\r\nBARCODE 8,40,"128",40,1,0,2,2,"TSC-BRIDGE-OK"\r\nPRINT 1\r\n';
-  }
-  try {
-    const r = await fetch(API + '/print?printer=' + encodeURIComponent(name), {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/octet-stream' },
-      body: tspl
-    });
-    const d = await r.json();
-    if (r.ok) toast(`Test OK (${p ? p.name : 'single'}): ` + name, 'success');
+    if (r.ok) toast('Impreso: ' + d.bytes + ' bytes', 'success');
     else toast(d.error || 'Error', 'error');
-  } catch { toast('Error de conexion', 'error'); }
+  } catch(e) { toast('Error de conexión', 'error'); }
 }
 
-// --- AutoStart ---
-let autostartEnabled = false;
+function testPrintOnPrinter(name) {
+  const sel = document.getElementById('presetSelect');
+  const p = presets.find(x => x.id === sel?.value);
+  if (!p) return toast('Sin preset', 'error');
+  let tspl = `SIZE ${p.label_width_mm} mm, ${p.label_height_mm} mm\r\nGAP ${p.gap_mm || 3} mm, 0 mm\r\nDIRECTION 1,0\r\nCLS\r\n`;
+  for (let i = 0; i < p.columns; i++) {
+    const x = p.col_offsets && p.col_offsets[i] ? p.col_offsets[i] : 8;
+    tspl += `TEXT ${x},16,"3",0,1,1,"TEST"\r\n`;
+    tspl += `BARCODE ${x},48,"128",40,1,0,2,2,"12345${i}"\r\n`;
+  }
+  tspl += 'PRINT 1\r\n';
+  fetch('/print?printer=' + encodeURIComponent(name), {method:'POST', headers:{'Content-Type':'application/octet-stream'}, body:tspl})
+    .then(r => r.json())
+    .then(d => toast(d.status === 'printed' ? 'Test OK' : (d.error||'Error'), d.status === 'printed' ? 'success' : 'error'))
+    .catch(() => toast('Error', 'error'));
+}
+
+// ═══════════════════════════════════════════════════
+// Autostart
+// ═══════════════════════════════════════════════════
 async function refreshAutoStart() {
   try {
-    const r = await fetch(API + '/autostart');
+    const r = await fetch('/autostart');
     const d = await r.json();
     autostartEnabled = d.enabled;
     renderAutoStart();
-  } catch { autostartEnabled = false; }
+  } catch(e) {}
 }
 
 function renderAutoStart() {
   const dot = document.getElementById('autostartDot');
   const label = document.getElementById('autostartLabel');
   const toggle = document.getElementById('autostartToggle');
-  if (autostartEnabled) {
-    dot.className = 'share-dot on';
-    label.textContent = 'Activado — inicia al login';
-    toggle.className = 'toggle active';
-  } else {
-    dot.className = 'share-dot off';
-    label.textContent = 'Desactivado';
-    toggle.className = 'toggle';
-  }
+  dot.className = 'dot ' + (autostartEnabled ? 'dot-green' : 'dot-red');
+  label.textContent = autostartEnabled ? 'Activado' : 'Desactivado';
+  toggle.textContent = autostartEnabled ? 'Desactivar' : 'Activar';
 }
 
 async function toggleAutoStart() {
   try {
-    const r = await fetch(API + '/autostart', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ enabled: !autostartEnabled })
-    });
-    if (r.ok) {
-      const d = await r.json();
-      autostartEnabled = d.enabled;
-      renderAutoStart();
-      toast(autostartEnabled ? 'Auto-inicio activado' : 'Auto-inicio desactivado', 'success');
-    }
-  } catch { toast('Error de conexion', 'error'); }
+    await fetch('/autostart', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({enabled:!autostartEnabled})});
+    autostartEnabled = !autostartEnabled;
+    renderAutoStart();
+  } catch(e) { toast('Error', 'error'); }
 }
 
-// --- Utilities ---
-function esc(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+// ═══════════════════════════════════════════════════
+// Drivers
+// ═══════════════════════════════════════════════════
+async function checkDriverStatus() {
+  try {
+    const r = await fetch('/driver/status');
+    const d = await r.json();
+    const card = document.getElementById('driverCard');
+    if (!d.needs_setup && !d.usb_devices?.length && !d.drivers_installed) { card.style.display = 'none'; return; }
+    card.style.display = 'block';
+    let html = '';
+    if (d.usb_devices?.length) {
+      html += '<div class="text-sm mb-2"><strong>Dispositivos USB:</strong></div>';
+      d.usb_devices.forEach(dev => {
+        html += `<div class="printer-item"><span>${esc(dev.name)} <span class="text-xs text-dim">${dev.vendor_id}:${dev.product_id}</span></span></div>`;
+      });
+    }
+    if (d.drivers_installed) {
+      html += `<div class="mt-2 text-sm"><span class="badge badge-green">Drivers instalados</span></div>`;
+      if (d.driver_names?.length) html += `<div class="text-xs text-dim mt-2">${d.driver_names.join(', ')}</div>`;
+    }
+    if (d.registered_printers?.length) {
+      html += `<div class="mt-2 text-sm"><strong>Impresoras registradas:</strong> ${d.registered_printers.join(', ')}</div>`;
+    }
+    if (d.needs_setup) {
+      if (d.instructions) html += `<div class="mt-2 text-sm text-dim">${esc(d.instructions)}</div>`;
+      html += '<div class="flex gap-2 mt-3">';
+      if (d.can_auto_install) html += `<button class="btn btn-sm btn-primary" onclick="driverSetup('register')">Registrar (modo RAW)</button>`;
+      html += `<button class="btn btn-sm" onclick="driverSetup('full-setup')">Configuración completa</button>`;
+      if (d.download_url) html += `<a href="${d.download_url}" target="_blank" class="btn btn-sm">Descargar drivers</a>`;
+      html += '</div>';
+    }
+    document.getElementById('driverContent').innerHTML = html;
+  } catch(e) {}
+}
+
+async function driverSetup(action) {
+  try {
+    const r = await fetch('/driver/setup', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({action})});
+    const d = await r.json();
+    if (d.download_url) window.open(d.download_url, '_blank');
+    toast(d.message || 'Setup iniciado', 'success');
+    setTimeout(() => { checkDriverStatus(); refreshPrinters(); }, 1000);
+  } catch(e) { toast('Error', 'error'); }
+}
+
+// ═══════════════════════════════════════════════════
+// API connection
+// ═══════════════════════════════════════════════════
+async function testApiConnection() {
+  const dot = document.getElementById('apiDot');
+  const el = document.getElementById('apiStatus');
+  try {
+    const r = await fetch('/api/test');
+    const d = await r.json();
+    if (r.ok && d.status === 'connected') {
+      dot.className = 'dot dot-green';
+      el.innerHTML = `<strong>Conectado</strong> — ${esc(d.api_url)} | WL: ${d.wl} | ${d.thermal_templates || 0} plantillas térmicas de ${d.total_templates || 0} total`;
+    } else {
+      dot.className = 'dot dot-red';
+      el.innerHTML = `<span style="color:var(--red)">${esc(d.error || 'Error')}</span>`;
+    }
+  } catch(e) {
+    dot.className = 'dot dot-orange';
+    el.textContent = 'API no configurada';
+  }
+}
+
+// ═══════════════════════════════════════════════════
+// Templates
+// ═══════════════════════════════════════════════════
+async function refreshLabelTemplates() {
+  try {
+    const r = await fetch('/templates');
+    const d = await r.json();
+    localTemplates = d.templates || [];
+    renderLocalTemplateGrid();
+    updateTemplateCounts();
+  } catch(e) {}
+}
+
+async function refreshBackendTemplates() {
+  try {
+    const r = await fetch('/api/templates');
+    const d = await r.json();
+    backendTemplates = (d.templates || []).filter(t => t.categoria === 'etiqueta' || t.thermal_printable === 1);
+    renderBackendTemplateGrid();
+    updateTemplateCounts();
+  } catch(e) {}
+}
+
+function updateTemplateCounts() {
+  document.getElementById('templateCount').textContent = backendTemplates.length + localTemplates.length;
+}
+
+function renderBackendTemplateGrid() {
+  const el = document.getElementById('backendTemplateGrid');
+  if (!backendTemplates.length) { el.innerHTML = '<div class="empty-state"><p>Sin plantillas del backend</p></div>'; return; }
+  el.innerHTML = backendTemplates.map(t =>
+    `<div class="template-card ${selectedTemplateId===t.id?'selected':''}" onclick="selectBackendTemplate('${t.id}')">
+      <h3>${esc(t.name)}</h3>
+      <p>${esc(t.description||'')}</p>
+      <div class="template-source">Backend ${t.thermal_printable ? '🔥' : ''}</div>
+    </div>`
+  ).join('');
+}
+
+function renderLocalTemplateGrid() {
+  const el = document.getElementById('localTemplateGrid');
+  if (!localTemplates.length) { el.innerHTML = '<div class="empty-state"><p>Sin plantillas locales</p></div>'; return; }
+  el.innerHTML = localTemplates.map(t =>
+    `<div class="template-card ${selectedTemplateId===t.id?'selected':''}" onclick="selectLocalTemplate('${t.id}')">
+      <h3>${esc(t.name)}</h3>
+      <p>${t.fields?.length||0} campos</p>
+      <div class="template-source">Local</div>
+    </div>`
+  ).join('');
+}
+
+async function selectBackendTemplate(id) {
+  try {
+    const r = await fetch('/api/templates?id=' + id);
+    const d = await r.json();
+    selectedTemplateId = id;
+    selectedTemplateMode = 'backend';
+    allTemplateFields = d.fields || [];
+    const mappable = ['multiVariableText','qrcode','text'];
+    selectedTemplateFields = [];
+    selectedTemplateFieldTypes = {};
+    templateFieldDetails = d.fields_typed || [];
+    templateSchema = d.schema || null;
+
+    if (d.fields_typed?.length) {
+      d.fields_typed.forEach(f => {
+        if (mappable.includes(f.type)) {
+          selectedTemplateFields.push(f.name);
+        }
+        selectedTemplateFieldTypes[f.name] = f.type;
+      });
+    } else {
+      selectedTemplateFields = allTemplateFields;
+    }
+
+    renderBackendTemplateGrid();
+    renderAllWizardTemplates();
+    updateWizardButtons();
+    toast('Plantilla: ' + (d.name || id), 'success');
+  } catch(e) { toast('Error al cargar plantilla', 'error'); }
+}
+
+function selectLocalTemplate(id) {
+  const t = localTemplates.find(x => x.id === id);
+  if (!t) return;
+  selectedTemplateId = id;
+  selectedTemplateMode = 'local';
+  selectedTemplateFields = (t.fields || []).map(f => f.name || f);
+  selectedTemplateFieldTypes = {};
+  (t.fields || []).forEach(f => { if (f.name) selectedTemplateFieldTypes[f.name] = f.type || 'text'; });
+  allTemplateFields = selectedTemplateFields;
+  templateFieldDetails = [];
+  templateSchema = null;
+  renderLocalTemplateGrid();
+  renderAllWizardTemplates();
+  updateWizardButtons();
+}
+
+// ═══════════════════════════════════════════════════
+// Wizard
+// ═══════════════════════════════════════════════════
+function goToWizardStep(step) {
+  if (step > 1 && !excelData) return toast('Sube un archivo Excel primero', 'error');
+  if (step > 2 && !selectedTemplateId) return toast('Selecciona una plantilla', 'error');
+
+  currentWizardStep = step;
+  document.querySelectorAll('.wizard-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('ws' + step).classList.add('active');
+
+  // Update indicators
+  for (let i = 1; i <= 4; i++) {
+    const ind = document.querySelectorAll('.step-indicator')[i-1];
+    const circle = document.getElementById('sc' + i);
+    ind.className = 'step-indicator' + (i === step ? ' active' : i < step ? ' completed' : ' locked');
+    circle.textContent = i < step ? '✓' : i;
+  }
+  ['conn12','conn23','conn34'].forEach((id, idx) => {
+    document.getElementById(id).className = 'step-connector' + (idx + 2 <= step ? ' completed' : '');
+  });
+
+  if (step === 2) { renderAllWizardTemplates(); renderBatchPresetSelect(); }
+  if (step === 3) generatePreview();
+  if (step === 4) preparePrintTab();
+}
+
+function updateWizardButtons() {
+  const n1 = document.getElementById('nextStep1');
+  const n2 = document.getElementById('nextStep2');
+  if (n1) n1.disabled = !excelData;
+  if (n2) n2.disabled = !selectedTemplateId;
+}
+
+function renderAllWizardTemplates() {
+  const el = document.getElementById('wizardTemplateGrid');
+  if (!el) return;
+  let html = '';
+  if (backendTemplates.length) {
+    html += '<div class="text-xs text-dim mb-2" style="font-weight:700;text-transform:uppercase">Backend</div>';
+    html += '<div class="template-grid">' + backendTemplates.map(t =>
+      `<div class="template-card ${selectedTemplateId===t.id?'selected':''}" onclick="selectBackendTemplate('${t.id}')">
+        <h3>${esc(t.name)}</h3><p>${esc(t.description||'')}</p>
+      </div>`
+    ).join('') + '</div>';
+  }
+  if (localTemplates.length) {
+    html += '<div class="text-xs text-dim mb-2 mt-3" style="font-weight:700;text-transform:uppercase">Locales</div>';
+    html += '<div class="template-grid">' + localTemplates.map(t =>
+      `<div class="template-card ${selectedTemplateId===t.id?'selected':''}" onclick="selectLocalTemplate('${t.id}')">
+        <h3>${esc(t.name)}</h3><p>${(t.fields||[]).length} campos</p>
+      </div>`
+    ).join('') + '</div>';
+  }
+  if (!backendTemplates.length && !localTemplates.length) {
+    html = '<div class="empty-state"><p>Sin plantillas disponibles</p></div>';
+  }
+  el.innerHTML = html;
+}
+
+function renderBatchPresetSelect() {
+  const el = document.getElementById('batchPreset');
+  if (!el) return;
+  el.innerHTML = presets.map(p => `<option value="${p.id}">${p.name} (${p.label_width_mm}×${p.label_height_mm}mm)</option>`).join('');
+}
+
+// ═══════════════════════════════════════════════════
+// Step 1: Excel
+// ═══════════════════════════════════════════════════
+function setupDropZone() {
+  const dz = document.getElementById('dropZone');
+  if (!dz) return;
+  dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('dragging'); });
+  dz.addEventListener('dragleave', () => dz.classList.remove('dragging'));
+  dz.addEventListener('drop', e => {
+    e.preventDefault();
+    dz.classList.remove('dragging');
+    const file = e.dataTransfer.files[0];
+    if (file) uploadExcelFile(file);
+  });
+}
+
+function handleExcelUpload(e) {
+  const file = e.target.files[0];
+  if (file) uploadExcelFile(file);
+}
+
+async function uploadExcelFile(file) {
+  const fd = new FormData();
+  fd.append('file', file);
+  try {
+    const r = await fetch('/excel/upload', {method:'POST', body:fd});
+    const d = await r.json();
+    if (d.error) return toast(d.error, 'error');
+    excelData = d;
+    renderExcelPreview();
+    updateWizardButtons();
+    toast(`${d.rows.length} filas cargadas`, 'success');
+  } catch(e) { toast('Error al subir archivo', 'error'); }
+}
+
+function renderExcelPreview() {
+  if (!excelData) return;
+  const el = document.getElementById('excelPreview');
+  const rows = excelData.rows.slice(0, 5);
+  let html = `<div class="text-xs text-dim mb-2">${excelData.rows.length} filas, ${excelData.headers.length} columnas</div>`;
+  html += '<div style="overflow-x:auto"><table class="data-table"><thead><tr>';
+  excelData.headers.forEach(h => html += `<th>${esc(h)}</th>`);
+  html += '</tr></thead><tbody>';
+  rows.forEach(row => {
+    html += '<tr>';
+    excelData.headers.forEach(h => html += `<td>${esc(row[h]||'')}</td>`);
+    html += '</tr>';
+  });
+  if (excelData.rows.length > 5) html += `<tr><td colspan="${excelData.headers.length}" class="text-dim text-xs">... ${excelData.rows.length - 5} filas más</td></tr>`;
+  html += '</tbody></table></div>';
+  el.innerHTML = html;
+  document.getElementById('clearExcelBtn').style.display = '';
+}
+
+function clearExcel() {
+  excelData = null;
+  document.getElementById('excelPreview').innerHTML = '';
+  document.getElementById('clearExcelBtn').style.display = 'none';
+  document.getElementById('excelFile').value = '';
+  updateWizardButtons();
+}
+
+// ═══════════════════════════════════════════════════
+// Step 3: Mapping + Preview
+// ═══════════════════════════════════════════════════
+function renderColumnMapping() {
+  if (!excelData || !selectedTemplateFields.length) return;
+  const container = document.getElementById('mappingContainer');
+  columnMapping = {};
+
+  // Auto-map by name
+  selectedTemplateFields.forEach(field => {
+    const match = excelData.headers.find(h => h.toLowerCase().replace(/[_\s-]/g,'') === field.toLowerCase().replace(/[_\s-]/g,''));
+    if (match) columnMapping[field] = match;
+  });
+
+  let html = '<div class="text-sm mb-2" style="font-weight:700">Mapeo de columnas</div>';
+  html += '<div class="mapping-grid">';
+  html += '<div class="text-xs text-dim" style="font-weight:700">Campo plantilla</div><div></div><div class="text-xs text-dim" style="font-weight:700">Columna Excel</div>';
+  selectedTemplateFields.forEach(field => {
+    const type = selectedTemplateFieldTypes[field] || 'text';
+    html += `<div class="text-sm">${esc(field)} <span class="badge badge-blue" style="font-size:9px">${type}</span></div>`;
+    html += '<div class="mapping-arrow">→</div>';
+    html += `<select onchange="columnMapping['${esc(field)}']=this.value;updateMappingInfo();renderVisualPreview()" style="font-size:12px">`;
+    html += '<option value="">(sin mapear)</option>';
+    excelData.headers.forEach(h => {
+      html += `<option value="${esc(h)}" ${columnMapping[field]===h?'selected':''}>${esc(h)}</option>`;
+    });
+    html += '</select>';
+  });
+  html += '</div>';
+  container.innerHTML = html;
+  updateMappingInfo();
+}
+
+function updateMappingInfo() {
+  const mapped = Object.values(columnMapping).filter(v => v).length;
+  const el = document.getElementById('mappingInfo');
+  el.textContent = `${mapped}/${selectedTemplateFields.length} campos mapeados`;
+  if (mapped < selectedTemplateFields.length) {
+    const unmapped = selectedTemplateFields.filter(f => !columnMapping[f]);
+    el.textContent += ' — Sin mapear: ' + unmapped.join(', ');
+  }
+}
+
+function applyMapping(rows) {
+  return rows.map(row => {
+    const mapped = {};
+    for (const [field, col] of Object.entries(columnMapping)) {
+      if (col && row[col] !== undefined) mapped[field] = String(row[col]);
+    }
+    return mapped;
+  });
+}
+
+function renderVisualPreview() {
+  if (!excelData || !selectedTemplateFields.length) return;
+  const container = document.getElementById('visualPreview');
+  const mappedRows = applyMapping(excelData.rows.slice(0, 4));
+  if (templateFieldDetails?.length && templateFieldDetails.some(f => f.x > 0 || f.y > 0)) {
+    renderSpatialPreview(container, mappedRows);
+  } else {
+    renderListPreview(container, mappedRows);
+  }
+}
+
+function renderSpatialPreview(container, rows) {
+  const bp = templateSchema?.basePdf || {width:76, height:50};
+  const scale = 300 / bp.width;
+  let html = '<div class="text-sm mb-2" style="font-weight:700">Vista previa</div><div style="display:flex;flex-wrap:wrap;gap:8px">';
+  rows.forEach(row => {
+    html += `<div class="label-preview" style="width:${bp.width*scale}px;height:${bp.height*scale}px;position:relative">`;
+    templateFieldDetails.forEach(f => {
+      const val = row[f.name] || f.name;
+      const x = (f.x||0) * scale;
+      const y = (f.y||0) * scale;
+      const w = (f.width||20) * scale;
+      const h = (f.height||5) * scale;
+      const fs = Math.max(8, (f.font_size||10) * scale * 0.35);
+      if (f.type === 'qrcode') {
+        html += `<div style="position:absolute;left:${x}px;top:${y}px;width:${w}px;height:${h}px;border:1px solid #ccc;display:flex;align-items:center;justify-content:center;font-size:8px;color:#999;background:#f9f9f9">QR</div>`;
+      } else if (f.type === 'image') {
+        html += `<div style="position:absolute;left:${x}px;top:${y}px;width:${w}px;height:${h}px;border:1px solid #eee;background:#f5f5f5;display:flex;align-items:center;justify-content:center;font-size:7px;color:#bbb">IMG</div>`;
+      } else {
+        html += `<div style="position:absolute;left:${x}px;top:${y}px;width:${w}px;height:${h}px;font-size:${fs}px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;color:#333;line-height:${h}px">${esc(val)}</div>`;
+      }
+    });
+    html += '</div>';
+  });
+  html += '</div>';
+  container.innerHTML = html;
+}
+
+function renderListPreview(container, rows) {
+  let html = '<div class="text-sm mb-2" style="font-weight:700">Vista previa</div><div style="display:flex;flex-wrap:wrap;gap:8px">';
+  rows.forEach(row => {
+    html += '<div class="label-preview" style="width:280px;padding:12px">';
+    selectedTemplateFields.forEach(field => {
+      const val = row[field] || '';
+      const type = selectedTemplateFieldTypes[field] || 'text';
+      if (type === 'qrcode') {
+        html += `<div style="display:flex;align-items:center;gap:8px;margin:4px 0"><div style="width:30px;height:30px;border:1px solid #ccc;display:flex;align-items:center;justify-content:center;font-size:7px;color:#999">QR</div><span class="text-xs">${esc(val||field)}</span></div>`;
+      } else {
+        html += `<div style="display:flex;justify-content:space-between;padding:3px 0;font-size:11px;border-bottom:1px solid #f0f0f0"><span class="text-dim">${esc(field)}</span><span style="font-weight:600">${esc(val||'—')}</span></div>`;
+      }
+    });
+    html += '</div>';
+  });
+  html += '</div>';
+  container.innerHTML = html;
+}
+
+async function generatePreview() {
+  renderColumnMapping();
+  renderVisualPreview();
+
+  // Fetch TSPL preview
+  if (selectedTemplateMode === 'backend' || selectedTemplateMode === 'local') {
+    try {
+      const mappedRows = applyMapping(excelData.rows.slice(0, 3));
+      const body = {
+        template_id: selectedTemplateId,
+        preset_id: document.getElementById('batchPreset')?.value || '',
+        rows: mappedRows,
+        copies: 1,
+        mode: selectedTemplateMode
+      };
+      const r = await fetch('/batch-preview', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body)});
+      const d = await r.json();
+      if (d.tspl) {
+        document.getElementById('tsplPreviewVisual').innerHTML = renderTsplVisual(d.tspl);
+        document.getElementById('tsplPreviewRaw').value = d.tspl;
+      }
+    } catch(e) {}
+  }
+}
+
+// ═══════════════════════════════════════════════════
+// TSPL visual renderer
+// ═══════════════════════════════════════════════════
+function parseTspl(tspl) {
+  const lines = tspl.split(/\r?\n/);
+  let w = 300, h = 200;
+  const els = [];
+  lines.forEach(line => {
+    const t = line.trim();
+    const sizeMatch = t.match(/^SIZE\s+(\d+)\s*mm?\s*,\s*(\d+)/i);
+    if (sizeMatch) { w = parseInt(sizeMatch[1]) * 3; h = parseInt(sizeMatch[2]) * 3; return; }
+    const textMatch = t.match(/^TEXT\s+(\d+)\s*,\s*(\d+)\s*,\s*"(\d+)"\s*,\s*\d+\s*,\s*\d+\s*,\s*\d+\s*,\s*"(.*)"/i);
+    if (textMatch) { els.push({type:'text', x:parseInt(textMatch[1]), y:parseInt(textMatch[2]), font:textMatch[3], text:textMatch[4]}); return; }
+    const bcMatch = t.match(/^BARCODE\s+(\d+)\s*,\s*(\d+)\s*,\s*"(\w+)"\s*,\s*(\d+)/i);
+    if (bcMatch) { els.push({type:'barcode', x:parseInt(bcMatch[1]), y:parseInt(bcMatch[2]), bcType:bcMatch[3], h:parseInt(bcMatch[4])}); return; }
+    const qrMatch = t.match(/^QRCODE\s+(\d+)\s*,\s*(\d+)/i);
+    if (qrMatch) { els.push({type:'qr', x:parseInt(qrMatch[1]), y:parseInt(qrMatch[2])}); }
+  });
+  return {w, h, els};
+}
+
+function renderTsplVisual(tspl) {
+  const pages = tspl.split(/PRINT\s+\d+/i).filter(p => p.trim());
+  if (!pages.length) return '<div class="text-dim text-sm">Sin contenido TSPL</div>';
+  let html = '';
+  pages.slice(0, 3).forEach(page => {
+    const {w, h, els} = parseTspl(page);
+    const scale = Math.min(300/w, 200/h, 1);
+    html += `<div style="display:inline-block;width:${w*scale}px;height:${h*scale}px;border:1px solid var(--border);border-radius:4px;position:relative;margin:4px;background:#fff;overflow:hidden">`;
+    els.forEach(el => {
+      const x = el.x * scale, y = el.y * scale;
+      if (el.type === 'text') {
+        const fs = Math.max(8, parseInt(el.font||'2') * 4 * scale);
+        html += `<div style="position:absolute;left:${x}px;top:${y}px;font-size:${fs}px;white-space:nowrap;font-family:var(--mono)">${esc(el.text)}</div>`;
+      } else if (el.type === 'barcode') {
+        const bh = (el.h||40) * scale;
+        html += `<div style="position:absolute;left:${x}px;top:${y}px;width:80px;height:${bh}px;background:repeating-linear-gradient(90deg,#000 0,#000 1px,#fff 1px,#fff 3px);opacity:0.6"></div>`;
+      } else if (el.type === 'qr') {
+        html += `<div style="position:absolute;left:${x}px;top:${y}px;width:40px;height:40px;border:2px solid #333;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700">QR</div>`;
+      }
+    });
+    html += '</div>';
+  });
+  return html;
+}
+
+// ═══════════════════════════════════════════════════
+// Step 4: Execute
+// ═══════════════════════════════════════════════════
+function setOutputMode(mode) {
+  outputMode = mode;
+  document.getElementById('outPrint').classList.toggle('active', mode === 'print');
+  document.getElementById('outPdf').classList.toggle('active', mode === 'pdf');
+  document.getElementById('printOptions').style.display = mode === 'print' ? '' : 'none';
+  document.getElementById('executeBtn').textContent = mode === 'print' ? 'Imprimir' : 'Generar PDF';
+}
+
+function preparePrintTab() {
+  // Populate printer select
+  const opts = printers.map(p => `<option value="${esc(p.name)}">${esc(p.name)} (${p.type})</option>`).join('');
+  document.getElementById('batchPrinter').innerHTML = '<option value="">Auto</option>' + opts;
+  // Set row range
+  if (excelData) {
+    document.getElementById('rowEnd').value = excelData.rows.length;
+    document.getElementById('rowEnd').max = excelData.rows.length;
+    document.getElementById('rowStart').max = excelData.rows.length;
+  }
+  updateBatchSummary();
+  // Listeners
+  ['rowStart','rowEnd','batchCopies'].forEach(id => {
+    document.getElementById(id).addEventListener('input', updateBatchSummary);
+  });
+}
+
+function updateBatchSummary() {
+  const start = parseInt(document.getElementById('rowStart').value) || 1;
+  const end = parseInt(document.getElementById('rowEnd').value) || 1;
+  const copies = parseInt(document.getElementById('batchCopies').value) || 1;
+  const rows = Math.max(0, end - start + 1);
+  const total = rows * copies;
+  document.getElementById('batchSummary').textContent = `${rows} filas × ${copies} copias = ${total} etiquetas`;
+}
+
+function getSelectedRows() {
+  if (!excelData) return [];
+  const start = Math.max(1, parseInt(document.getElementById('rowStart').value) || 1);
+  const end = Math.min(excelData.rows.length, parseInt(document.getElementById('rowEnd').value) || 1);
+  return excelData.rows.slice(start - 1, end);
+}
+
+function executeBatch() {
+  if (outputMode === 'pdf') {
+    executeBatchPdf();
+  } else {
+    executeBatchPrint();
+  }
+}
+
+async function executeBatchPrint() {
+  const rows = getSelectedRows();
+  if (!rows.length) return toast('Sin filas seleccionadas', 'error');
+  const mappedRows = applyMapping(rows);
+  const copies = parseInt(document.getElementById('batchCopies').value) || 1;
+
+  const prog = document.getElementById('batchProgress');
+  const fill = document.getElementById('batchProgressFill');
+  prog.style.display = 'block';
+  fill.style.width = '30%';
+
+  try {
+    const body = {
+      template_id: selectedTemplateId,
+      preset_id: document.getElementById('batchPreset')?.value || '',
+      rows: mappedRows,
+      copies: copies,
+      printer: document.getElementById('batchPrinter').value,
+      mode: selectedTemplateMode
+    };
+    fill.style.width = '60%';
+    const r = await fetch('/batch-print', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body)});
+    const d = await r.json();
+    fill.style.width = '100%';
+
+    const resultEl = document.getElementById('batchResult');
+    if (r.ok && !d.error) {
+      resultEl.innerHTML = `<div class="badge badge-green">✓ Impreso — ${d.total_sent||mappedRows.length} etiquetas, ${d.total_bytes||'?'} bytes</div>`;
+      toast('Impresión completada', 'success');
+    } else {
+      resultEl.innerHTML = `<div class="badge badge-red">✕ Error: ${esc(d.error||'desconocido')}</div>`;
+      toast(d.error || 'Error', 'error');
+    }
+    setTimeout(() => { prog.style.display = 'none'; fill.style.width = '0'; }, 2000);
+  } catch(e) {
+    toast('Error de conexión', 'error');
+    prog.style.display = 'none';
+  }
+}
+
+async function executeBatchPdf() {
+  const rows = getSelectedRows();
+  if (!rows.length) return toast('Sin filas seleccionadas', 'error');
+  const mappedRows = applyMapping(rows);
+
+  const prog = document.getElementById('batchProgress');
+  const fill = document.getElementById('batchProgressFill');
+  prog.style.display = 'block';
+  fill.style.width = '40%';
+
+  try {
+    const body = {
+      template_id: selectedTemplateId,
+      rows: mappedRows,
+      mapping: columnMapping
+    };
+    fill.style.width = '70%';
+    const r = await fetch('/batch-pdf', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body)});
+
+    if (r.ok) {
+      fill.style.width = '100%';
+      const blob = await r.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `batch_${mappedRows.length}.pdf`;
+      a.click();
+      URL.revokeObjectURL(url);
+      document.getElementById('batchResult').innerHTML = '<div class="badge badge-green">✓ PDF generado y descargado</div>';
+      toast('PDF descargado', 'success');
+    } else {
+      const d = await r.json();
+      document.getElementById('batchResult').innerHTML = `<div class="badge badge-red">✕ ${esc(d.error||'Error')}</div>`;
+      toast(d.error || 'Error', 'error');
+    }
+    setTimeout(() => { prog.style.display = 'none'; fill.style.width = '0'; }, 2000);
+  } catch(e) {
+    toast('Error de conexión', 'error');
+    prog.style.display = 'none';
+  }
+}
+
+async function executeBatchPreview() {
+  const rows = getSelectedRows();
+  if (!rows.length) return toast('Sin filas', 'error');
+  const mappedRows = applyMapping(rows);
+  try {
+    const body = {
+      template_id: selectedTemplateId,
+      preset_id: document.getElementById('batchPreset')?.value || '',
+      rows: mappedRows,
+      copies: parseInt(document.getElementById('batchCopies').value) || 1,
+      mode: selectedTemplateMode
+    };
+    const r = await fetch('/batch-preview', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body)});
+    const d = await r.json();
+    if (d.tspl) {
+      document.getElementById('tsplPreviewVisual').innerHTML = renderTsplVisual(d.tspl);
+      document.getElementById('tsplPreviewRaw').value = d.tspl;
+      goToWizardStep(3);
+    }
+  } catch(e) { toast('Error', 'error'); }
+}
+
+// ═══════════════════════════════════════════════════
+// Utilities
+// ═══════════════════════════════════════════════════
+function esc(s) { if (!s) return ''; const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
 
 function toast(msg, type) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.className = 'toast show ' + (type || '');
-  clearTimeout(t._timer);
-  t._timer = setTimeout(() => { t.className = 'toast'; }, 3000);
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'toast toast-' + (type || 'success') + ' show';
+  setTimeout(() => el.classList.remove('show'), 3000);
 }
 </script>
 </body>
