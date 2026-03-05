@@ -630,6 +630,7 @@ func startServers(port string) error {
 	mux.HandleFunc("/batch-print", corsMiddleware(handleBatchPrint))
 	mux.HandleFunc("/batch-preview", corsMiddleware(handleBatchPreview))
 	mux.HandleFunc("/batch-pdf", corsMiddleware(handleBatchPdf))
+	mux.HandleFunc("/bridge/download", corsMiddleware(handleBridgeDownload))
 
 	// HTTP server — bind synchronously so we catch port-in-use errors immediately
 	httpAddr := "127.0.0.1:" + port
