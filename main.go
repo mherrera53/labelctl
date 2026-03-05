@@ -629,6 +629,7 @@ func startServers(port string) error {
 	mux.HandleFunc("/templates/", corsMiddleware(handleLabelTemplateByID))
 	mux.HandleFunc("/batch-print", corsMiddleware(handleBatchPrint))
 	mux.HandleFunc("/batch-preview", corsMiddleware(handleBatchPreview))
+	mux.HandleFunc("/batch-pdf", corsMiddleware(handleBatchPdf))
 
 	// HTTP server — bind synchronously so we catch port-in-use errors immediately
 	httpAddr := "127.0.0.1:" + port
@@ -1017,4 +1018,72 @@ func handleBatchPreview(w http.ResponseWriter, r *http.Request) {
 		"bytes": len(tspl),
 		"mode":  job.Mode,
 	})
+}
+
+// handleBatchPdf generates a multi-page PDF from Excel rows + pdfme template.
+func handleBatchPdf(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		jsonResponse(w, http.StatusMethodNotAllowed, map[string]string{"error": "POST only"})
+		return
+	}
+
+	var req struct {
+		TemplateID string              `json:"template_id"`
+		Rows       []map[string]string `json:"rows"`
+		Mapping    map[string]string   `json:"mapping"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		jsonResponse(w, http.StatusBadRequest, map[string]string{"error": "invalid JSON"})
+		return
+	}
+	if req.TemplateID == "" || len(req.Rows) == 0 {
+		jsonResponse(w, http.StatusBadRequest, map[string]string{"error": "template_id and rows required"})
+		return
+	}
+
+	cfg := getConfig()
+	client := NewApiClient(cfg)
+	detail, err := client.FetchTemplateDetail(req.TemplateID)
+	if err != nil {
+		jsonResponse(w, http.StatusBadGateway, map[string]string{"error": "fetch template: " + err.Error()})
+		return
+	}
+	if detail.Schema == nil {
+		jsonResponse(w, http.StatusBadRequest, map[string]string{"error": "template has no pdfme schema"})
+		return
+	}
+
+	schema, err := ParsePdfmeSchema(detail.Schema)
+	if err != nil {
+		jsonResponse(w, http.StatusInternalServerError, map[string]string{"error": "parse schema: " + err.Error()})
+		return
+	}
+
+	// Apply column mapping if provided
+	mappedRows := req.Rows
+	if len(req.Mapping) > 0 {
+		mappedRows = make([]map[string]string, len(req.Rows))
+		for i, row := range req.Rows {
+			mapped := make(map[string]string)
+			for fieldName, colName := range req.Mapping {
+				if val, ok := row[colName]; ok {
+					mapped[fieldName] = val
+				}
+			}
+			mappedRows[i] = mapped
+		}
+	}
+
+	outputDir := filepath.Join(configDir(), "output")
+	os.MkdirAll(outputDir, 0755)
+	outputPath := filepath.Join(outputDir, fmt.Sprintf("batch_%d.pdf", time.Now().UnixMilli()))
+
+	if err := RenderBulkPDF(schema, mappedRows, outputPath); err != nil {
+		jsonResponse(w, http.StatusInternalServerError, map[string]string{"error": "render PDF: " + err.Error()})
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/pdf")
+	w.Header().Set("Content-Disposition", fmt.Sprintf(`attachment; filename="batch_%d.pdf"`, len(mappedRows)))
+	http.ServeFile(w, r, outputPath)
 }
