@@ -749,19 +749,25 @@ func startServers(port string) error {
 		}()
 	}
 
-	// HTTPS server with auto-generated certs (also on dedicated thread)
+	// HTTPS server — try embedded Let's Encrypt cert first, fallback to self-signed
 	httpsPort := fmt.Sprintf("%d", portInt(port)+1)
 	httpsAddr := "127.0.0.1:" + httpsPort
-	certFile, keyFile, caFile, err := ensureCerts(defaultHostname)
-	if err != nil {
-		log.Printf("[tls] Could not generate certs: %v — HTTPS disabled", err)
-		return nil // HTTP is running, HTTPS is optional
-	}
-	go installCACert(caFile)
-	tlsCert, err := loadCertWithCA(certFile, keyFile, caFile)
-	if err != nil {
-		log.Printf("[tls] Could not load certs: %v — HTTPS disabled", err)
-		return nil
+	var tlsCert tls.Certificate
+	if embedded := loadEmbeddedCert(); embedded != nil {
+		tlsCert = *embedded
+	} else {
+		certFile, keyFile, caFile, err := ensureCerts(defaultHostname)
+		if err != nil {
+			log.Printf("[tls] Could not generate certs: %v — HTTPS disabled", err)
+			return nil
+		}
+		go installCACert(caFile)
+		loaded, err := loadCertWithCA(certFile, keyFile, caFile)
+		if err != nil {
+			log.Printf("[tls] Could not load certs: %v — HTTPS disabled", err)
+			return nil
+		}
+		tlsCert = loaded
 	}
 	httpsLn, err := net.Listen("tcp", httpsAddr)
 	if err != nil {
