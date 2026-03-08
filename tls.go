@@ -210,9 +210,34 @@ func installCACert(caFile string) {
 		log.Printf("[tls] CA certificate installed in Windows trust store")
 
 	case "darwin":
-		// macOS requires manual trust or admin password — skip auto-install
-		// PNA headers handle HTTPS→HTTP access from Chrome
-		log.Printf("[tls] macOS: CA available at %s (PNA headers handle browser access)", caFile)
+		// Add CA to login keychain as trusted root — prompts for keychain password
+		cmd := exec.Command("security", "add-trusted-cert", "-r", "trustRoot",
+			"-k", filepath.Join(os.Getenv("HOME"), "Library", "Keychains", "login.keychain-db"),
+			caFile)
+		out, err := cmd.CombinedOutput()
+		if err != nil {
+			log.Printf("[tls] Failed to install CA on macOS: %v — %s", err, string(out))
+			log.Printf("[tls] Install manually: security add-trusted-cert -r trustRoot -k ~/Library/Keychains/login.keychain-db \"%s\"", caFile)
+			return
+		}
+		log.Printf("[tls] CA certificate installed in macOS login keychain")
+
+	case "linux":
+		// Copy CA to system trust store and update
+		destDir := "/usr/local/share/ca-certificates"
+		dest := filepath.Join(destDir, "tsc-bridge-ca.crt")
+		cpCmd := exec.Command("sudo", "cp", caFile, dest)
+		if out, err := cpCmd.CombinedOutput(); err != nil {
+			log.Printf("[tls] Failed to copy CA on Linux: %v — %s", err, string(out))
+			log.Printf("[tls] Install manually: sudo cp \"%s\" %s && sudo update-ca-certificates", caFile, dest)
+			return
+		}
+		updCmd := exec.Command("sudo", "update-ca-certificates")
+		if out, err := updCmd.CombinedOutput(); err != nil {
+			log.Printf("[tls] Failed to update CA store on Linux: %v — %s", err, string(out))
+			return
+		}
+		log.Printf("[tls] CA certificate installed in Linux trust store")
 
 	default:
 		log.Printf("[tls] Auto CA install not supported on %s — manually trust %s", runtime.GOOS, caFile)
