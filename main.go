@@ -129,16 +129,15 @@ func findPrinter(name string, printers []PrinterInfo) *PrinterInfo {
 func handleStatus(w http.ResponseWriter, r *http.Request) {
 	printers, _ := listAllPrinters()
 	cfg := getConfig()
-	httpsPort := cfg.Port + 1
 	jsonResponse(w, http.StatusOK, map[string]any{
 		"status":          "ok",
 		"version":         version,
 		"os":              runtime.GOOS,
 		"uptime":          time.Since(startTime).Truncate(time.Second).String(),
 		"port":            cfg.Port,
-		"https_port":      httpsPort,
+		"https_port":      443,
 		"hostname":        defaultHostname,
-		"dashboard":       fmt.Sprintf("https://%s:%d/", defaultHostname, httpsPort),
+		"dashboard":       fmt.Sprintf("https://%s/", defaultHostname),
 		"printers":        printers,
 		"names":           printerNames(printers),
 		"default_printer": cfg.DefaultPrinter,
