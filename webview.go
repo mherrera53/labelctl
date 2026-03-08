@@ -4,76 +4,99 @@ import (
 	"fmt"
 	"log"
 	"sync"
+
+	webview "github.com/webview/webview_go"
 )
 
 var (
-	webviewActive bool
-	webviewMu     sync.Mutex
-	dashboardURL  string
+	wv            webview.WebView
+	wvMu          sync.Mutex
+	wvDashboardURL string
 )
 
-// initWebview prepares the webview subsystem.
-// For now, uses browser fallback. Will be upgraded to native webview
-// when the build toolchain supports github.com/webview/webview with CGO.
+// initWebview creates the native webview window on the main thread.
+// Must be called before systray.Run() so both share the same Cocoa run loop.
+// If creation fails (e.g. no CGO, missing WebKit), falls back to browser mode.
 func initWebview(dashURL string) {
-	webviewMu.Lock()
-	defer webviewMu.Unlock()
-	dashboardURL = dashURL
-	log.Printf("[webview] initialized with URL: %s", dashURL)
-}
+	wvMu.Lock()
+	defer wvMu.Unlock()
+	wvDashboardURL = dashURL
 
-// showDashboard opens the dashboard in the native window (or browser fallback).
-// This is the primary entry point that tray.go should call instead of
-// openBrowser() directly, allowing a future swap to a native webview.
-func showDashboard(dashURL string) {
-	webviewMu.Lock()
-	active := webviewActive
-	webviewMu.Unlock()
-
-	if dashURL == "" {
-		dashURL = dashboardURL
-	}
-
-	if !active {
-		log.Printf("[webview] native webview not available, opening in browser: %s", dashURL)
-		openBrowser(dashURL)
+	w := webview.New(false)
+	if w == nil {
+		log.Printf("[webview] failed to create native window — browser fallback active")
 		return
 	}
 
-	// When native webview is available, navigate the existing window
-	// instead of opening a new browser tab.
-	log.Printf("[webview] navigating native window to: %s", dashURL)
-	openBrowser(dashURL)
-}
-
-// setWebviewTitle updates the window title with whitelabel branding.
-// Currently logs the computed title; will call w.SetTitle() once
-// a native webview backend is integrated.
-func setWebviewTitle() {
 	cfg := getConfig()
 	title := "TSC Bridge"
 	if cfg.Whitelabel.Name != "" {
 		title = fmt.Sprintf("TSC Bridge — %s", cfg.Whitelabel.Name)
 	}
-	log.Printf("[webview] title set: %s", title)
-	// When native webview is available: w.SetTitle(title)
+
+	w.SetTitle(title)
+	w.SetSize(1100, 750, webview.HintNone)
+	w.Navigate(dashURL)
+
+	wv = w
+	log.Printf("[webview] native window created: %s", dashURL)
 }
 
-// isWebviewActive reports whether a native webview window is currently open.
+// showDashboard opens or refocuses the native webview window.
+// Falls back to browser if webview is not available.
+func showDashboard(dashURL string) {
+	wvMu.Lock()
+	w := wv
+	wvMu.Unlock()
+
+	if dashURL == "" {
+		dashURL = wvDashboardURL
+	}
+
+	if w == nil {
+		log.Printf("[webview] no native window — opening browser: %s", dashURL)
+		openBrowser(dashURL)
+		return
+	}
+
+	w.Dispatch(func() {
+		w.Navigate(dashURL)
+	})
+}
+
+// setWebviewTitle updates the window title with whitelabel branding.
+func setWebviewTitle() {
+	wvMu.Lock()
+	w := wv
+	wvMu.Unlock()
+
+	cfg := getConfig()
+	title := "TSC Bridge"
+	if cfg.Whitelabel.Name != "" {
+		title = fmt.Sprintf("TSC Bridge — %s", cfg.Whitelabel.Name)
+	}
+
+	if w != nil {
+		w.Dispatch(func() {
+			w.SetTitle(title)
+		})
+	}
+}
+
+// isWebviewActive reports whether a native webview window exists.
 func isWebviewActive() bool {
-	webviewMu.Lock()
-	defer webviewMu.Unlock()
-	return webviewActive
+	wvMu.Lock()
+	defer wvMu.Unlock()
+	return wv != nil
 }
 
-// destroyWebview tears down the native webview window if one is active.
-// Safe to call even when no native window exists.
+// destroyWebview tears down the native webview window.
 func destroyWebview() {
-	webviewMu.Lock()
-	defer webviewMu.Unlock()
-	if webviewActive {
+	wvMu.Lock()
+	defer wvMu.Unlock()
+	if wv != nil {
 		log.Printf("[webview] destroying native window")
-		webviewActive = false
-		// When native webview is available: w.Destroy()
+		wv.Destroy()
+		wv = nil
 	}
 }
