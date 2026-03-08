@@ -18,7 +18,7 @@ import (
 	"time"
 )
 
-const defaultHostname = "myprinter.com"
+const defaultHostname = "local.labelctl.dev"
 
 // certDir returns the directory for TLS certificates.
 func certDir() string {
@@ -101,7 +101,7 @@ func ensureCerts(hostname string) (certFile, keyFile, caFile string, err error) 
 			Organization: []string{"TSC Bridge"},
 			CommonName:   hostname,
 		},
-		DNSNames:    []string{hostname, "localhost", "tsc-bridge", "myprinter.com"},
+		DNSNames:    []string{hostname, "localhost", "local.labelctl.dev"},
 		IPAddresses: []net.IP{net.ParseIP("127.0.0.1"), net.ParseIP("::1")},
 		NotBefore:   time.Now(),
 		NotAfter:    time.Now().Add(397 * 24 * time.Hour), // Max 398 days for Apple/Chrome compliance
