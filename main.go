@@ -18,7 +18,7 @@ import (
 	"time"
 )
 
-const version = "2.3.0"
+const version = "3.0.0"
 
 var startTime = time.Now()
 
@@ -613,6 +613,14 @@ func main() {
 		log.Printf("WARNING: HTTP server bound but slow to accept — continuing anyway")
 	}
 	log.Printf("tsc-bridge v%s ready on %s", version, httpAddr)
+
+	// Initialize webview subsystem (browser fallback until native webview is available)
+	initWebview(dashURL)
+
+	// Check if this is the first run (no API credentials configured)
+	if !IsAuthConfigured() {
+		log.Printf("First run detected — setup wizard will appear in dashboard")
+	}
 
 	// Run system tray — blocks until user clicks "Salir"
 	// autoOpen=true when NOT headless → spawns dashboard window on first run
