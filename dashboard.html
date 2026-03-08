@@ -4,1946 +4,2361 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>TSC Bridge — Dashboard</title>
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect x='8' y='16' width='48' height='36' rx='4' fill='%23141620' stroke='%236366f1' stroke-width='2.5'/%3E%3Crect x='14' y='22' width='36' height='8' rx='2' fill='%230a0b10' stroke='%236366f1' stroke-width='1.5'/%3E%3Crect x='14' y='34' width='36' height='4' rx='1' fill='%236366f1' opacity='.3'/%3E%3Crect x='14' y='40' width='36' height='4' rx='1' fill='%236366f1' opacity='.2'/%3E%3Ccircle cx='46' cy='25' r='2' fill='%2334d399'/%3E%3C/svg%3E">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect x='8' y='16' width='48' height='36' rx='4' fill='%23141620' stroke='%232563eb' stroke-width='2.5'/%3E%3Crect x='14' y='22' width='36' height='8' rx='2' fill='%230a0b10' stroke='%232563eb' stroke-width='1.5'/%3E%3Ccircle cx='46' cy='25' r='2' fill='%2334d399'/%3E%3C/svg%3E">
 <style>
-  :root {
-    --bg: #f8f9fc;
-    --surface: #ffffff;
-    --surface-2: #f1f3f8;
-    --surface-3: #e8ebf2;
-    --border: #e2e5ee;
-    --border-light: #d0d4e0;
-    --text: #1a1d2e;
-    --text-dim: #6b7084;
-    --text-muted: #9499b0;
-    --primary: #4f46e5;
-    --primary-hover: #4338ca;
-    --primary-light: rgba(79,70,229,0.08);
-    --primary-glow: rgba(79,70,229,0.12);
-    --accent: #4f46e5;
-    --green: #10b981;
-    --green-dim: rgba(16,185,129,0.10);
-    --red: #ef4444;
-    --red-dim: rgba(239,68,68,0.08);
-    --orange: #f59e0b;
-    --orange-dim: rgba(245,158,11,0.10);
-    --blue: #3b82f6;
-    --purple: #8b5cf6;
-    --radius: 12px;
-    --radius-sm: 8px;
-    --radius-xs: 6px;
-    --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-    --mono: 'SF Mono', 'JetBrains Mono', 'Cascadia Code', 'Consolas', monospace;
-    --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
-    --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
-    --shadow-md: 0 4px 6px rgba(0,0,0,0.06), 0 2px 4px rgba(0,0,0,0.04);
-  }
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body {
-    font-family: var(--font);
-    background: var(--bg);
-    color: var(--text);
-    line-height: 1.5;
-    min-height: 100vh;
-    font-size: 14px;
-    display: flex;
-    flex-direction: column;
-  }
+:root {
+  --primary: #2563eb;
+  --primary-hover: #1d4ed8;
+  --primary-light: rgba(37,99,235,0.08);
+  --surface: #ffffff;
+  --surface-2: #f8f9fa;
+  --text: #1a1d2e;
+  --text-dim: #6c757d;
+  --text-muted: #adb5bd;
+  --border: #dee2e6;
+  --green: #198754;
+  --red: #dc3545;
+  --orange: #fd7e14;
+  --font-mono: 'SF Mono','JetBrains Mono','Cascadia Code','Consolas',monospace;
+}
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; background: #f0f2f5; }
 
-  /* ── Header ── */
-  header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 12px 24px;
-    background: var(--surface);
-    border-bottom: 1px solid var(--border);
-    box-shadow: var(--shadow-sm);
-    position: sticky;
-    top: 0;
-    z-index: 100;
-  }
-  .header-left {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
-  .header-logo {
-    width: 32px;
-    height: 32px;
-    border-radius: 8px;
-    object-fit: contain;
-  }
-  .header-logo-default {
-    width: 32px;
-    height: 32px;
-    border-radius: 8px;
-    background: var(--primary);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #fff;
-    font-weight: 800;
-    font-size: 14px;
-  }
-  header h1 {
-    font-size: 16px;
-    font-weight: 700;
-    letter-spacing: -0.02em;
-    color: var(--text);
-  }
-  .header-right {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
-  .version-badge {
-    font-size: 11px;
-    font-weight: 600;
-    color: var(--text-muted);
-    padding: 3px 8px;
-    background: var(--surface-2);
-    border-radius: 20px;
-  }
+/* Header */
+.app-header {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 10px 20px;
+  position: sticky; top: 0; z-index: 1030;
+  display: flex; align-items: center; justify-content: space-between;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+}
+.app-header .brand { display: flex; align-items: center; gap: 10px; }
+.app-header .brand img { height: 28px; border-radius: 6px; }
+.app-header .brand .brand-icon {
+  width: 28px; height: 28px; background: var(--primary); border-radius: 6px;
+  display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 800; font-size: 12px;
+}
+.app-header .brand h1 { font-size: 15px; font-weight: 700; margin: 0; }
+.header-controls { display: flex; align-items: center; gap: 10px; }
+.header-controls select { font-size: 13px; max-width: 200px; }
+.header-controls .badge { font-size: 11px; }
 
-  /* ── Badges ── */
-  .badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    padding: 3px 10px;
-    border-radius: 20px;
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: 0.01em;
-  }
-  .badge-green { background: var(--green-dim); color: var(--green); }
-  .badge-red { background: var(--red-dim); color: var(--red); }
-  .badge-orange { background: var(--orange-dim); color: var(--orange); }
-  .badge-blue { background: rgba(59,130,246,0.08); color: var(--blue); }
-  .badge-purple { background: rgba(139,92,246,0.08); color: var(--purple); }
-  .dot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; }
-  .dot-green { background: var(--green); }
-  .dot-red { background: var(--red); }
-  .dot-orange { background: var(--orange); }
+/* Tab nav */
+.tab-nav {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 0 20px;
+  display: flex; gap: 0;
+  overflow-x: auto;
+}
+.tab-nav .nav-link {
+  padding: 12px 18px; font-size: 13px; font-weight: 600;
+  color: var(--text-dim); border: none; background: none;
+  border-bottom: 2px solid transparent; cursor: pointer;
+  white-space: nowrap; display: flex; align-items: center; gap: 6px;
+  transition: all 0.15s;
+}
+.tab-nav .nav-link:hover { color: var(--text); background: var(--primary-light); }
+.tab-nav .nav-link.active { color: var(--primary); border-bottom-color: var(--primary); }
+.tab-nav .nav-link .bi { font-size: 15px; }
 
-  /* ── Tab Navigation ── */
-  .tab-nav {
-    display: flex;
-    align-items: center;
-    gap: 2px;
-    padding: 6px 24px;
-    background: var(--surface);
-    border-bottom: 1px solid var(--border);
-  }
-  .tab-btn {
-    padding: 10px 20px;
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--text-dim);
-    border: none;
-    background: none;
-    cursor: pointer;
-    border-radius: var(--radius-sm);
-    transition: all 0.15s;
-    position: relative;
-  }
-  .tab-btn:hover { color: var(--text); background: var(--surface-2); }
-  .tab-btn.active {
-    color: var(--primary);
-    background: var(--primary-light);
-  }
-  .tab-btn.active::after {
-    content: '';
-    position: absolute;
-    bottom: -7px;
-    left: 20%;
-    right: 20%;
-    height: 2px;
-    background: var(--primary);
-    border-radius: 2px;
-  }
-  .tab-count {
-    font-size: 10px;
-    font-weight: 700;
-    background: var(--surface-3);
-    color: var(--text-dim);
-    padding: 1px 6px;
-    border-radius: 10px;
-    margin-left: 6px;
-  }
-  .tab-btn.active .tab-count {
-    background: var(--primary);
-    color: #fff;
-  }
+/* Main */
+.app-main { max-width: 1200px; margin: 0 auto; padding: 20px; }
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
 
-  /* ── Main Content ── */
-  main {
-    flex: 1;
-    max-width: 1000px;
-    width: 100%;
-    margin: 0 auto;
-    padding: 20px 24px 80px;
-  }
-  .tab-panel { display: none; }
-  .tab-panel.active { display: block; }
+/* Cards */
+.card { border: 1px solid var(--border); border-radius: 10px; box-shadow: 0 1px 2px rgba(0,0,0,0.04); }
+.card-header { font-weight: 600; font-size: 14px; background: var(--surface-2); }
 
-  /* ── Cards ── */
-  .card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 20px;
-    box-shadow: var(--shadow-sm);
-    margin-bottom: 16px;
-  }
-  .card h2 {
-    font-size: 11px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    color: var(--text-dim);
-    margin-bottom: 14px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-  .card h2 .dot { width: 6px; height: 6px; }
+/* Printer table */
+.printer-row { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid #f0f0f0; }
+.printer-row:last-child { border-bottom: none; }
 
-  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
-  @media (max-width: 640px) { .grid { grid-template-columns: 1fr; } }
-  .grid .card { margin-bottom: 0; }
+/* Designer */
+.designer-wrap { display: flex; gap: 0; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; background: var(--surface); min-height: 500px; }
+.designer-toolbar {
+  width: 56px; background: #f8f9fa; border-right: 1px solid var(--border);
+  display: flex; flex-direction: column; align-items: center; padding: 8px 0; gap: 4px;
+}
+.designer-toolbar button {
+  width: 40px; height: 40px; border: none; background: none; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 15px; color: var(--text-dim); cursor: pointer;
+}
+.designer-toolbar button:hover { background: var(--primary-light); color: var(--primary); }
+.designer-canvas-wrap {
+  flex: 1; display: flex; align-items: flex-start; justify-content: center;
+  padding: 20px; background: #e9ecef; overflow: auto; position: relative;
+}
+.designer-canvas-wrap canvas { cursor: crosshair; box-shadow: 0 2px 12px rgba(0,0,0,0.12); }
+.designer-props {
+  width: 280px; border-left: 1px solid var(--border); background: var(--surface);
+  padding: 16px; overflow-y: auto; font-size: 13px;
+}
+.designer-props label { font-weight: 600; font-size: 11px; text-transform: uppercase; color: var(--text-dim); margin-bottom: 2px; }
+.designer-props .form-control, .designer-props .form-select { font-size: 13px; }
+.designer-tspl {
+  border-top: 1px solid var(--border); background: #1e1e2e; color: #cdd6f4;
+  padding: 12px 16px; font-family: var(--font-mono); font-size: 11px;
+  max-height: 160px; overflow-y: auto; white-space: pre-wrap;
+}
 
-  /* ── Buttons ── */
-  .btn {
-    padding: 7px 14px;
-    border-radius: var(--radius-xs);
-    font-size: 12px;
-    font-weight: 600;
-    cursor: pointer;
-    border: 1px solid var(--border);
-    background: var(--surface);
-    color: var(--text);
-    transition: all 0.15s;
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-  }
-  .btn:hover { border-color: var(--border-light); background: var(--surface-2); }
-  .btn:disabled { opacity: 0.4; cursor: not-allowed; }
-  .btn-primary {
-    background: var(--primary);
-    color: #fff;
-    border-color: var(--primary);
-  }
-  .btn-primary:hover { background: var(--primary-hover); border-color: var(--primary-hover); }
-  .btn-sm { padding: 4px 10px; font-size: 11px; }
-  .btn-danger { color: var(--red); border-color: rgba(239,68,68,0.3); }
-  .btn-danger:hover { background: var(--red-dim); }
-  .btn-success { color: var(--green); border-color: rgba(16,185,129,0.3); }
-  .btn-success:hover { background: var(--green-dim); }
+/* Batch wizard */
+.wizard-steps { display: flex; gap: 0; margin-bottom: 20px; }
+.wizard-step {
+  flex: 1; text-align: center; padding: 12px; font-size: 13px; font-weight: 600;
+  color: var(--text-muted); border-bottom: 3px solid var(--border); cursor: pointer;
+}
+.wizard-step.active { color: var(--primary); border-bottom-color: var(--primary); }
+.wizard-step.done { color: var(--green); border-bottom-color: var(--green); }
+.wizard-panel { display: none; }
+.wizard-panel.active { display: block; }
 
-  /* ── Forms ── */
-  input, select, textarea {
-    font-family: var(--font);
-    font-size: 13px;
-    padding: 7px 12px;
-    border: 1px solid var(--border);
-    border-radius: var(--radius-xs);
-    background: var(--surface);
-    color: var(--text);
-    outline: none;
-    transition: border-color 0.15s;
-    width: 100%;
-  }
-  input:focus, select:focus, textarea:focus {
-    border-color: var(--primary);
-    box-shadow: 0 0 0 3px var(--primary-light);
-  }
-  select { cursor: pointer; }
-  label { font-size: 12px; font-weight: 600; color: var(--text-dim); margin-bottom: 4px; display: block; }
-  .form-row { display: flex; gap: 12px; align-items: end; margin-bottom: 12px; }
-  .form-group { flex: 1; }
+/* Template cards */
+.template-card {
+  border: 2px solid var(--border); border-radius: 10px; padding: 16px;
+  cursor: pointer; transition: all 0.15s; background: var(--surface);
+}
+.template-card:hover { border-color: var(--primary); }
+.template-card.selected { border-color: var(--primary); background: var(--primary-light); }
 
-  /* ── Lists ── */
-  .printer-list { list-style: none; }
-  .printer-item {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 10px 12px;
-    border: 1px solid var(--border);
-    border-radius: var(--radius-xs);
-    margin-bottom: 6px;
-    font-size: 13px;
-    transition: background 0.1s;
-  }
-  .printer-item:hover { background: var(--surface-2); }
-  .printer-name { font-weight: 600; display: flex; align-items: center; gap: 8px; }
-  .printer-actions { display: flex; gap: 6px; }
-
-  /* ── Info rows ── */
-  .info-row {
-    display: flex;
-    justify-content: space-between;
-    padding: 6px 0;
-    font-size: 13px;
-    border-bottom: 1px solid var(--surface-2);
-  }
-  .info-row:last-child { border-bottom: none; }
-  .info-label { color: var(--text-dim); }
-  .info-value { font-weight: 600; }
-
-  /* ── Toggle ── */
-  .toggle-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 8px 0;
-  }
-  .toggle-label { font-size: 13px; display: flex; align-items: center; gap: 8px; }
-
-  /* ── Template grid ── */
-  .template-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 12px;
-    margin-top: 12px;
-  }
-  .template-card {
-    border: 2px solid var(--border);
-    border-radius: var(--radius);
-    padding: 14px;
-    cursor: pointer;
-    transition: all 0.15s;
-    background: var(--surface);
-  }
-  .template-card:hover { border-color: var(--border-light); box-shadow: var(--shadow); }
-  .template-card.selected { border-color: var(--primary); background: var(--primary-light); }
-  .template-card h3 { font-size: 13px; font-weight: 700; margin-bottom: 4px; }
-  .template-card p { font-size: 11px; color: var(--text-dim); }
-  .template-source {
-    font-size: 10px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    color: var(--text-muted);
-    margin-top: 8px;
-  }
-
-  /* ── Wizard steps ── */
-  .wizard-steps {
-    display: flex;
-    align-items: center;
-    gap: 0;
-    margin-bottom: 24px;
-  }
-  .step-indicator {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    cursor: pointer;
-    padding: 6px 12px;
-    border-radius: var(--radius-sm);
-    transition: background 0.15s;
-  }
-  .step-indicator:hover { background: var(--surface-2); }
-  .step-circle {
-    width: 28px;
-    height: 28px;
-    border-radius: 50%;
-    border: 2px solid var(--border);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 12px;
-    font-weight: 700;
-    color: var(--text-dim);
-    background: var(--surface);
-    transition: all 0.15s;
-  }
-  .step-indicator.active .step-circle {
-    background: var(--primary);
-    border-color: var(--primary);
-    color: #fff;
-  }
-  .step-indicator.completed .step-circle {
-    background: var(--green);
-    border-color: var(--green);
-    color: #fff;
-  }
-  .step-indicator.locked .step-circle { opacity: 0.4; }
-  .step-label { font-size: 12px; font-weight: 600; color: var(--text-dim); }
-  .step-indicator.active .step-label { color: var(--text); }
-  .step-connector { flex: 1; height: 2px; background: var(--border); margin: 0 4px; }
-  .step-connector.completed { background: var(--green); }
-
-  .wizard-panel { display: none; }
-  .wizard-panel.active { display: block; }
-
-  /* ── Drop zone ── */
-  .drop-zone {
-    border: 2px dashed var(--border);
-    border-radius: var(--radius);
-    padding: 40px 20px;
-    text-align: center;
-    color: var(--text-dim);
-    transition: all 0.2s;
-    cursor: pointer;
-  }
-  .drop-zone:hover, .drop-zone.dragging {
-    border-color: var(--primary);
-    background: var(--primary-light);
-    color: var(--primary);
-  }
-  .drop-zone-icon { font-size: 32px; margin-bottom: 8px; }
-
-  /* ── Preview ── */
-  .preview-container { margin-top: 16px; }
-  .label-preview {
-    background: #fff;
-    border: 1px solid var(--border);
-    border-radius: var(--radius-xs);
-    padding: 8px;
-    display: inline-block;
-    margin: 4px;
-    position: relative;
-    overflow: hidden;
-    box-shadow: var(--shadow-sm);
-  }
-  .mapping-grid {
-    display: grid;
-    grid-template-columns: 1fr auto 1fr;
-    gap: 8px;
-    align-items: center;
-    margin: 12px 0;
-  }
-  .mapping-arrow { color: var(--text-muted); font-size: 16px; text-align: center; }
-
-  /* ── Progress ── */
-  .progress-bar {
-    width: 100%;
-    height: 6px;
-    background: var(--surface-2);
-    border-radius: 3px;
-    overflow: hidden;
-    margin: 12px 0;
-    display: none;
-  }
-  .progress-fill {
-    height: 100%;
-    background: var(--primary);
-    border-radius: 3px;
-    transition: width 0.3s;
-    width: 0;
-  }
-
-  /* ── Footer ── */
-  footer {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 8px 24px;
-    background: var(--surface);
-    border-top: 1px solid var(--border);
-    font-size: 11px;
-    color: var(--text-dim);
-    z-index: 100;
-  }
-  .footer-left, .footer-right { display: flex; align-items: center; gap: 12px; }
-
-  /* ── Toast ── */
-  .toast {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    padding: 12px 20px;
-    border-radius: var(--radius-sm);
-    font-size: 13px;
-    font-weight: 600;
-    z-index: 9999;
-    opacity: 0;
-    transform: translateY(-10px);
-    transition: all 0.3s;
-    pointer-events: none;
-    box-shadow: var(--shadow-md);
-  }
-  .toast.show { opacity: 1; transform: translateY(0); pointer-events: auto; }
-  .toast-success { background: #ecfdf5; color: #065f46; border: 1px solid #a7f3d0; }
-  .toast-error { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
-
-  /* ── Data table ── */
-  .data-table { width: 100%; border-collapse: collapse; font-size: 12px; margin: 12px 0; }
-  .data-table th { background: var(--surface-2); font-weight: 700; text-align: left; padding: 8px 10px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-dim); }
-  .data-table td { padding: 6px 10px; border-bottom: 1px solid var(--surface-2); }
-  .data-table tr:hover td { background: var(--surface-2); }
-
-  /* ── Empty state ── */
-  .empty-state { text-align: center; padding: 40px 20px; color: var(--text-dim); }
-  .empty-state-icon { font-size: 40px; margin-bottom: 8px; opacity: 0.3; }
-  .empty-state p { font-size: 13px; }
-
-  /* ── Output toggle ── */
-  .output-toggle { display: flex; gap: 0; border: 1px solid var(--border); border-radius: var(--radius-sm); overflow: hidden; margin: 12px 0; }
-  .output-toggle-btn {
-    flex: 1;
-    padding: 10px 16px;
-    font-size: 13px;
-    font-weight: 600;
-    border: none;
-    background: var(--surface);
-    color: var(--text-dim);
-    cursor: pointer;
-    transition: all 0.15s;
-    text-align: center;
-  }
-  .output-toggle-btn:not(:last-child) { border-right: 1px solid var(--border); }
-  .output-toggle-btn.active {
-    background: var(--primary);
-    color: #fff;
-  }
-
-  /* ── TSPL visual ── */
-  .tspl-visual {
-    background: #fff;
-    border: 1px solid var(--border);
-    border-radius: var(--radius-xs);
-    padding: 16px;
-    position: relative;
-    overflow: hidden;
-    min-height: 80px;
-    margin: 12px 0;
-  }
-
-  /* ── Misc ── */
-  .text-dim { color: var(--text-dim); }
-  .text-sm { font-size: 12px; }
-  .text-xs { font-size: 11px; }
-  .mt-2 { margin-top: 8px; }
-  .mt-3 { margin-top: 12px; }
-  .mt-4 { margin-top: 16px; }
-  .mb-2 { margin-bottom: 8px; }
-  .mb-3 { margin-bottom: 12px; }
-  .flex { display: flex; }
-  .flex-between { display: flex; justify-content: space-between; align-items: center; }
-  .gap-2 { gap: 8px; }
-  .gap-3 { gap: 12px; }
-  details summary { cursor: pointer; font-size: 12px; color: var(--text-dim); font-weight: 600; padding: 6px 0; }
-  details summary:hover { color: var(--text); }
-  textarea.mono { font-family: var(--mono); font-size: 11px; resize: vertical; }
-
-  /* ── Scrollbar ── */
-  ::-webkit-scrollbar { width: 6px; height: 6px; }
-  ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
-  ::-webkit-scrollbar-thumb:hover { background: var(--border-light); }
+/* Toast */
+.toast-container { position: fixed; bottom: 20px; right: 20px; z-index: 9999; }
 </style>
 </head>
 <body>
 
-<!-- ═══ Header ═══ -->
-<header>
-  <div class="header-left">
-    <div id="headerLogo" class="header-logo-default">TB</div>
-    <h1 id="headerTitle">TSC Bridge</h1>
+<!-- ==================== HEADER ==================== -->
+<header class="app-header">
+  <div class="brand">
+    <div class="brand-icon" id="brandIcon">TB</div>
+    <img id="brandLogo" src="" alt="" style="display:none;">
+    <h1 id="brandName">TSC Bridge</h1>
   </div>
-  <div class="header-right">
-    <span class="version-badge" id="versionBadge">v--</span>
-    <span class="badge badge-green" id="connBadge"><span class="dot dot-green"></span> Conectado</span>
+  <div class="header-controls">
+    <select id="headerPrinter" class="form-select form-select-sm" onchange="onPrinterChange(this.value)" title="Impresora">
+      <option value="">Sin impresoras</option>
+    </select>
+    <select id="headerPreset" class="form-select form-select-sm" onchange="onPresetChange(this.value)" title="Preset de etiqueta">
+      <option value="">Sin preset</option>
+    </select>
+    <span class="badge bg-primary" id="dpiBadge" title="DPI de la impresora seleccionada">203 DPI</span>
+    <span class="badge bg-secondary" id="versionBadge">v--</span>
   </div>
 </header>
 
-<!-- ═══ Tab Navigation ═══ -->
-<nav class="tab-nav">
-  <button class="tab-btn active" data-tab="printers" onclick="switchTab('printers')">
-    Impresoras<span class="tab-count" id="printerCount">0</span>
-  </button>
-  <button class="tab-btn" data-tab="templates" onclick="switchTab('templates')">
-    Plantillas<span class="tab-count" id="templateCount">0</span>
-  </button>
-  <button class="tab-btn" data-tab="batch" onclick="switchTab('batch')">
-    Batch
-  </button>
-  <button class="tab-btn" data-tab="settings" onclick="switchTab('settings')">
-    Config
-  </button>
+<!-- ==================== TAB NAV ==================== -->
+<nav class="tab-nav" id="tabNav">
+  <button class="nav-link active" data-tab="printers"><i class="bi bi-printer"></i> Impresoras</button>
+  <button class="nav-link" data-tab="designer"><i class="bi bi-pencil-square"></i> Disenar</button>
+  <button class="nav-link" data-tab="batch"><i class="bi bi-grid-3x3-gap"></i> Batch</button>
+  <button class="nav-link" data-tab="templates"><i class="bi bi-file-earmark-text"></i> Templates</button>
+  <button class="nav-link" data-tab="config"><i class="bi bi-gear"></i> Config</button>
 </nav>
 
-<!-- ═══ Main Content ═══ -->
-<main>
+<!-- ==================== MAIN ==================== -->
+<div class="app-main">
 
-<!-- ────── Tab: Impresoras ────── -->
-<div class="tab-panel active" id="panel-printers">
-
-  <!-- Status + Printers -->
-  <div class="grid">
-    <div class="card">
-      <h2>Estado</h2>
-      <div class="info-row"><span class="info-label">Version</span><span class="info-value" id="infoVersion">--</span></div>
-      <div class="info-row"><span class="info-label">SO</span><span class="info-value" id="infoOS">--</span></div>
-      <div class="info-row"><span class="info-label">Puerto</span><span class="info-value" id="infoPort">--</span></div>
-      <div class="info-row"><span class="info-label">Preset</span><span class="info-value" id="infoPreset">--</span></div>
-      <div class="info-row"><span class="info-label">Impresora</span><span class="info-value" id="infoPrinter">--</span></div>
-    </div>
-    <div class="card">
-      <h2>Impresoras del Sistema</h2>
-      <ul class="printer-list" id="localPrinterList"><li class="text-dim text-sm">Cargando...</li></ul>
+<!-- ========== TAB 1: IMPRESORAS ========== -->
+<div class="tab-panel active" id="tab-printers">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h5 class="mb-0"><i class="bi bi-printer me-2"></i>Impresoras Detectadas</h5>
+    <div class="d-flex gap-2">
+      <button class="btn btn-sm btn-outline-primary" onclick="discoverPrinters()"><i class="bi bi-arrow-clockwise me-1"></i>Escanear Red</button>
     </div>
   </div>
 
-  <!-- Driver Card -->
-  <div class="card" id="driverCard" style="display:none;">
-    <h2>Drivers TSC</h2>
-    <div id="driverContent"></div>
-    <div class="progress-bar" id="driverProgress"><div class="progress-fill"></div></div>
-  </div>
-
-  <!-- Network + Sharing -->
-  <div class="grid">
-    <div class="card">
-      <h2>Impresoras en Red</h2>
-      <ul class="printer-list" id="netPrinterList"><li class="text-dim text-sm">Ninguna</li></ul>
-      <div class="mt-3">
-        <button class="btn btn-sm" onclick="scanNetwork()">Escanear red</button>
-      </div>
-      <div class="mt-3">
-        <h2>Impresora Manual</h2>
-        <div id="manualPrintersList" class="mb-2"></div>
-        <div class="form-row">
-          <div class="form-group">
-            <input type="text" id="manualIp" placeholder="192.168.1.100:9100">
-          </div>
-          <button class="btn btn-sm" onclick="probeManualIp()">Agregar</button>
-        </div>
-      </div>
-    </div>
-    <div class="card">
-      <h2>Compartir USB</h2>
-      <div class="toggle-row">
-        <span class="toggle-label"><span class="dot" id="shareDot"></span> <span id="shareLabel">--</span></span>
-        <button class="btn btn-sm" id="shareToggle" onclick="toggleShareBtn()">--</button>
-      </div>
-      <div class="info-row"><span class="info-label">Puerto</span><span class="info-value" id="sharePort">--</span></div>
-      <div class="info-row"><span class="info-label">Jobs</span><span class="info-value" id="shareJobs">--</span></div>
-      <div class="mt-2 text-xs text-dim" id="shareAddresses"></div>
-      <div class="mt-3">
-        <label>Impresora a compartir</label>
-        <select id="sharePrinterSelect"></select>
-      </div>
+  <div class="card mb-3">
+    <div class="table-responsive">
+      <table class="table table-hover mb-0" id="printerTable">
+        <thead class="table-light">
+          <tr>
+            <th>Nombre</th>
+            <th>Tipo</th>
+            <th>DPI</th>
+            <th>Estado</th>
+            <th class="text-end">Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="printerTableBody">
+          <tr><td colspan="5" class="text-center text-muted py-4">Cargando impresoras...</td></tr>
+        </tbody>
+      </table>
     </div>
   </div>
 
-  <!-- Autostart + Download -->
-  <div class="grid">
-    <div class="card">
-      <h2>Inicio Automático</h2>
-      <div class="toggle-row">
-        <span class="toggle-label"><span class="dot" id="autostartDot"></span> <span id="autostartLabel">--</span></span>
-        <button class="btn btn-sm" id="autostartToggle" onclick="toggleAutoStart()">--</button>
+  <!-- Add Manual IP -->
+  <div class="card mb-3">
+    <div class="card-body">
+      <h6 class="card-title"><i class="bi bi-plus-circle me-2"></i>Agregar Impresora Manual (IP)</h6>
+      <div class="d-flex gap-2">
+        <input type="text" id="manualIP" class="form-control form-control-sm" placeholder="192.168.1.100:9100" style="max-width:250px;">
+        <button class="btn btn-sm btn-primary" onclick="addManualPrinter()">Agregar</button>
       </div>
-    </div>
-    <div class="card">
-      <h2>Descargar Bridge</h2>
-      <div class="flex gap-2">
-        <a href="/download?os=mac" class="btn btn-sm">macOS</a>
-        <a href="/download?os=windows" class="btn btn-sm">Windows</a>
-      </div>
+      <div id="manualPrintersList" class="mt-2"></div>
     </div>
   </div>
 
-  <!-- Test Print -->
-  <div class="card">
-    <h2>Prueba de Impresión</h2>
-    <div class="form-row">
-      <div class="form-group">
-        <label>Preset</label>
-        <select id="presetSelect" onchange="renderPresetInfo();renderPresetPreview();loadTestTemplate()"></select>
-      </div>
-      <div class="form-group">
-        <label>Impresora</label>
-        <select id="testPrinter"></select>
-      </div>
-    </div>
-    <div class="flex gap-2 mb-3">
-      <div id="presetInfo" class="text-xs text-dim"></div>
-    </div>
-    <div id="presetPreview" class="mb-3"></div>
-    <textarea id="tsplInput" rows="6" class="mono" placeholder="TSPL2 commands..."></textarea>
-    <div class="flex gap-2 mt-2">
-      <button class="btn btn-sm" onclick="loadTestTemplate()">Cargar template</button>
-      <button class="btn btn-sm btn-primary" onclick="sendTestPrint()">Enviar a impresora</button>
-    </div>
-  </div>
-</div>
-
-<!-- ────── Tab: Plantillas ────── -->
-<div class="tab-panel" id="panel-templates">
-
-  <!-- API Connection -->
-  <div class="card">
-    <h2><span class="dot" id="apiDot"></span> Conexión Backend</h2>
-    <div id="apiStatus" class="text-sm text-dim">Verificando...</div>
-    <button class="btn btn-sm mt-2" onclick="testApiConnection()">Probar conexión</button>
-  </div>
-
-  <!-- Backend Templates -->
-  <div class="card">
-    <h2>Plantillas del Backend</h2>
-    <div id="backendTemplateGrid" class="template-grid">
-      <div class="empty-state"><p>Cargando plantillas...</p></div>
-    </div>
-  </div>
-
-  <!-- Local Templates -->
-  <div class="card">
-    <h2>Plantillas Locales</h2>
-    <div id="localTemplateGrid" class="template-grid">
-      <div class="empty-state"><p>Cargando...</p></div>
-    </div>
-  </div>
-</div>
-
-<!-- ────── Tab: Batch ────── -->
-<div class="tab-panel" id="panel-batch">
-  <div class="card">
-    <h2>Impresión / PDF por Lote</h2>
-
-    <!-- Wizard Steps -->
-    <div class="wizard-steps">
-      <div class="step-indicator active" onclick="goToWizardStep(1)">
-        <div class="step-circle" id="sc1">1</div>
-        <span class="step-label">Datos</span>
-      </div>
-      <div class="step-connector" id="conn12"></div>
-      <div class="step-indicator locked" onclick="goToWizardStep(2)">
-        <div class="step-circle" id="sc2">2</div>
-        <span class="step-label">Plantilla</span>
-      </div>
-      <div class="step-connector" id="conn23"></div>
-      <div class="step-indicator locked" onclick="goToWizardStep(3)">
-        <div class="step-circle" id="sc3">3</div>
-        <span class="step-label">Mapeo</span>
-      </div>
-      <div class="step-connector" id="conn34"></div>
-      <div class="step-indicator locked" onclick="goToWizardStep(4)">
-        <div class="step-circle" id="sc4">4</div>
-        <span class="step-label">Ejecutar</span>
-      </div>
-    </div>
-
-    <!-- Step 1: Upload -->
-    <div class="wizard-panel active" id="ws1">
-      <div class="drop-zone" id="dropZone" onclick="document.getElementById('excelFile').click()">
-        <div class="drop-zone-icon" style="font-size:32px;color:var(--text-muted)">XLS</div>
-        <p><strong>Arrastra tu archivo Excel aquí</strong></p>
-        <p class="text-xs text-dim">.xlsx / .xls</p>
-      </div>
-      <input type="file" id="excelFile" accept=".xlsx,.xls" style="display:none" onchange="handleExcelUpload(event)">
-      <div id="excelPreview" class="mt-3"></div>
-      <div class="flex-between mt-3">
-        <button class="btn btn-sm btn-danger" id="clearExcelBtn" onclick="clearExcel()" style="display:none">Limpiar datos</button>
-        <button class="btn btn-primary" id="nextStep1" onclick="goToWizardStep(2)" disabled>Siguiente →</button>
-      </div>
-    </div>
-
-    <!-- Step 2: Template -->
-    <div class="wizard-panel" id="ws2">
-      <div id="wizardTemplateGrid"></div>
-      <div class="mt-3">
-        <label>Preset de etiqueta</label>
-        <select id="batchPreset"></select>
-      </div>
-      <div class="flex-between mt-3">
-        <button class="btn" onclick="goToWizardStep(1)">← Atrás</button>
-        <button class="btn btn-primary" id="nextStep2" onclick="goToWizardStep(3)" disabled>Siguiente →</button>
-      </div>
-    </div>
-
-    <!-- Step 3: Mapping + Preview -->
-    <div class="wizard-panel" id="ws3">
-      <div id="mappingContainer"></div>
-      <div id="mappingInfo" class="text-xs text-dim mt-2"></div>
-      <div id="visualPreview" class="preview-container"></div>
-      <details class="mt-3">
-        <summary>Vista previa TSPL</summary>
-        <div id="tsplPreviewVisual" class="tspl-visual"></div>
-        <textarea id="tsplPreviewRaw" rows="8" class="mono mt-2" readonly></textarea>
-      </details>
-      <div class="flex-between mt-3">
-        <button class="btn" onclick="goToWizardStep(2)">← Atrás</button>
-        <button class="btn btn-primary" onclick="goToWizardStep(4)">Siguiente →</button>
-      </div>
-    </div>
-
-    <!-- Step 4: Execute -->
-    <div class="wizard-panel" id="ws4">
-      <!-- Output toggle: Print vs PDF -->
-      <label>Tipo de salida</label>
-      <div class="output-toggle">
-        <button class="output-toggle-btn active" id="outPrint" onclick="setOutputMode('print')">Imprimir etiquetas (TSPL)</button>
-        <button class="output-toggle-btn" id="outPdf" onclick="setOutputMode('pdf')">Generar PDF</button>
-      </div>
-
-      <div class="form-row">
-        <div class="form-group">
-          <label>Fila inicio</label>
-          <input type="number" id="rowStart" value="1" min="1">
-        </div>
-        <div class="form-group">
-          <label>Fila fin</label>
-          <input type="number" id="rowEnd" value="1" min="1">
-        </div>
-        <div class="form-group">
-          <label>Copias</label>
-          <input type="number" id="batchCopies" value="1" min="1" max="99">
-        </div>
-      </div>
-
-      <!-- Print-only options -->
-      <div id="printOptions">
-        <div class="form-row">
-          <div class="form-group">
-            <label>Impresora</label>
-            <select id="batchPrinter"></select>
+  <!-- System toggles -->
+  <div class="row g-3">
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <h6 class="mb-1"><i class="bi bi-share me-2"></i>Compartir USB</h6>
+              <small class="text-muted">Exponer impresora USB como servidor de red</small>
+            </div>
+            <div class="form-check form-switch">
+              <input class="form-check-input" type="checkbox" id="shareToggle" onchange="toggleShare(this.checked)">
+            </div>
           </div>
         </div>
       </div>
-
-      <div class="flex-between mb-3">
-        <span class="text-sm" id="batchSummary">--</span>
-      </div>
-
-      <div class="progress-bar" id="batchProgress"><div class="progress-fill" id="batchProgressFill"></div></div>
-      <div id="batchResult" class="mt-2"></div>
-
-      <div class="flex-between mt-3">
-        <button class="btn" onclick="goToWizardStep(3)">← Atrás</button>
-        <div class="flex gap-2">
-          <button class="btn" onclick="executeBatchPreview()">Solo Preview</button>
-          <button class="btn btn-primary" id="executeBtn" onclick="executeBatch()">Ejecutar</button>
+    </div>
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <h6 class="mb-1"><i class="bi bi-power me-2"></i>Inicio Automatico</h6>
+              <small class="text-muted">Iniciar TSC Bridge al encender la computadora</small>
+            </div>
+            <div class="form-check form-switch">
+              <input class="form-check-input" type="checkbox" id="autostartToggle" onchange="toggleAutostart(this.checked)">
+            </div>
+          </div>
         </div>
       </div>
     </div>
   </div>
 </div>
 
-<!-- ────── Tab: Settings ────── -->
-<div class="tab-panel" id="panel-settings">
-  <div class="card">
-    <h2>Configuración</h2>
-    <div class="form-row">
-      <div class="form-group">
-        <label>Puerto HTTP</label>
-        <input type="number" id="cfgPort" value="9638">
+<!-- ========== TAB 2: DISENAR ========== -->
+<div class="tab-panel" id="tab-designer">
+  <!-- Standard selector -->
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h5 class="mb-0"><i class="bi bi-pencil-square me-2"></i>Disenador de Etiquetas</h5>
+    <div class="d-flex gap-2 align-items-center">
+      <label class="form-label mb-0 me-1 text-muted" style="font-size:12px;">Estandar:</label>
+      <select id="designerStandard" class="form-select form-select-sm" style="width:auto;" onchange="validateStandard()">
+        <option value="">Ninguno</option>
+        <option value="gafete">Gafete</option>
+        <option value="gs1-128">GS1-128</option>
+        <option value="iso-15223">ISO 15223</option>
+      </select>
+    </div>
+  </div>
+  <div id="standardWarnings" class="mb-2"></div>
+
+  <div class="designer-wrap">
+    <!-- Left toolbar -->
+    <div class="designer-toolbar">
+      <button onclick="Designer.addElement('text')" title="Texto (T)"><i class="bi bi-fonts"></i></button>
+      <button onclick="Designer.addElement('barcode')" title="Barcode (B)"><i class="bi bi-upc-scan"></i></button>
+      <button onclick="Designer.addElement('qrcode')" title="QR Code (Q)"><i class="bi bi-qr-code"></i></button>
+      <button onclick="Designer.addElement('line')" title="Linea (L)"><i class="bi bi-dash-lg"></i></button>
+      <button onclick="Designer.addElement('rectangle')" title="Rectangulo (R)"><i class="bi bi-square"></i></button>
+      <button onclick="Designer.addElement('image')" title="Imagen (I)"><i class="bi bi-image"></i></button>
+      <hr style="width:80%;margin:4px 0;border-color:var(--border);">
+      <button onclick="Designer.deleteSelected()" title="Eliminar seleccionado"><i class="bi bi-trash text-danger"></i></button>
+      <button onclick="Designer.toggleGrid()" title="Toggle grid" id="btnGrid"><i class="bi bi-grid-3x3"></i></button>
+    </div>
+
+    <!-- Center canvas -->
+    <div class="designer-canvas-wrap">
+      <canvas id="designerCanvas" width="600" height="440"></canvas>
+    </div>
+
+    <!-- Right properties -->
+    <div class="designer-props" id="designerProps">
+      <div id="propsEmpty" class="text-center text-muted py-5">
+        <i class="bi bi-cursor" style="font-size:24px;"></i>
+        <p class="mt-2">Selecciona un elemento<br>o agrega uno desde la barra</p>
       </div>
-      <div class="form-group">
-        <label>Impresora por defecto</label>
-        <select id="cfgPrinter"></select>
+      <div id="propsPanel" style="display:none;">
+        <div class="mb-2">
+          <label>Tipo</label>
+          <input type="text" id="propType" class="form-control form-control-sm" readonly>
+        </div>
+        <div class="row g-2 mb-2">
+          <div class="col-6"><label>X (mm)</label><input type="number" id="propX" class="form-control form-control-sm" step="0.5" onchange="Designer.updateFromProps()"></div>
+          <div class="col-6"><label>Y (mm)</label><input type="number" id="propY" class="form-control form-control-sm" step="0.5" onchange="Designer.updateFromProps()"></div>
+        </div>
+        <div class="row g-2 mb-2">
+          <div class="col-6"><label>Ancho (mm)</label><input type="number" id="propW" class="form-control form-control-sm" step="0.5" onchange="Designer.updateFromProps()"></div>
+          <div class="col-6"><label>Alto (mm)</label><input type="number" id="propH" class="form-control form-control-sm" step="0.5" onchange="Designer.updateFromProps()"></div>
+        </div>
+        <div class="mb-2" id="propContentWrap">
+          <label>Contenido</label>
+          <textarea id="propContent" class="form-control form-control-sm" rows="2" onchange="Designer.updateFromProps()"></textarea>
+          <small class="text-muted">Usa {variable} para campos dinamicos</small>
+        </div>
+        <div class="row g-2 mb-2" id="propFontWrap">
+          <div class="col-6">
+            <label>Fuente TSPL</label>
+            <select id="propFont" class="form-select form-select-sm" onchange="Designer.updateFromProps()">
+              <option value="1">1 (8x12)</option>
+              <option value="2">2 (12x20)</option>
+              <option value="3" selected>3 (16x24)</option>
+              <option value="4">4 (24x32)</option>
+              <option value="5">5 (32x48)</option>
+            </select>
+          </div>
+          <div class="col-6">
+            <label>Multiplicador</label>
+            <select id="propFontMult" class="form-select form-select-sm" onchange="Designer.updateFromProps()">
+              <option value="1">1x</option><option value="2">2x</option>
+              <option value="3">3x</option><option value="4">4x</option>
+              <option value="5">5x</option><option value="6">6x</option>
+              <option value="7">7x</option><option value="8">8x</option>
+            </select>
+          </div>
+        </div>
+        <div class="row g-2 mb-2">
+          <div class="col-6">
+            <label>Rotacion</label>
+            <select id="propRotation" class="form-select form-select-sm" onchange="Designer.updateFromProps()">
+              <option value="0">0</option><option value="90">90</option>
+              <option value="180">180</option><option value="270">270</option>
+            </select>
+          </div>
+          <div class="col-6" id="propAlignWrap">
+            <label>Alineacion</label>
+            <select id="propAlign" class="form-select form-select-sm" onchange="Designer.updateFromProps()">
+              <option value="left">Izquierda</option>
+              <option value="center">Centro</option>
+              <option value="right">Derecha</option>
+            </select>
+          </div>
+        </div>
+        <div id="propBarcodeWrap" style="display:none;" class="mb-2">
+          <label>Tipo Barcode</label>
+          <select id="propBarcodeType" class="form-select form-select-sm" onchange="Designer.updateFromProps()">
+            <option value="128">Code 128</option>
+            <option value="EAN13">EAN-13</option>
+            <option value="39">Code 39</option>
+            <option value="93">Code 93</option>
+          </select>
+        </div>
+        <!-- QR Builder -->
+        <div id="propQRWrap" style="display:none;">
+          <label>Tipo QR</label>
+          <select id="propQRType" class="form-select form-select-sm mb-2" onchange="Designer.updateQRType()">
+            <option value="free">Texto libre</option>
+            <option value="vcard">vCard</option>
+            <option value="url">URL</option>
+            <option value="wifi">WiFi</option>
+          </select>
+          <div id="qrFreeWrap"><small class="text-muted">Edita el contenido arriba</small></div>
+          <div id="qrVcardWrap" style="display:none;">
+            <input type="text" class="form-control form-control-sm mb-1" id="qrFN" placeholder="Nombre {nombre}" onchange="Designer.updateQRFields()">
+            <input type="text" class="form-control form-control-sm mb-1" id="qrLN" placeholder="Apellido {apellido}" onchange="Designer.updateQRFields()">
+            <input type="text" class="form-control form-control-sm mb-1" id="qrTel" placeholder="Telefono {tel}" onchange="Designer.updateQRFields()">
+            <input type="text" class="form-control form-control-sm mb-1" id="qrEmail" placeholder="Email {email}" onchange="Designer.updateQRFields()">
+            <input type="text" class="form-control form-control-sm mb-1" id="qrOrg" placeholder="Empresa {org}" onchange="Designer.updateQRFields()">
+            <input type="text" class="form-control form-control-sm" id="qrTitle" placeholder="Cargo {cargo}" onchange="Designer.updateQRFields()">
+          </div>
+          <div id="qrUrlWrap" style="display:none;">
+            <input type="text" class="form-control form-control-sm" id="qrURLPattern" placeholder="https://example.com/{id}" onchange="Designer.updateQRFields()">
+          </div>
+          <div id="qrWifiWrap" style="display:none;">
+            <input type="text" class="form-control form-control-sm mb-1" id="qrSSID" placeholder="SSID" onchange="Designer.updateQRFields()">
+            <input type="text" class="form-control form-control-sm mb-1" id="qrPass" placeholder="Password" onchange="Designer.updateQRFields()">
+            <select id="qrSecurity" class="form-select form-select-sm" onchange="Designer.updateQRFields()">
+              <option value="WPA">WPA/WPA2</option>
+              <option value="WEP">WEP</option>
+              <option value="">Sin seguridad</option>
+            </select>
+          </div>
+        </div>
       </div>
     </div>
-    <div class="form-row">
-      <div class="form-group">
-        <label>Preset por defecto</label>
-        <select id="cfgPreset"></select>
-      </div>
-    </div>
-    <button class="btn btn-primary" onclick="saveConfig()">Guardar configuración</button>
+  </div>
+
+  <!-- TSPL Preview + actions -->
+  <div class="designer-tspl" id="tsplPreview">-- TSPL preview --</div>
+  <div class="d-flex gap-2 mt-2">
+    <button class="btn btn-sm btn-outline-primary" onclick="Designer.saveLocal()"><i class="bi bi-download me-1"></i>Guardar Local</button>
+    <button class="btn btn-sm btn-outline-success" onclick="Designer.exportJSON()"><i class="bi bi-filetype-json me-1"></i>Exportar JSON</button>
+    <button class="btn btn-sm btn-outline-secondary" onclick="Designer.importJSON()"><i class="bi bi-upload me-1"></i>Importar JSON</button>
+    <input type="file" id="importJSONInput" accept=".json" style="display:none;" onchange="Designer.handleImportJSON(event)">
   </div>
 </div>
 
-</main>
+<!-- ========== TAB 3: BATCH ========== -->
+<div class="tab-panel" id="tab-batch">
+  <h5 class="mb-3"><i class="bi bi-grid-3x3-gap me-2"></i>Impresion por Lote</h5>
 
-<!-- ═══ Footer ═══ -->
-<footer>
-  <div class="footer-left">
-    <span><span class="dot dot-green" id="footerDot"></span> TSC Bridge</span>
-    <span id="footerPrinters">0 impresoras</span>
+  <!-- Wizard steps -->
+  <div class="wizard-steps">
+    <div class="wizard-step active" data-step="1" onclick="goToStep(1)">1. Subir Excel</div>
+    <div class="wizard-step" data-step="2" onclick="goToStep(2)">2. Plantilla</div>
+    <div class="wizard-step" data-step="3" onclick="goToStep(3)">3. Mapeo</div>
+    <div class="wizard-step" data-step="4" onclick="goToStep(4)">4. Ejecutar</div>
   </div>
-  <div class="footer-right">
-    <span id="footerUptime">--</span>
+
+  <!-- Step 1: Upload Excel -->
+  <div class="wizard-panel active" id="batchStep1">
+    <div class="card">
+      <div class="card-body text-center py-5">
+        <i class="bi bi-file-earmark-spreadsheet" style="font-size:48px;color:var(--green);"></i>
+        <h6 class="mt-3">Selecciona un archivo Excel</h6>
+        <p class="text-muted">Formatos: .xlsx, .xls, .csv</p>
+        <input type="file" id="excelFile" accept=".xlsx,.xls,.csv" class="form-control mx-auto" style="max-width:400px;" onchange="uploadExcel(event)">
+      </div>
+    </div>
+    <div id="excelPreview" class="mt-3" style="display:none;">
+      <h6>Vista previa <span class="badge bg-secondary" id="excelRowCount">0</span> filas</h6>
+      <div class="table-responsive">
+        <table class="table table-sm table-bordered" id="excelPreviewTable"></table>
+      </div>
+      <button class="btn btn-primary" onclick="goToStep(2)">Siguiente <i class="bi bi-arrow-right"></i></button>
+    </div>
   </div>
-</footer>
 
-<!-- Toast -->
-<div class="toast" id="toast"></div>
+  <!-- Step 2: Select Template -->
+  <div class="wizard-panel" id="batchStep2">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h6 class="mb-0">Seleccionar Plantilla</h6>
+      <button class="btn btn-sm btn-outline-secondary" onclick="loadAllTemplatesForBatch()"><i class="bi bi-arrow-clockwise me-1"></i>Recargar</button>
+    </div>
+    <div class="row g-3" id="batchTemplateGrid">
+      <div class="col-12 text-center text-muted py-4">Cargando plantillas...</div>
+    </div>
+    <div class="mt-3">
+      <button class="btn btn-outline-secondary me-2" onclick="goToStep(1)"><i class="bi bi-arrow-left me-1"></i>Anterior</button>
+      <button class="btn btn-primary" onclick="goToStep(3)" id="btnNextStep3" disabled>Siguiente <i class="bi bi-arrow-right"></i></button>
+    </div>
+  </div>
 
+  <!-- Step 3: Map Columns -->
+  <div class="wizard-panel" id="batchStep3">
+    <h6 class="mb-3">Mapeo de Campos</h6>
+    <div id="mappingContainer"></div>
+    <div id="mappingPreview" class="mt-3" style="display:none;">
+      <h6>Vista previa de mapeo (primeras 4 filas)</h6>
+      <div class="table-responsive"><table class="table table-sm table-bordered" id="mappingPreviewTable"></table></div>
+    </div>
+    <div class="mt-3">
+      <button class="btn btn-outline-secondary me-2" onclick="goToStep(2)"><i class="bi bi-arrow-left me-1"></i>Anterior</button>
+      <button class="btn btn-primary" onclick="goToStep(4)">Siguiente <i class="bi bi-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- Step 4: Execute -->
+  <div class="wizard-panel" id="batchStep4">
+    <div class="card">
+      <div class="card-body">
+        <h6><i class="bi bi-play-circle me-2"></i>Ejecutar Impresion</h6>
+        <div class="row g-3 mb-3">
+          <div class="col-auto">
+            <label class="form-label">Copias por etiqueta</label>
+            <input type="number" id="batchCopies" class="form-control form-control-sm" value="1" min="1" style="width:80px;">
+          </div>
+          <div class="col-auto">
+            <label class="form-label">Modo</label>
+            <select id="batchMode" class="form-select form-select-sm" style="width:auto;">
+              <option value="tspl">TSPL (texto)</option>
+              <option value="raster">Raster (bitmap)</option>
+            </select>
+          </div>
+        </div>
+        <div class="d-flex gap-2">
+          <button class="btn btn-primary" onclick="executeBatch('print')"><i class="bi bi-printer me-1"></i>Imprimir TSPL</button>
+          <button class="btn btn-outline-success" onclick="executeBatch('pdf')"><i class="bi bi-filetype-pdf me-1"></i>Generar PDF</button>
+          <button class="btn btn-outline-secondary" onclick="executeBatch('preview')"><i class="bi bi-eye me-1"></i>Vista previa TSPL</button>
+        </div>
+        <div id="batchProgress" class="mt-3" style="display:none;">
+          <div class="progress" style="height:6px;">
+            <div class="progress-bar progress-bar-striped progress-bar-animated" id="batchProgressBar" style="width:0%"></div>
+          </div>
+          <small class="text-muted" id="batchProgressText">Procesando...</small>
+        </div>
+        <div id="batchResult" class="mt-3" style="display:none;"></div>
+        <div id="batchTsplPreview" class="mt-3" style="display:none;">
+          <h6>TSPL Generado</h6>
+          <pre class="bg-dark text-light p-3 rounded" style="max-height:300px;overflow:auto;font-size:12px;" id="batchTsplCode"></pre>
+        </div>
+      </div>
+    </div>
+    <div class="mt-3">
+      <button class="btn btn-outline-secondary" onclick="goToStep(3)"><i class="bi bi-arrow-left me-1"></i>Anterior</button>
+    </div>
+  </div>
+</div>
+
+<!-- ========== TAB 4: TEMPLATES ========== -->
+<div class="tab-panel" id="tab-templates">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h5 class="mb-0"><i class="bi bi-file-earmark-text me-2"></i>Plantillas</h5>
+    <button class="btn btn-sm btn-outline-primary" onclick="loadTemplates()"><i class="bi bi-arrow-clockwise me-1"></i>Recargar</button>
+  </div>
+
+  <!-- Server templates -->
+  <div class="mb-4">
+    <div class="d-flex justify-content-between align-items-center mb-2">
+      <h6 class="mb-0"><i class="bi bi-cloud me-2"></i>Plantillas del Servidor</h6>
+      <span class="badge bg-secondary" id="serverTemplateCount">0</span>
+    </div>
+    <div id="serverTemplatesNotConnected" class="card" style="display:none;">
+      <div class="card-body text-center py-4">
+        <i class="bi bi-cloud-slash" style="font-size:32px;color:var(--text-muted);"></i>
+        <p class="text-muted mt-2 mb-2">No conectado al servidor</p>
+        <button class="btn btn-sm btn-primary" onclick="switchTab('config')">Conectar</button>
+      </div>
+    </div>
+    <div class="row g-3" id="serverTemplatesGrid"></div>
+  </div>
+
+  <!-- Local templates -->
+  <div>
+    <div class="d-flex justify-content-between align-items-center mb-2">
+      <h6 class="mb-0"><i class="bi bi-hdd me-2"></i>Plantillas Locales</h6>
+      <span class="badge bg-secondary" id="localTemplateCount">0</span>
+    </div>
+    <div class="row g-3" id="localTemplatesGrid"></div>
+  </div>
+</div>
+
+<!-- ========== TAB 5: CONFIG ========== -->
+<div class="tab-panel" id="tab-config">
+  <h5 class="mb-3"><i class="bi bi-gear me-2"></i>Configuracion</h5>
+
+  <!-- Account -->
+  <div class="card mb-3">
+    <div class="card-header"><i class="bi bi-person-circle me-2"></i>Cuenta</div>
+    <div class="card-body">
+      <div class="row g-3">
+        <div class="col-md-8">
+          <label class="form-label">URL del Servidor</label>
+          <input type="text" id="cfgApiUrl" class="form-control form-control-sm" readonly>
+        </div>
+        <div class="col-md-4 d-flex align-items-end gap-2">
+          <span class="badge" id="cfgAuthBadge">--</span>
+        </div>
+      </div>
+      <div class="row g-3 mt-1">
+        <div class="col-md-6">
+          <small class="text-muted">Whitelabel: <strong id="cfgWLName">--</strong></small>
+        </div>
+        <div class="col-md-6 text-end">
+          <button class="btn btn-sm btn-outline-primary me-1" onclick="reconnectAuth()"><i class="bi bi-arrow-repeat me-1"></i>Reconectar</button>
+          <button class="btn btn-sm btn-outline-danger" onclick="logoutAuth()"><i class="bi bi-box-arrow-right me-1"></i>Cerrar sesion</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Printing -->
+  <div class="card mb-3">
+    <div class="card-header"><i class="bi bi-printer me-2"></i>Impresion</div>
+    <div class="card-body">
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label class="form-label">Preset por defecto</label>
+          <select id="cfgDefaultPreset" class="form-select form-select-sm" onchange="saveDefaultPreset(this.value)"></select>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Impresora por defecto</label>
+          <select id="cfgDefaultPrinter" class="form-select form-select-sm" onchange="saveDefaultPrinter(this.value)"></select>
+        </div>
+      </div>
+      <div class="mt-3">
+        <label class="form-label">DPI por impresora</label>
+        <div id="cfgDPITable"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- System -->
+  <div class="card mb-3">
+    <div class="card-header"><i class="bi bi-cpu me-2"></i>Sistema</div>
+    <div class="card-body">
+      <div class="row g-3">
+        <div class="col-md-4">
+          <label class="form-label">Puerto HTTP</label>
+          <input type="number" id="cfgPort" class="form-control form-control-sm" readonly>
+        </div>
+        <div class="col-md-4">
+          <div class="form-check form-switch mt-4">
+            <input class="form-check-input" type="checkbox" id="cfgNetScan">
+            <label class="form-check-label">Escaneo de red</label>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">Intervalo scan (s)</label>
+          <input type="number" id="cfgNetInterval" class="form-control form-control-sm" min="10" max="300">
+        </div>
+      </div>
+      <div class="row g-3 mt-1">
+        <div class="col-md-4">
+          <div class="form-check form-switch">
+            <input class="form-check-input" type="checkbox" id="cfgShareEnabled">
+            <label class="form-check-label">Compartir USB</label>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">Puerto Share</label>
+          <input type="number" id="cfgSharePort" class="form-control form-control-sm">
+        </div>
+        <div class="col-md-4 d-flex align-items-end">
+          <button class="btn btn-sm btn-primary" onclick="saveSystemConfig()"><i class="bi bi-check-lg me-1"></i>Guardar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Downloads -->
+  <div class="card">
+    <div class="card-header"><i class="bi bi-download me-2"></i>Descargar TSC Bridge</div>
+    <div class="card-body">
+      <div class="d-flex gap-3">
+        <a href="/download?os=mac" class="btn btn-outline-dark"><i class="bi bi-apple me-1"></i>macOS</a>
+        <a href="/download?os=windows" class="btn btn-outline-primary"><i class="bi bi-windows me-1"></i>Windows</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /app-main -->
+
+<!-- ==================== SETUP WIZARD MODAL ==================== -->
+<div class="modal fade" id="setupWizard" data-bs-backdrop="static" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="bi bi-gear me-2"></i>Configurar TSC Bridge</h5>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3">
+          <label class="form-label">URL del servidor</label>
+          <input type="url" id="setup-url" class="form-control" placeholder="https://latam.paygateway-api.com/api">
+        </div>
+        <div class="mb-3">
+          <label class="form-label">API Key</label>
+          <input type="text" id="setup-key" class="form-control">
+        </div>
+        <div class="mb-3">
+          <label class="form-label">API Secret</label>
+          <input type="password" id="setup-secret" class="form-control">
+        </div>
+        <div class="mb-3">
+          <label class="form-label">White-label ID (opcional)</label>
+          <input type="number" id="setup-wl" class="form-control" value="20">
+        </div>
+        <div id="setup-error" class="alert alert-danger d-none"></div>
+        <div id="setup-success" class="alert alert-success d-none"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" onclick="setupConnect()"><i class="bi bi-plug me-1"></i>Conectar</button>
+        <button class="btn btn-secondary" data-bs-dismiss="modal">Omitir</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== TEMPLATE PREVIEW MODAL ==================== -->
+<div class="modal fade" id="templatePreviewModal" tabindex="-1">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="previewModalTitle">Vista Previa</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body text-center" id="previewModalBody">
+        <div class="spinner-border text-primary" role="status"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== TOAST CONTAINER ==================== -->
+<div class="toast-container" id="toast-container"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-// ═══════════════════════════════════════════════════
-// State
-// ═══════════════════════════════════════════════════
-let printers = [];
-let presets = [];
-let config = {};
-let shareStatus = {};
-let autostartEnabled = false;
-let excelData = null;
-let localTemplates = [];
-let backendTemplates = [];
-let selectedTemplateId = null;
-let selectedTemplateMode = '';
-let selectedTemplateFields = [];
-let selectedTemplateFieldTypes = {};
-let allTemplateFields = [];
-let columnMapping = {};
-let currentWizardStep = 1;
-let templateSchema = null;
-let templateFieldDetails = [];
-let outputMode = 'print'; // 'print' or 'pdf'
+'use strict';
 
-// ═══════════════════════════════════════════════════
-// Init
-// ═══════════════════════════════════════════════════
-document.addEventListener('DOMContentLoaded', () => {
-  refresh();
-  setInterval(() => { refreshStatus(); refreshShare(); }, 10000);
-  setupDropZone();
-  setTimeout(() => {
-    refreshLabelTemplates();
-    refreshBackendTemplates();
-    testApiConnection();
-  }, 500);
-  applyWhitelabel();
+// ===================== GLOBAL STATE =====================
+const AppState = {
+  printers: [],
+  selectedPrinter: '',
+  selectedPreset: '',
+  dpi: 203,
+  printerDPI: {},
+  authState: {},
+  config: {},
+  presets: [],
+  localTemplates: [],
+  backendTemplates: [],
+  // Designer
+  designerElements: [],
+  designerSelected: null,
+  // Batch
+  batchRows: [],
+  batchColumns: [],
+  batchStep: 1,
+  batchTemplate: null,
+  batchMappings: {},
+};
+
+// ===================== API HELPER =====================
+async function api(method, path, body, opts = {}) {
+  const fetchOpts = { method, headers: {} };
+  if (body && !(body instanceof FormData)) {
+    fetchOpts.headers['Content-Type'] = 'application/json';
+    fetchOpts.body = JSON.stringify(body);
+  } else if (body instanceof FormData) {
+    fetchOpts.body = body;
+  }
+  const res = await fetch(path, fetchOpts);
+  if (opts.raw) return res;
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(text);
+  }
+  const ct = res.headers.get('content-type') || '';
+  if (ct.includes('application/json')) return res.json();
+  if (ct.includes('image/')) return res.blob();
+  return res.text();
+}
+
+// ===================== TOAST =====================
+function showToast(message, type = 'success') {
+  const container = document.getElementById('toast-container');
+  const bgClass = type === 'error' ? 'text-bg-danger' : type === 'warning' ? 'text-bg-warning' : 'text-bg-success';
+  const toast = document.createElement('div');
+  toast.className = `toast align-items-center ${bgClass} border-0 show`;
+  toast.setAttribute('role', 'alert');
+  toast.innerHTML = `<div class="d-flex"><div class="toast-body">${message}</div>
+    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button></div>`;
+  container.appendChild(toast);
+  setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 300); }, 3500);
+}
+
+// ===================== TAB SWITCHING =====================
+function switchTab(tabId) {
+  document.querySelectorAll('.tab-nav .nav-link').forEach(btn => btn.classList.toggle('active', btn.dataset.tab === tabId));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.toggle('active', p.id === 'tab-' + tabId));
+  if (tabId === 'designer') Designer.init('designerCanvas');
+  if (tabId === 'templates') loadTemplates();
+  if (tabId === 'batch') loadAllTemplatesForBatch();
+}
+
+document.getElementById('tabNav').addEventListener('click', e => {
+  const btn = e.target.closest('[data-tab]');
+  if (btn) switchTab(btn.dataset.tab);
 });
 
-async function refresh() {
-  refreshStatus();
-  refreshPrinters();
-  refreshPresets();
-  refreshConfig();
-  refreshShare();
-  refreshAutoStart();
-  checkDriverStatus();
-}
-
-// ═══════════════════════════════════════════════════
-// Whitelabel
-// ═══════════════════════════════════════════════════
-async function applyWhitelabel() {
-  try {
-    const r = await fetch('/whitelabel');
-    const wl = await r.json();
-    if (wl.name) {
-      document.getElementById('headerTitle').textContent = wl.name;
-      document.title = wl.name + ' — Dashboard';
-    }
-    if (wl.logo_url) {
-      const logo = document.getElementById('headerLogo');
-      logo.outerHTML = `<img src="${esc(wl.logo_url)}" class="header-logo" id="headerLogo" onerror="this.style.display='none'">`;
-    }
-    if (wl.primary_color) {
-      document.documentElement.style.setProperty('--primary', wl.primary_color);
-      document.documentElement.style.setProperty('--primary-hover', wl.primary_color);
-      document.documentElement.style.setProperty('--accent', wl.primary_color);
-    }
-    if (wl.accent_color) {
-      document.documentElement.style.setProperty('--accent', wl.accent_color);
-    }
-  } catch(e) {}
-}
-
-// ═══════════════════════════════════════════════════
-// Tab switching
-// ═══════════════════════════════════════════════════
-function switchTab(tab) {
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-  document.querySelector(`[data-tab="${tab}"]`).classList.add('active');
-  document.getElementById('panel-' + tab).classList.add('active');
-  if (tab === 'templates') {
-    refreshBackendTemplates();
-    refreshLabelTemplates();
+// ===================== HEADER CONTROLS =====================
+function populatePrinterSelector() {
+  const sel = document.getElementById('headerPrinter');
+  sel.innerHTML = '';
+  if (AppState.printers.length === 0) {
+    sel.innerHTML = '<option value="">Sin impresoras</option>';
+    return;
   }
-}
-
-// ═══════════════════════════════════════════════════
-// Status
-// ═══════════════════════════════════════════════════
-async function refreshStatus() {
-  try {
-    const r = await fetch('/status');
-    const d = await r.json();
-    document.getElementById('infoVersion').textContent = d.version || '--';
-    document.getElementById('infoOS').textContent = d.os || '--';
-    document.getElementById('infoPort').textContent = d.port || '--';
-    document.getElementById('infoPreset').textContent = d.default_preset || '--';
-    document.getElementById('infoPrinter').textContent = d.default_printer || '(auto)';
-    document.getElementById('versionBadge').textContent = 'v' + (d.version || '--');
-    document.getElementById('footerUptime').textContent = d.uptime || '--';
-    const badge = document.getElementById('connBadge');
-    badge.className = 'badge badge-green';
-    badge.innerHTML = '<span class="dot dot-green"></span> Conectado';
-    document.getElementById('footerDot').className = 'dot dot-green';
-  } catch(e) {
-    const badge = document.getElementById('connBadge');
-    badge.className = 'badge badge-red';
-    badge.innerHTML = '<span class="dot dot-red"></span> Desconectado';
-    document.getElementById('footerDot').className = 'dot dot-red';
-  }
-}
-
-// ═══════════════════════════════════════════════════
-// Printers
-// ═══════════════════════════════════════════════════
-async function refreshPrinters() {
-  try {
-    const r = await fetch('/printers');
-    const d = await r.json();
-    printers = d.printers || [];
-    renderLocalPrinters();
-    renderNetPrinters();
-    populatePrinterSelects();
-    document.getElementById('printerCount').textContent = printers.length;
-    document.getElementById('footerPrinters').textContent = printers.length + ' impresora' + (printers.length !== 1 ? 's' : '');
-  } catch(e) {}
-}
-
-function typeBadge(t) {
-  const map = {usb:'badge-blue',cups:'badge-purple',spooler:'badge-purple',network:'badge-green',manual:'badge-orange',raw:'badge-orange'};
-  return `<span class="badge ${map[t]||'badge-blue'}">${t}</span>`;
-}
-
-function onlineDot(p) {
-  if (p.type === 'network' || p.type === 'manual' || p.type === 'raw') {
-    return p.online ? '<span class="dot dot-green"></span>' : '<span class="dot dot-red"></span>';
-  }
-  return '';
-}
-
-function printerItem(p) {
-  return `<li class="printer-item">
-    <div class="printer-name">${onlineDot(p)} ${esc(p.name)} ${typeBadge(p.type)}</div>
-    <div class="printer-actions">
-      <button class="btn btn-sm" onclick="setDefaultPrinter('${esc(p.name)}')">Default</button>
-      <button class="btn btn-sm" onclick="testPrintOnPrinter('${esc(p.name)}')">Test</button>
-    </div>
-  </li>`;
-}
-
-function renderLocalPrinters() {
-  const el = document.getElementById('localPrinterList');
-  const local = printers.filter(p => p.type !== 'network' && p.type !== 'manual' && p.type !== 'raw');
-  el.innerHTML = local.length ? local.map(printerItem).join('') : '<li class="text-dim text-sm">Ninguna detectada</li>';
-}
-
-function renderNetPrinters() {
-  const el = document.getElementById('netPrinterList');
-  const net = printers.filter(p => p.type === 'network' || p.type === 'manual' || p.type === 'raw');
-  el.innerHTML = net.length ? net.map(printerItem).join('') : '<li class="text-dim text-sm">Ninguna</li>';
-}
-
-function populatePrinterSelects() {
-  const opts = printers.map(p => `<option value="${esc(p.name)}">${esc(p.name)} (${p.type})</option>`).join('');
-  ['cfgPrinter','testPrinter','batchPrinter'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.innerHTML = '<option value="">Auto</option>' + opts;
+  AppState.printers.forEach(p => {
+    const opt = document.createElement('option');
+    opt.value = p.Name;
+    opt.textContent = p.Name + (p.Online === false ? ' (offline)' : '');
+    opt.selected = p.Name === AppState.selectedPrinter;
+    sel.appendChild(opt);
   });
-  // Share only local printers
-  const localOpts = printers.filter(p => p.type !== 'network' && p.type !== 'manual' && p.type !== 'raw')
-    .map(p => `<option value="${esc(p.name)}">${esc(p.name)}</option>`).join('');
-  const sp = document.getElementById('sharePrinterSelect');
-  if (sp) sp.innerHTML = '<option value="">Auto</option>' + localOpts;
-  // Restore selections
-  if (config.default_printer) {
-    const cp = document.getElementById('cfgPrinter');
-    if (cp) cp.value = config.default_printer;
+}
+
+function populatePresetSelector() {
+  const sel = document.getElementById('headerPreset');
+  sel.innerHTML = '';
+  AppState.presets.forEach(p => {
+    const opt = document.createElement('option');
+    opt.value = p.id;
+    opt.textContent = p.name;
+    opt.selected = p.id === AppState.selectedPreset;
+    sel.appendChild(opt);
+  });
+}
+
+function onPrinterChange(name) {
+  AppState.selectedPrinter = name;
+  updateDPIBadge();
+}
+
+function onPresetChange(id) {
+  AppState.selectedPreset = id;
+  const preset = AppState.presets.find(p => p.id === id);
+  if (preset) {
+    Designer.labelW = preset.label_width || 30;
+    Designer.labelH = preset.label_height || 22;
+    Designer.resizeCanvas();
+    Designer.render();
   }
+}
+
+function updateDPIBadge() {
+  const dpi = AppState.printerDPI[AppState.selectedPrinter] || AppState.dpi || 203;
+  AppState.dpi = dpi;
+  document.getElementById('dpiBadge').textContent = dpi + ' DPI';
+}
+
+function updateAuthBadge() {
+  const badge = document.getElementById('cfgAuthBadge');
+  const s = AppState.authState;
+  if (s.connected) {
+    badge.className = 'badge bg-success';
+    badge.textContent = 'Conectado';
+  } else if (s.configured) {
+    badge.className = 'badge bg-warning';
+    badge.textContent = 'Desconectado';
+  } else {
+    badge.className = 'badge bg-secondary';
+    badge.textContent = 'No configurado';
+  }
+}
+
+// ===================== INIT =====================
+async function init() {
+  try {
+    // Fetch status
+    const status = await api('GET', '/status');
+    AppState.printers = status.printers || [];
+    AppState.printerDPI = status.printer_dpi || {};
+    AppState.dpi = status.default_dpi || 203;
+    document.getElementById('versionBadge').textContent = 'v' + (status.version || '?');
+
+    // Config
+    const config = await api('GET', '/config');
+    AppState.config = config;
+    AppState.selectedPrinter = config.default_printer || (AppState.printers.length ? AppState.printers[0].Name : '');
+    AppState.selectedPreset = config.default_preset || '';
+
+    // Presets
+    const presetsRes = await api('GET', '/presets');
+    AppState.presets = presetsRes.presets || [];
+
+    // Auth state
+    try {
+      const auth = await api('GET', '/auth/state');
+      AppState.authState = auth;
+      updateAuthBadge();
+    } catch(e) {
+      AppState.authState = { configured: false, connected: false };
+    }
+
+    // Whitelabel
+    try {
+      const wl = await api('GET', '/whitelabel');
+      if (wl.name && wl.name !== 'TSC Bridge') {
+        document.getElementById('brandName').textContent = wl.name;
+      }
+      if (wl.logo_url) {
+        document.getElementById('brandLogo').src = wl.logo_url;
+        document.getElementById('brandLogo').style.display = '';
+        document.getElementById('brandIcon').style.display = 'none';
+      }
+      if (wl.primary_color) {
+        document.documentElement.style.setProperty('--primary', wl.primary_color);
+      }
+    } catch(e) {}
+
+    // Populate UI
+    populatePrinterSelector();
+    populatePresetSelector();
+    updateDPIBadge();
+    renderPrinterTable();
+    renderConfigTab();
+    renderManualPrinters();
+
+    // Autostart
+    try {
+      const autoRes = await api('GET', '/autostart');
+      document.getElementById('autostartToggle').checked = autoRes.enabled;
+    } catch(e) {}
+
+    // Share
+    try {
+      const shareRes = await api('GET', '/share');
+      document.getElementById('shareToggle').checked = shareRes.enabled;
+    } catch(e) {}
+
+    // Setup wizard if not configured
+    if (!AppState.authState.configured) {
+      new bootstrap.Modal(document.getElementById('setupWizard')).show();
+    }
+
+    // Init designer
+    Designer.init('designerCanvas');
+
+    // Polling
+    setInterval(pollStatus, 5000);
+  } catch(e) {
+    console.error('Init error:', e);
+    showToast('Error al inicializar: ' + e.message, 'error');
+  }
+}
+
+async function pollStatus() {
+  try {
+    const status = await api('GET', '/status');
+    AppState.printers = status.printers || [];
+    AppState.printerDPI = status.printer_dpi || {};
+    updateDPIBadge();
+    // Update printer count badge in tab
+    const countEl = document.querySelector('[data-tab="printers"]');
+    if (countEl && AppState.printers.length > 0) {
+      const existing = countEl.querySelector('.tab-count');
+      if (existing) existing.textContent = AppState.printers.length;
+    }
+  } catch(e) {}
+}
+
+// ===================== TAB 1: PRINTERS =====================
+function renderPrinterTable() {
+  const tbody = document.getElementById('printerTableBody');
+  if (AppState.printers.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted py-4"><i class="bi bi-printer me-2"></i>No se encontraron impresoras TSC</td></tr>';
+    return;
+  }
+  tbody.innerHTML = AppState.printers.map(p => {
+    const typeBadge = p.Type === 'usb' ? '<span class="badge bg-primary">USB</span>' :
+                      p.Type === 'network' ? '<span class="badge bg-info text-dark">Red</span>' :
+                      p.Type === 'manual' ? '<span class="badge bg-warning text-dark">Manual</span>' :
+                      `<span class="badge bg-secondary">${p.Type || '?'}</span>`;
+    const dpi = AppState.printerDPI[p.Name] || AppState.dpi;
+    const statusBadge = p.Online !== false ?
+      '<span class="badge bg-success"><i class="bi bi-circle-fill me-1" style="font-size:6px;"></i>Online</span>' :
+      '<span class="badge bg-danger"><i class="bi bi-circle-fill me-1" style="font-size:6px;"></i>Offline</span>';
+    const isDefault = p.Name === AppState.selectedPrinter;
+    return `<tr>
+      <td><strong>${esc(p.Name)}</strong>${isDefault ? ' <span class="badge bg-primary bg-opacity-10 text-primary">default</span>' : ''}
+        ${p.Address ? '<br><small class="text-muted">' + esc(p.Address) + '</small>' : ''}
+        ${p.Model ? '<br><small class="text-muted">' + esc(p.Model) + '</small>' : ''}
+      </td>
+      <td>${typeBadge}</td>
+      <td><span class="badge bg-dark">${dpi}</span></td>
+      <td>${statusBadge}</td>
+      <td class="text-end">
+        <div class="btn-group btn-group-sm">
+          ${!isDefault ? `<button class="btn btn-outline-primary" onclick="setDefaultPrinter('${esc(p.Name)}')" title="Hacer default"><i class="bi bi-star"></i></button>` : ''}
+          <button class="btn btn-outline-success" onclick="testPrint('${esc(p.Name)}')" title="Test print"><i class="bi bi-printer"></i></button>
+          <div class="btn-group btn-group-sm">
+            <button class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown" title="Set DPI">DPI</button>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><button class="dropdown-item" onclick="setDPI('${esc(p.Name)}',200)">200</button></li>
+              <li><button class="dropdown-item" onclick="setDPI('${esc(p.Name)}',203)">203</button></li>
+              <li><button class="dropdown-item" onclick="setDPI('${esc(p.Name)}',300)">300</button></li>
+              <li><button class="dropdown-item" onclick="setDPI('${esc(p.Name)}',600)">600</button></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><button class="dropdown-item" onclick="detectDPI('${esc(p.Name)}')"><i class="bi bi-search me-1"></i>Auto-detectar</button></li>
+            </ul>
+          </div>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
 }
 
 async function setDefaultPrinter(name) {
   try {
-    await fetch('/config', {method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify({...config, default_printer:name})});
-    config.default_printer = name;
-    populatePrinterSelects();
-    toast('Impresora por defecto: ' + name, 'success');
-    refreshStatus();
-  } catch(e) { toast('Error al guardar', 'error'); }
+    await api('PUT', '/config', { default_printer: name });
+    AppState.selectedPrinter = name;
+    AppState.config.default_printer = name;
+    populatePrinterSelector();
+    updateDPIBadge();
+    renderPrinterTable();
+    showToast('Impresora default: ' + name);
+  } catch(e) { showToast('Error: ' + e.message, 'error'); }
 }
 
-// ═══════════════════════════════════════════════════
-// Sharing
-// ═══════════════════════════════════════════════════
-async function refreshShare() {
+async function testPrint(printer) {
   try {
-    const r = await fetch('/share');
-    shareStatus = await r.json();
-    renderShare();
-  } catch(e) {}
+    await api('POST', '/test-print?printer=' + encodeURIComponent(printer) + '&preset=' + encodeURIComponent(AppState.selectedPreset));
+    showToast('Prueba enviada a ' + printer);
+  } catch(e) { showToast('Error: ' + e.message, 'error'); }
 }
 
-function renderShare() {
-  const s = shareStatus;
-  const dot = document.getElementById('shareDot');
-  const label = document.getElementById('shareLabel');
-  const toggle = document.getElementById('shareToggle');
-  dot.className = 'dot ' + (s.enabled ? 'dot-green' : 'dot-red');
-  label.textContent = s.enabled ? 'Compartiendo' : 'Desactivado';
-  toggle.textContent = s.enabled ? 'Desactivar' : 'Activar';
-  document.getElementById('sharePort').textContent = s.port || '--';
-  document.getElementById('shareJobs').textContent = s.total_jobs || '0';
-  const addrs = document.getElementById('shareAddresses');
-  if (s.local_addresses && s.local_addresses.length) {
-    addrs.innerHTML = s.local_addresses.map(a => `${a}:${s.port}`).join(', ');
-  }
-}
-
-async function toggleShareBtn() {
+async function setDPI(printer, dpi) {
   try {
-    await fetch('/share', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({enabled:!shareStatus.enabled})});
-    refreshShare();
-  } catch(e) { toast('Error', 'error'); }
+    await api('PUT', '/dpi?printer=' + encodeURIComponent(printer) + '&dpi=' + dpi);
+    AppState.printerDPI[printer] = dpi;
+    updateDPIBadge();
+    renderPrinterTable();
+    showToast('DPI de ' + printer + ' = ' + dpi);
+  } catch(e) { showToast('Error: ' + e.message, 'error'); }
 }
 
-// ═══════════════════════════════════════════════════
-// Manual printers
-// ═══════════════════════════════════════════════════
-function renderManualPrintersList() {
+async function detectDPI(printer) {
+  try {
+    showToast('Detectando DPI de ' + printer + '...');
+    const res = await api('POST', '/dpi/detect?printer=' + encodeURIComponent(printer));
+    AppState.printerDPI[printer] = res.dpi;
+    updateDPIBadge();
+    renderPrinterTable();
+    showToast('DPI detectado: ' + res.dpi);
+  } catch(e) { showToast('Error: ' + e.message, 'error'); }
+}
+
+async function discoverPrinters() {
+  try {
+    showToast('Escaneando red...');
+    const res = await api('POST', '/discover');
+    showToast('Encontradas: ' + (res.count || 0) + ' impresoras de red');
+    const status = await api('GET', '/status');
+    AppState.printers = status.printers || [];
+    AppState.printerDPI = status.printer_dpi || {};
+    populatePrinterSelector();
+    renderPrinterTable();
+  } catch(e) { showToast('Error: ' + e.message, 'error'); }
+}
+
+async function addManualPrinter() {
+  const ip = document.getElementById('manualIP').value.trim();
+  if (!ip) return;
+  try {
+    const cfg = AppState.config;
+    const manualList = cfg.manual_printers || [];
+    if (!manualList.includes(ip)) manualList.push(ip);
+    await api('PUT', '/config', { manual_printers: manualList });
+    AppState.config.manual_printers = manualList;
+    document.getElementById('manualIP').value = '';
+    renderManualPrinters();
+    showToast('IP agregada: ' + ip);
+    // Refresh printers
+    const status = await api('GET', '/status');
+    AppState.printers = status.printers || [];
+    populatePrinterSelector();
+    renderPrinterTable();
+  } catch(e) { showToast('Error: ' + e.message, 'error'); }
+}
+
+function renderManualPrinters() {
+  const list = AppState.config.manual_printers || [];
   const el = document.getElementById('manualPrintersList');
-  if (!config.manual_printers || !config.manual_printers.length) { el.innerHTML = ''; return; }
-  el.innerHTML = config.manual_printers.map(ip =>
-    `<div class="flex-between" style="padding:4px 0;font-size:12px">
-      <span>${esc(ip)}</span>
-      <button class="btn btn-sm btn-danger" onclick="removeManualPrinter('${esc(ip)}')">✕</button>
-    </div>`
-  ).join('');
+  if (list.length === 0) { el.innerHTML = ''; return; }
+  el.innerHTML = list.map(ip => `<span class="badge bg-light text-dark border me-1 mb-1">
+    ${esc(ip)} <button class="btn-close btn-close-dark" style="font-size:8px;" onclick="removeManualPrinter('${esc(ip)}')"></button>
+  </span>`).join('');
 }
 
 async function removeManualPrinter(ip) {
   try {
-    await fetch('/manual-printers?ip=' + encodeURIComponent(ip), {method:'DELETE'});
-    refreshConfig();
-    refreshPrinters();
-  } catch(e) {}
+    await api('DELETE', '/manual-printers?ip=' + encodeURIComponent(ip));
+    const list = AppState.config.manual_printers || [];
+    AppState.config.manual_printers = list.filter(x => x !== ip);
+    renderManualPrinters();
+    showToast('IP removida: ' + ip);
+  } catch(e) { showToast('Error: ' + e.message, 'error'); }
 }
 
-async function probeManualIp() {
-  const ip = document.getElementById('manualIp').value.trim();
-  if (!ip) return;
-  const mp = config.manual_printers || [];
-  if (!mp.includes(ip)) mp.push(ip);
+async function toggleShare(enabled) {
   try {
-    await fetch('/config', {method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify({...config, manual_printers:mp})});
-    document.getElementById('manualIp').value = '';
-    scanNetwork();
-    refreshConfig();
-  } catch(e) { toast('Error', 'error'); }
+    await api('POST', '/share', { enabled });
+    showToast('USB sharing ' + (enabled ? 'activado' : 'desactivado'));
+  } catch(e) { showToast('Error: ' + e.message, 'error'); }
 }
 
-async function scanNetwork() {
+async function toggleAutostart(enabled) {
   try {
-    await fetch('/discover', {method:'POST'});
-    toast('Escaneo completado', 'success');
-    refreshPrinters();
-  } catch(e) { toast('Error al escanear', 'error'); }
+    await api('POST', '/autostart', { enabled });
+    showToast('Autostart ' + (enabled ? 'activado' : 'desactivado'));
+  } catch(e) { showToast('Error: ' + e.message, 'error'); }
 }
 
-// ═══════════════════════════════════════════════════
-// Presets
-// ═══════════════════════════════════════════════════
-async function refreshPresets() {
-  try {
-    const r = await fetch('/presets');
-    const d = await r.json();
-    presets = d.presets || [];
-    renderPresetSelects();
-    renderPresetInfo();
-    renderPresetPreview();
-  } catch(e) {}
-}
-
-function renderPresetSelects() {
-  const opts = presets.map(p => `<option value="${p.id}" ${p.id===config.default_preset?'selected':''}>${p.name} (${p.label_width_mm}×${p.label_height_mm}mm)</option>`).join('');
-  ['presetSelect','cfgPreset','batchPreset'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.innerHTML = opts;
-  });
-}
-
-function renderPresetInfo() {
-  const sel = document.getElementById('presetSelect');
-  if (!sel) return;
-  const p = presets.find(x => x.id === sel.value);
-  const el = document.getElementById('presetInfo');
-  if (!p) { el.textContent = ''; return; }
-  el.textContent = `${p.columns} col × ${p.label_width_mm}×${p.label_height_mm}mm | Total: ${p.total_width_mm}mm`;
-}
-
-function renderPresetPreview() {
-  const sel = document.getElementById('presetSelect');
-  if (!sel) return;
-  const p = presets.find(x => x.id === sel.value);
-  const el = document.getElementById('presetPreview');
-  if (!p) { el.innerHTML = ''; return; }
-  const scale = 2;
-  const tw = (p.total_width_mm || p.label_width_mm * p.columns) * scale;
-  const th = p.label_height_mm * scale;
-  let html = `<div style="display:inline-flex;gap:2px;padding:8px;background:var(--surface-2);border-radius:var(--radius-xs)">`;
-  for (let i = 0; i < p.columns; i++) {
-    html += `<div style="width:${p.label_width_mm*scale}px;height:${th}px;border:1px dashed var(--border-light);border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--text-muted)">Col ${i+1}</div>`;
+// ===================== TAB 2: DESIGNER =====================
+const QRBuilder = {
+  generateVCard(f) {
+    f = f || {};
+    return ['BEGIN:VCARD','VERSION:3.0',
+      ('FN:' + (f.fn||'') + ' ' + (f.ln||'')).trim(),
+      'N:' + (f.ln||'') + ';' + (f.fn||'') + ';',
+      f.tel ? 'TEL;TYPE=CELL:' + f.tel : '',
+      f.email ? 'EMAIL:' + f.email : '',
+      f.org ? 'ORG:' + f.org : '',
+      f.title ? 'TITLE:' + f.title : '',
+      'END:VCARD'
+    ].filter(l => l).join('\n');
+  },
+  generateWiFi(f) {
+    f = f || {};
+    return 'WIFI:S:' + (f.ssid||'') + ';T:' + (f.security||'WPA') + ';P:' + (f.pass||'') + ';;';
   }
-  html += '</div>';
-  el.innerHTML = html;
-}
+};
 
-// ═══════════════════════════════════════════════════
-// Config
-// ═══════════════════════════════════════════════════
-async function refreshConfig() {
-  try {
-    const r = await fetch('/config');
-    config = await r.json();
-    document.getElementById('cfgPort').value = config.port || 9638;
-    renderManualPrintersList();
-  } catch(e) {}
-}
-
-async function saveConfig() {
-  const body = {
-    ...config,
-    port: parseInt(document.getElementById('cfgPort').value) || 9638,
-    default_printer: document.getElementById('cfgPrinter').value,
-    default_preset: document.getElementById('cfgPreset').value,
-    auto_start: true,
-    share_printer: document.getElementById('sharePrinterSelect')?.value || ''
-  };
-  try {
-    await fetch('/config', {method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body)});
-    Object.assign(config, body);
-    toast('Configuración guardada', 'success');
-    refreshStatus();
-  } catch(e) { toast('Error al guardar', 'error'); }
-}
-
-async function savePreset() {
-  const body = {...config, default_preset: document.getElementById('presetSelect').value};
-  try {
-    await fetch('/config', {method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body)});
-    config.default_preset = body.default_preset;
-    toast('Preset guardado', 'success');
-  } catch(e) {}
-}
-
-// ═══════════════════════════════════════════════════
-// Test print
-// ═══════════════════════════════════════════════════
-function loadTestTemplate() {
-  const sel = document.getElementById('presetSelect');
-  const p = presets.find(x => x.id === sel?.value);
-  if (!p) return;
-  let tspl = `SIZE ${p.label_width_mm} mm, ${p.label_height_mm} mm\r\nGAP ${p.gap_mm || 3} mm, 0 mm\r\nDIRECTION 1,0\r\nCLS\r\n`;
-  for (let i = 0; i < p.columns; i++) {
-    const x = p.col_offsets && p.col_offsets[i] ? p.col_offsets[i] : 8;
-    tspl += `TEXT ${x},16,"3",0,1,1,"TEST COL ${i+1}"\r\n`;
-    tspl += `BARCODE ${x},48,"128",40,1,0,2,2,"12345${i}"\r\n`;
+const Standards = {
+  validate(standard, elements) {
+    switch(standard) {
+      case 'gafete': return this.validateGafete(elements);
+      case 'gs1-128': return this.validateGS1(elements);
+      case 'iso-15223': return this.validateISO(elements);
+      default: return { valid: true, warnings: [] };
+    }
+  },
+  validateGafete(els) {
+    const w = [];
+    if (!els.some(e => e.type === 'text' && /nombre|name/i.test(e.content))) w.push('Se recomienda un campo de nombre');
+    if (!els.some(e => e.type === 'qrcode')) w.push('Se recomienda un QR con vCard');
+    return { valid: true, warnings: w };
+  },
+  validateGS1(els) {
+    const w = [];
+    if (!els.some(e => e.type === 'barcode')) w.push('Se requiere codigo de barras GS1-128');
+    return { valid: w.length === 0, warnings: w };
+  },
+  validateISO(els) {
+    const w = [];
+    if (!els.some(e => e.type === 'text' && /mrn|expediente/i.test(e.content))) w.push('Se requiere campo MRN/Expediente');
+    return { valid: w.length === 0, warnings: w };
   }
-  tspl += 'PRINT 1\r\n';
-  document.getElementById('tsplInput').value = tspl;
-}
+};
 
-async function sendTestPrint() {
-  const tspl = document.getElementById('tsplInput').value;
-  if (!tspl.trim()) return toast('Sin comandos TSPL', 'error');
-  const printer = document.getElementById('testPrinter').value;
-  try {
-    const url = '/print' + (printer ? '?printer=' + encodeURIComponent(printer) : '');
-    const r = await fetch(url, {method:'POST', headers:{'Content-Type':'application/octet-stream'}, body:tspl});
-    const d = await r.json();
-    if (r.ok) toast('Impreso: ' + d.bytes + ' bytes', 'success');
-    else toast(d.error || 'Error', 'error');
-  } catch(e) { toast('Error de conexión', 'error'); }
-}
+const Designer = {
+  canvas: null, ctx: null,
+  elements: [], selected: null,
+  zoom: 2, gridSnap: true, gridSize: 1,
+  labelW: 30, labelH: 22,
+  dragging: false, resizing: false,
+  dragOffset: { x: 0, y: 0 },
+  resizeHandle: -1,
 
-function testPrintOnPrinter(name) {
-  const sel = document.getElementById('presetSelect');
-  const p = presets.find(x => x.id === sel?.value);
-  if (!p) return toast('Sin preset', 'error');
-  let tspl = `SIZE ${p.label_width_mm} mm, ${p.label_height_mm} mm\r\nGAP ${p.gap_mm || 3} mm, 0 mm\r\nDIRECTION 1,0\r\nCLS\r\n`;
-  for (let i = 0; i < p.columns; i++) {
-    const x = p.col_offsets && p.col_offsets[i] ? p.col_offsets[i] : 8;
-    tspl += `TEXT ${x},16,"3",0,1,1,"TEST"\r\n`;
-    tspl += `BARCODE ${x},48,"128",40,1,0,2,2,"12345${i}"\r\n`;
-  }
-  tspl += 'PRINT 1\r\n';
-  fetch('/print?printer=' + encodeURIComponent(name), {method:'POST', headers:{'Content-Type':'application/octet-stream'}, body:tspl})
-    .then(r => r.json())
-    .then(d => toast(d.status === 'printed' ? 'Test OK' : (d.error||'Error'), d.status === 'printed' ? 'success' : 'error'))
-    .catch(() => toast('Error', 'error'));
-}
-
-// ═══════════════════════════════════════════════════
-// Autostart
-// ═══════════════════════════════════════════════════
-async function refreshAutoStart() {
-  try {
-    const r = await fetch('/autostart');
-    const d = await r.json();
-    autostartEnabled = d.enabled;
-    renderAutoStart();
-  } catch(e) {}
-}
-
-function renderAutoStart() {
-  const dot = document.getElementById('autostartDot');
-  const label = document.getElementById('autostartLabel');
-  const toggle = document.getElementById('autostartToggle');
-  dot.className = 'dot ' + (autostartEnabled ? 'dot-green' : 'dot-red');
-  label.textContent = autostartEnabled ? 'Activado' : 'Desactivado';
-  toggle.textContent = autostartEnabled ? 'Desactivar' : 'Activar';
-}
-
-async function toggleAutoStart() {
-  try {
-    await fetch('/autostart', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({enabled:!autostartEnabled})});
-    autostartEnabled = !autostartEnabled;
-    renderAutoStart();
-  } catch(e) { toast('Error', 'error'); }
-}
-
-// ═══════════════════════════════════════════════════
-// Drivers
-// ═══════════════════════════════════════════════════
-async function checkDriverStatus() {
-  try {
-    const r = await fetch('/driver/status');
-    const d = await r.json();
-    const card = document.getElementById('driverCard');
-    if (!d.needs_setup && !d.usb_devices?.length && !d.drivers_installed) { card.style.display = 'none'; return; }
-    card.style.display = 'block';
-    let html = '';
-    if (d.usb_devices?.length) {
-      html += '<div class="text-sm mb-2"><strong>Dispositivos USB:</strong></div>';
-      d.usb_devices.forEach(dev => {
-        html += `<div class="printer-item"><span>${esc(dev.name)} <span class="text-xs text-dim">${dev.vendor_id}:${dev.product_id}</span></span></div>`;
-      });
+  init(canvasId) {
+    this.canvas = document.getElementById(canvasId);
+    if (!this.canvas) return;
+    this.ctx = this.canvas.getContext('2d');
+    // Set label size from preset
+    const preset = AppState.presets.find(p => p.id === AppState.selectedPreset);
+    if (preset) {
+      this.labelW = preset.label_width || 30;
+      this.labelH = preset.label_height || 22;
     }
-    if (d.drivers_installed) {
-      html += `<div class="mt-2 text-sm"><span class="badge badge-green">Drivers instalados</span></div>`;
-      if (d.driver_names?.length) html += `<div class="text-xs text-dim mt-2">${d.driver_names.join(', ')}</div>`;
-    }
-    if (d.registered_printers?.length) {
-      html += `<div class="mt-2 text-sm"><strong>Impresoras registradas:</strong> ${d.registered_printers.join(', ')}</div>`;
-    }
-    if (d.needs_setup) {
-      if (d.instructions) html += `<div class="mt-2 text-sm text-dim">${esc(d.instructions)}</div>`;
-      html += '<div class="flex gap-2 mt-3">';
-      if (d.can_auto_install) html += `<button class="btn btn-sm btn-primary" onclick="driverSetup('register')">Registrar (modo RAW)</button>`;
-      html += `<button class="btn btn-sm" onclick="driverSetup('full-setup')">Configuración completa</button>`;
-      if (d.download_url) html += `<a href="${d.download_url}" target="_blank" class="btn btn-sm">Descargar drivers</a>`;
-      html += '</div>';
-    }
-    document.getElementById('driverContent').innerHTML = html;
-  } catch(e) {}
-}
+    this.resizeCanvas();
+    this.bindEvents();
+    this.render();
+  },
 
-async function driverSetup(action) {
-  try {
-    const r = await fetch('/driver/setup', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({action})});
-    const d = await r.json();
-    if (d.download_url) window.open(d.download_url, '_blank');
-    toast(d.message || 'Setup iniciado', 'success');
-    setTimeout(() => { checkDriverStatus(); refreshPrinters(); }, 1000);
-  } catch(e) { toast('Error', 'error'); }
-}
+  resizeCanvas() {
+    const w = this.mmToPx(this.labelW) + 40;
+    const h = this.mmToPx(this.labelH) + 40;
+    this.canvas.width = w;
+    this.canvas.height = h;
+  },
 
-// ═══════════════════════════════════════════════════
-// API connection
-// ═══════════════════════════════════════════════════
-async function testApiConnection() {
-  const dot = document.getElementById('apiDot');
-  const el = document.getElementById('apiStatus');
-  try {
-    const r = await fetch('/api/test');
-    const d = await r.json();
-    if (r.ok && d.status === 'connected') {
-      dot.className = 'dot dot-green';
-      el.innerHTML = `<strong>Conectado</strong> — ${esc(d.api_url)} | WL: ${d.wl} | ${d.thermal_templates || 0} plantillas térmicas de ${d.total_templates || 0} total`;
-    } else {
-      dot.className = 'dot dot-red';
-      el.innerHTML = `<span style="color:var(--red)">${esc(d.error || 'Error')}</span>`;
-    }
-  } catch(e) {
-    dot.className = 'dot dot-orange';
-    el.textContent = 'API no configurada';
-  }
-}
+  mmToPx(mm) { return mm * (96 / 25.4) * this.zoom; },
+  pxToMm(px) { return px / (96 / 25.4) / this.zoom; },
+  snap(mm) { return this.gridSnap ? Math.round(mm / this.gridSize) * this.gridSize : mm; },
 
-// ═══════════════════════════════════════════════════
-// Templates
-// ═══════════════════════════════════════════════════
-async function refreshLabelTemplates() {
-  try {
-    const r = await fetch('/templates');
-    const d = await r.json();
-    localTemplates = d.templates || [];
-    renderLocalTemplateGrid();
-    updateTemplateCounts();
-  } catch(e) {}
-}
-
-async function refreshBackendTemplates() {
-  try {
-    const r = await fetch('/api/templates');
-    const d = await r.json();
-    backendTemplates = (d.templates || []).filter(t => t.categoria === 'etiqueta' || t.thermal_printable === 1);
-    renderBackendTemplateGrid();
-    updateTemplateCounts();
-  } catch(e) {}
-}
-
-function updateTemplateCounts() {
-  document.getElementById('templateCount').textContent = backendTemplates.length + localTemplates.length;
-}
-
-function renderBackendTemplateGrid() {
-  const el = document.getElementById('backendTemplateGrid');
-  if (!backendTemplates.length) { el.innerHTML = '<div class="empty-state"><p>Sin plantillas del backend</p></div>'; return; }
-  el.innerHTML = backendTemplates.map(t =>
-    `<div class="template-card ${selectedTemplateId===t.id?'selected':''}" onclick="selectBackendTemplate('${t.id}')">
-      <h3>${esc(t.name)}</h3>
-      <p>${esc(t.description||'')}</p>
-      <div class="template-source">Backend ${t.thermal_printable ? '(thermal)' : ''}</div>
-    </div>`
-  ).join('');
-}
-
-function renderLocalTemplateGrid() {
-  const el = document.getElementById('localTemplateGrid');
-  if (!localTemplates.length) { el.innerHTML = '<div class="empty-state"><p>Sin plantillas locales</p></div>'; return; }
-  el.innerHTML = localTemplates.map(t =>
-    `<div class="template-card ${selectedTemplateId===t.id?'selected':''}" onclick="selectLocalTemplate('${t.id}')">
-      <h3>${esc(t.name)}</h3>
-      <p>${t.fields?.length||0} campos</p>
-      <div class="template-source">Local</div>
-    </div>`
-  ).join('');
-}
-
-async function selectBackendTemplate(id) {
-  try {
-    const r = await fetch('/api/templates?id=' + id);
-    const d = await r.json();
-    selectedTemplateId = id;
-    selectedTemplateMode = 'backend';
-    allTemplateFields = d.fields || [];
-    const mappable = ['multiVariableText','qrcode','text'];
-    selectedTemplateFields = [];
-    selectedTemplateFieldTypes = {};
-    templateFieldDetails = d.fields_typed || [];
-    templateSchema = d.schema || null;
-
-    if (d.fields_typed?.length) {
-      d.fields_typed.forEach(f => {
-        if (mappable.includes(f.type)) {
-          selectedTemplateFields.push(f.name);
+  bindEvents() {
+    this.canvas.onmousedown = e => this.onMouseDown(e);
+    this.canvas.onmousemove = e => this.onMouseMove(e);
+    this.canvas.onmouseup = e => this.onMouseUp(e);
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Delete' || e.key === 'Backspace') {
+        if (this.selected && document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA' && document.activeElement.tagName !== 'SELECT') {
+          this.deleteSelected();
         }
-        selectedTemplateFieldTypes[f.name] = f.type;
-      });
+      }
+    });
+  },
+
+  getCanvasXY(e) {
+    const rect = this.canvas.getBoundingClientRect();
+    return { x: e.clientX - rect.left - 20, y: e.clientY - rect.top - 20 };
+  },
+
+  addElement(type) {
+    const el = {
+      id: 'el_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
+      type, x: 5, y: 5,
+      w: type === 'text' ? 20 : type === 'line' ? 20 : 10,
+      h: type === 'text' ? 5 : type === 'line' ? 1 : 10,
+      content: type === 'text' ? '{texto}' : type === 'qrcode' ? '{qr}' : type === 'barcode' ? '{codigo}' : '',
+      font: '3', fontMult: 1,
+      rotation: 0, alignment: 'left',
+      barcodeType: '128',
+      qrType: 'free', qrFields: {},
+    };
+    this.elements.push(el);
+    this.selected = el;
+    this.render();
+    this.updateProperties();
+    this.updateTSPL();
+    validateStandard();
+  },
+
+  render() {
+    if (!this.ctx) return;
+    const c = this.canvas, ctx = this.ctx;
+    const lw = this.mmToPx(this.labelW), lh = this.mmToPx(this.labelH);
+    ctx.clearRect(0, 0, c.width, c.height);
+
+    ctx.save();
+    ctx.translate(20, 20);
+
+    // Label background
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, lw, lh);
+    ctx.strokeStyle = '#ccc';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(0, 0, lw, lh);
+
+    // Grid
+    if (this.gridSnap) {
+      ctx.strokeStyle = '#f0f0f0';
+      ctx.lineWidth = 0.5;
+      for (let mm = this.gridSize; mm < this.labelW; mm += this.gridSize) {
+        const px = this.mmToPx(mm);
+        ctx.beginPath(); ctx.moveTo(px, 0); ctx.lineTo(px, lh); ctx.stroke();
+      }
+      for (let mm = this.gridSize; mm < this.labelH; mm += this.gridSize) {
+        const px = this.mmToPx(mm);
+        ctx.beginPath(); ctx.moveTo(0, px); ctx.lineTo(lw, px); ctx.stroke();
+      }
+    }
+
+    // Elements
+    for (const el of this.elements) {
+      const x = this.mmToPx(el.x), y = this.mmToPx(el.y);
+      const w = this.mmToPx(el.w), h = this.mmToPx(el.h);
+      ctx.save();
+
+      switch (el.type) {
+        case 'text':
+          ctx.fillStyle = '#333';
+          ctx.font = Math.max(10, Math.min(h * 0.7, 18)) + 'px monospace';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(el.content || '{texto}', x + 2, y + h / 2, w - 4);
+          ctx.strokeStyle = '#aaa';
+          ctx.setLineDash([2, 2]);
+          ctx.strokeRect(x, y, w, h);
+          break;
+        case 'qrcode':
+          ctx.fillStyle = '#000';
+          const sz = Math.min(w, h);
+          const cells = 7;
+          const cellSz = sz / cells;
+          for (let i = 0; i < cells; i++) for (let j = 0; j < cells; j++) {
+            if ((i + j) % 2 === 0 || (i < 2 && j < 2) || (i >= cells - 2 && j < 2) || (i < 2 && j >= cells - 2))
+              ctx.fillRect(x + i * cellSz, y + j * cellSz, cellSz - 0.5, cellSz - 0.5);
+          }
+          break;
+        case 'barcode':
+          ctx.fillStyle = '#000';
+          for (let i = 0; i < 24; i++) {
+            if (i % 2 === 0) ctx.fillRect(x + i * w / 24, y, w / 24 * 0.8, h);
+          }
+          break;
+        case 'line':
+          ctx.strokeStyle = '#000';
+          ctx.lineWidth = Math.max(1, h * 0.5);
+          ctx.beginPath();
+          ctx.moveTo(x, y + h / 2);
+          ctx.lineTo(x + w, y + h / 2);
+          ctx.stroke();
+          break;
+        case 'rectangle':
+          ctx.strokeStyle = '#000';
+          ctx.lineWidth = 2;
+          ctx.strokeRect(x, y, w, h);
+          break;
+        case 'image':
+          ctx.fillStyle = '#f0f0f0';
+          ctx.fillRect(x, y, w, h);
+          ctx.strokeStyle = '#ccc';
+          ctx.strokeRect(x, y, w, h);
+          ctx.fillStyle = '#999';
+          ctx.font = '10px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText('IMG', x + w / 2, y + h / 2);
+          ctx.textAlign = 'left';
+          break;
+      }
+
+      // Selection highlight
+      if (el === this.selected) {
+        ctx.strokeStyle = '#2563eb';
+        ctx.lineWidth = 2;
+        ctx.setLineDash([]);
+        ctx.strokeRect(x - 1, y - 1, w + 2, h + 2);
+        const hs = 7;
+        ctx.fillStyle = '#2563eb';
+        [[x - hs / 2, y - hs / 2], [x + w - hs / 2, y - hs / 2],
+         [x - hs / 2, y + h - hs / 2], [x + w - hs / 2, y + h - hs / 2]].forEach(([hx, hy]) => {
+          ctx.fillRect(hx, hy, hs, hs);
+        });
+      }
+      ctx.restore();
+    }
+    ctx.restore();
+  },
+
+  hitTest(canvasX, canvasY) {
+    const mx = this.pxToMm(canvasX), my = this.pxToMm(canvasY);
+    for (let i = this.elements.length - 1; i >= 0; i--) {
+      const el = this.elements[i];
+      if (mx >= el.x && mx <= el.x + el.w && my >= el.y && my <= el.y + el.h) return el;
+    }
+    return null;
+  },
+
+  hitHandle(canvasX, canvasY) {
+    if (!this.selected) return -1;
+    const el = this.selected;
+    const corners = [
+      [el.x, el.y], [el.x + el.w, el.y],
+      [el.x, el.y + el.h], [el.x + el.w, el.y + el.h]
+    ];
+    const mx = this.pxToMm(canvasX), my = this.pxToMm(canvasY);
+    const tol = 1.5;
+    for (let i = 0; i < corners.length; i++) {
+      if (Math.abs(mx - corners[i][0]) < tol && Math.abs(my - corners[i][1]) < tol) return i;
+    }
+    return -1;
+  },
+
+  onMouseDown(e) {
+    const { x, y } = this.getCanvasXY(e);
+    // Check resize handles first
+    const handle = this.hitHandle(x, y);
+    if (handle >= 0) {
+      this.resizing = true;
+      this.resizeHandle = handle;
+      return;
+    }
+    // Check element hit
+    const el = this.hitTest(x, y);
+    if (el) {
+      this.selected = el;
+      this.dragging = true;
+      this.dragOffset.x = this.pxToMm(x) - el.x;
+      this.dragOffset.y = this.pxToMm(y) - el.y;
+      this.updateProperties();
     } else {
-      selectedTemplateFields = allTemplateFields;
+      this.selected = null;
+      this.updateProperties();
     }
+    this.render();
+  },
 
-    renderBackendTemplateGrid();
-    renderAllWizardTemplates();
-    updateWizardButtons();
-    toast('Plantilla: ' + (d.name || id), 'success');
-  } catch(e) { toast('Error al cargar plantilla', 'error'); }
-}
-
-function selectLocalTemplate(id) {
-  const t = localTemplates.find(x => x.id === id);
-  if (!t) return;
-  selectedTemplateId = id;
-  selectedTemplateMode = 'local';
-  selectedTemplateFields = (t.fields || []).map(f => f.name || f);
-  selectedTemplateFieldTypes = {};
-  (t.fields || []).forEach(f => { if (f.name) selectedTemplateFieldTypes[f.name] = f.type || 'text'; });
-  allTemplateFields = selectedTemplateFields;
-  templateFieldDetails = [];
-  templateSchema = null;
-  renderLocalTemplateGrid();
-  renderAllWizardTemplates();
-  updateWizardButtons();
-}
-
-// ═══════════════════════════════════════════════════
-// Wizard
-// ═══════════════════════════════════════════════════
-function goToWizardStep(step) {
-  if (step > 1 && !excelData) return toast('Sube un archivo Excel primero', 'error');
-  if (step > 2 && !selectedTemplateId) return toast('Selecciona una plantilla', 'error');
-
-  currentWizardStep = step;
-  document.querySelectorAll('.wizard-panel').forEach(p => p.classList.remove('active'));
-  document.getElementById('ws' + step).classList.add('active');
-
-  // Update indicators
-  for (let i = 1; i <= 4; i++) {
-    const ind = document.querySelectorAll('.step-indicator')[i-1];
-    const circle = document.getElementById('sc' + i);
-    ind.className = 'step-indicator' + (i === step ? ' active' : i < step ? ' completed' : ' locked');
-    circle.textContent = i < step ? '✓' : i;
-  }
-  ['conn12','conn23','conn34'].forEach((id, idx) => {
-    document.getElementById(id).className = 'step-connector' + (idx + 2 <= step ? ' completed' : '');
-  });
-
-  if (step === 2) { renderAllWizardTemplates(); renderBatchPresetSelect(); }
-  if (step === 3) generatePreview();
-  if (step === 4) preparePrintTab();
-}
-
-function updateWizardButtons() {
-  const n1 = document.getElementById('nextStep1');
-  const n2 = document.getElementById('nextStep2');
-  if (n1) n1.disabled = !excelData;
-  if (n2) n2.disabled = !selectedTemplateId;
-}
-
-function renderAllWizardTemplates() {
-  const el = document.getElementById('wizardTemplateGrid');
-  if (!el) return;
-  let html = '';
-  if (backendTemplates.length) {
-    html += '<div class="text-xs text-dim mb-2" style="font-weight:700;text-transform:uppercase">Backend</div>';
-    html += '<div class="template-grid">' + backendTemplates.map(t =>
-      `<div class="template-card ${selectedTemplateId===t.id?'selected':''}" onclick="selectBackendTemplate('${t.id}')">
-        <h3>${esc(t.name)}</h3><p>${esc(t.description||'')}</p>
-      </div>`
-    ).join('') + '</div>';
-  }
-  if (localTemplates.length) {
-    html += '<div class="text-xs text-dim mb-2 mt-3" style="font-weight:700;text-transform:uppercase">Locales</div>';
-    html += '<div class="template-grid">' + localTemplates.map(t =>
-      `<div class="template-card ${selectedTemplateId===t.id?'selected':''}" onclick="selectLocalTemplate('${t.id}')">
-        <h3>${esc(t.name)}</h3><p>${(t.fields||[]).length} campos</p>
-      </div>`
-    ).join('') + '</div>';
-  }
-  if (!backendTemplates.length && !localTemplates.length) {
-    html = '<div class="empty-state"><p>Sin plantillas disponibles</p></div>';
-  }
-  el.innerHTML = html;
-}
-
-function renderBatchPresetSelect() {
-  const el = document.getElementById('batchPreset');
-  if (!el) return;
-  el.innerHTML = presets.map(p => `<option value="${p.id}">${p.name} (${p.label_width_mm}×${p.label_height_mm}mm)</option>`).join('');
-}
-
-// ═══════════════════════════════════════════════════
-// Step 1: Excel
-// ═══════════════════════════════════════════════════
-function setupDropZone() {
-  const dz = document.getElementById('dropZone');
-  if (!dz) return;
-  dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('dragging'); });
-  dz.addEventListener('dragleave', () => dz.classList.remove('dragging'));
-  dz.addEventListener('drop', e => {
-    e.preventDefault();
-    dz.classList.remove('dragging');
-    const file = e.dataTransfer.files[0];
-    if (file) uploadExcelFile(file);
-  });
-}
-
-function handleExcelUpload(e) {
-  const file = e.target.files[0];
-  if (file) uploadExcelFile(file);
-}
-
-async function uploadExcelFile(file) {
-  const fd = new FormData();
-  fd.append('file', file);
-  try {
-    const r = await fetch('/excel/upload', {method:'POST', body:fd});
-    const d = await r.json();
-    if (d.error) return toast(d.error, 'error');
-    excelData = d;
-    renderExcelPreview();
-    updateWizardButtons();
-    toast(`${d.rows.length} filas cargadas`, 'success');
-  } catch(e) { toast('Error al subir archivo', 'error'); }
-}
-
-function renderExcelPreview() {
-  if (!excelData) return;
-  const el = document.getElementById('excelPreview');
-  const rows = excelData.rows.slice(0, 5);
-  let html = `<div class="text-xs text-dim mb-2">${excelData.rows.length} filas, ${excelData.headers.length} columnas</div>`;
-  html += '<div style="overflow-x:auto"><table class="data-table"><thead><tr>';
-  excelData.headers.forEach(h => html += `<th>${esc(h)}</th>`);
-  html += '</tr></thead><tbody>';
-  rows.forEach(row => {
-    html += '<tr>';
-    excelData.headers.forEach(h => html += `<td>${esc(row[h]||'')}</td>`);
-    html += '</tr>';
-  });
-  if (excelData.rows.length > 5) html += `<tr><td colspan="${excelData.headers.length}" class="text-dim text-xs">... ${excelData.rows.length - 5} filas más</td></tr>`;
-  html += '</tbody></table></div>';
-  el.innerHTML = html;
-  document.getElementById('clearExcelBtn').style.display = '';
-}
-
-function clearExcel() {
-  excelData = null;
-  document.getElementById('excelPreview').innerHTML = '';
-  document.getElementById('clearExcelBtn').style.display = 'none';
-  document.getElementById('excelFile').value = '';
-  updateWizardButtons();
-}
-
-// ═══════════════════════════════════════════════════
-// Step 3: Mapping + Preview
-// ═══════════════════════════════════════════════════
-function renderColumnMapping() {
-  if (!excelData || !selectedTemplateFields.length) return;
-  const container = document.getElementById('mappingContainer');
-  columnMapping = {};
-
-  // Auto-map by name
-  selectedTemplateFields.forEach(field => {
-    const match = excelData.headers.find(h => h.toLowerCase().replace(/[_\s-]/g,'') === field.toLowerCase().replace(/[_\s-]/g,''));
-    if (match) columnMapping[field] = match;
-  });
-
-  let html = '<div class="text-sm mb-2" style="font-weight:700">Mapeo de columnas</div>';
-  html += '<div class="mapping-grid">';
-  html += '<div class="text-xs text-dim" style="font-weight:700">Campo plantilla</div><div></div><div class="text-xs text-dim" style="font-weight:700">Columna Excel</div>';
-  selectedTemplateFields.forEach(field => {
-    const type = selectedTemplateFieldTypes[field] || 'text';
-    html += `<div class="text-sm">${esc(field)} <span class="badge badge-blue" style="font-size:9px">${type}</span></div>`;
-    html += '<div class="mapping-arrow">→</div>';
-    html += `<select onchange="columnMapping['${esc(field)}']=this.value;updateMappingInfo();renderVisualPreview()" style="font-size:12px">`;
-    html += '<option value="">(sin mapear)</option>';
-    excelData.headers.forEach(h => {
-      html += `<option value="${esc(h)}" ${columnMapping[field]===h?'selected':''}>${esc(h)}</option>`;
-    });
-    html += '</select>';
-  });
-  html += '</div>';
-  container.innerHTML = html;
-  updateMappingInfo();
-}
-
-function updateMappingInfo() {
-  const mapped = Object.values(columnMapping).filter(v => v).length;
-  const el = document.getElementById('mappingInfo');
-  el.textContent = `${mapped}/${selectedTemplateFields.length} campos mapeados`;
-  if (mapped < selectedTemplateFields.length) {
-    const unmapped = selectedTemplateFields.filter(f => !columnMapping[f]);
-    el.textContent += ' — Sin mapear: ' + unmapped.join(', ');
-  }
-}
-
-function applyMapping(rows) {
-  return rows.map(row => {
-    const mapped = {};
-    for (const [field, col] of Object.entries(columnMapping)) {
-      if (col && row[col] !== undefined) mapped[field] = String(row[col]);
+  onMouseMove(e) {
+    const { x, y } = this.getCanvasXY(e);
+    if (this.dragging && this.selected) {
+      const newX = this.snap(this.pxToMm(x) - this.dragOffset.x);
+      const newY = this.snap(this.pxToMm(y) - this.dragOffset.y);
+      this.selected.x = Math.max(0, Math.min(newX, this.labelW - this.selected.w));
+      this.selected.y = Math.max(0, Math.min(newY, this.labelH - this.selected.h));
+      this.render();
+      this.syncPropsFromElement();
     }
-    return mapped;
-  });
-}
-
-function renderVisualPreview() {
-  if (!excelData || !selectedTemplateFields.length) return;
-  const container = document.getElementById('visualPreview');
-  const mappedRows = applyMapping(excelData.rows.slice(0, 4));
-  if (templateFieldDetails?.length && templateFieldDetails.some(f => f.x > 0 || f.y > 0)) {
-    renderSpatialPreview(container, mappedRows);
-  } else {
-    renderListPreview(container, mappedRows);
-  }
-}
-
-function renderSpatialPreview(container, rows) {
-  const bp = templateSchema?.basePdf || {width:76, height:50};
-  const scale = 300 / bp.width;
-  let html = '<div class="text-sm mb-2" style="font-weight:700">Vista previa</div><div style="display:flex;flex-wrap:wrap;gap:8px">';
-  rows.forEach(row => {
-    html += `<div class="label-preview" style="width:${bp.width*scale}px;height:${bp.height*scale}px;position:relative">`;
-    templateFieldDetails.forEach(f => {
-      const val = row[f.name] || f.name;
-      const x = (f.x||0) * scale;
-      const y = (f.y||0) * scale;
-      const w = (f.width||20) * scale;
-      const h = (f.height||5) * scale;
-      const fs = Math.max(8, (f.font_size||10) * scale * 0.35);
-      if (f.type === 'qrcode') {
-        html += `<div style="position:absolute;left:${x}px;top:${y}px;width:${w}px;height:${h}px;border:1px solid #ccc;display:flex;align-items:center;justify-content:center;font-size:8px;color:#999;background:#f9f9f9">QR</div>`;
-      } else if (f.type === 'image') {
-        html += `<div style="position:absolute;left:${x}px;top:${y}px;width:${w}px;height:${h}px;border:1px solid #eee;background:#f5f5f5;display:flex;align-items:center;justify-content:center;font-size:7px;color:#bbb">IMG</div>`;
-      } else {
-        html += `<div style="position:absolute;left:${x}px;top:${y}px;width:${w}px;height:${h}px;font-size:${fs}px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;color:#333;line-height:${h}px">${esc(val)}</div>`;
+    if (this.resizing && this.selected) {
+      const mx = this.snap(this.pxToMm(x)), my = this.snap(this.pxToMm(y));
+      const el = this.selected;
+      switch (this.resizeHandle) {
+        case 0: // top-left
+          el.w += el.x - mx; el.h += el.y - my; el.x = mx; el.y = my; break;
+        case 1: // top-right
+          el.w = mx - el.x; el.h += el.y - my; el.y = my; break;
+        case 2: // bottom-left
+          el.w += el.x - mx; el.x = mx; el.h = my - el.y; break;
+        case 3: // bottom-right
+          el.w = mx - el.x; el.h = my - el.y; break;
       }
-    });
-    html += '</div>';
-  });
-  html += '</div>';
-  container.innerHTML = html;
-}
+      el.w = Math.max(2, el.w);
+      el.h = Math.max(1, el.h);
+      this.render();
+      this.syncPropsFromElement();
+    }
+    // Cursor
+    if (!this.dragging && !this.resizing) {
+      const handle = this.hitHandle(x, y);
+      this.canvas.style.cursor = handle >= 0 ? ['nwse-resize','nesw-resize','nesw-resize','nwse-resize'][handle]
+        : this.hitTest(x, y) ? 'move' : 'crosshair';
+    }
+  },
 
-function renderListPreview(container, rows) {
-  let html = '<div class="text-sm mb-2" style="font-weight:700">Vista previa</div><div style="display:flex;flex-wrap:wrap;gap:8px">';
-  rows.forEach(row => {
-    html += '<div class="label-preview" style="width:280px;padding:12px">';
-    selectedTemplateFields.forEach(field => {
-      const val = row[field] || '';
-      const type = selectedTemplateFieldTypes[field] || 'text';
-      if (type === 'qrcode') {
-        html += `<div style="display:flex;align-items:center;gap:8px;margin:4px 0"><div style="width:30px;height:30px;border:1px solid #ccc;display:flex;align-items:center;justify-content:center;font-size:7px;color:#999">QR</div><span class="text-xs">${esc(val||field)}</span></div>`;
-      } else {
-        html += `<div style="display:flex;justify-content:space-between;padding:3px 0;font-size:11px;border-bottom:1px solid #f0f0f0"><span class="text-dim">${esc(field)}</span><span style="font-weight:600">${esc(val||'—')}</span></div>`;
+  onMouseUp(e) {
+    if (this.dragging || this.resizing) {
+      this.updateTSPL();
+      validateStandard();
+    }
+    this.dragging = false;
+    this.resizing = false;
+    this.resizeHandle = -1;
+  },
+
+  deleteSelected() {
+    if (!this.selected) return;
+    this.elements = this.elements.filter(el => el !== this.selected);
+    this.selected = null;
+    this.render();
+    this.updateProperties();
+    this.updateTSPL();
+    validateStandard();
+  },
+
+  toggleGrid() {
+    this.gridSnap = !this.gridSnap;
+    document.getElementById('btnGrid').classList.toggle('text-primary', this.gridSnap);
+    this.render();
+  },
+
+  updateProperties() {
+    const empty = document.getElementById('propsEmpty');
+    const panel = document.getElementById('propsPanel');
+    if (!this.selected) {
+      empty.style.display = '';
+      panel.style.display = 'none';
+      return;
+    }
+    empty.style.display = 'none';
+    panel.style.display = '';
+    this.syncPropsFromElement();
+
+    const el = this.selected;
+    // Show/hide type-specific panels
+    document.getElementById('propFontWrap').style.display = el.type === 'text' ? '' : 'none';
+    document.getElementById('propAlignWrap').style.display = el.type === 'text' ? '' : 'none';
+    document.getElementById('propBarcodeWrap').style.display = el.type === 'barcode' ? '' : 'none';
+    document.getElementById('propQRWrap').style.display = el.type === 'qrcode' ? '' : 'none';
+    document.getElementById('propContentWrap').style.display = (el.type === 'line' || el.type === 'rectangle' || el.type === 'image') ? 'none' : '';
+  },
+
+  syncPropsFromElement() {
+    if (!this.selected) return;
+    const el = this.selected;
+    document.getElementById('propType').value = el.type;
+    document.getElementById('propX').value = Math.round(el.x * 10) / 10;
+    document.getElementById('propY').value = Math.round(el.y * 10) / 10;
+    document.getElementById('propW').value = Math.round(el.w * 10) / 10;
+    document.getElementById('propH').value = Math.round(el.h * 10) / 10;
+    document.getElementById('propContent').value = el.content || '';
+    document.getElementById('propFont').value = el.font || '3';
+    document.getElementById('propFontMult').value = el.fontMult || 1;
+    document.getElementById('propRotation').value = el.rotation || 0;
+    document.getElementById('propAlign').value = el.alignment || 'left';
+    document.getElementById('propBarcodeType').value = el.barcodeType || '128';
+
+    if (el.type === 'qrcode') {
+      document.getElementById('propQRType').value = el.qrType || 'free';
+      this.showQRSubPanel(el.qrType || 'free');
+      if (el.qrFields) {
+        document.getElementById('qrFN').value = el.qrFields.fn || '';
+        document.getElementById('qrLN').value = el.qrFields.ln || '';
+        document.getElementById('qrTel').value = el.qrFields.tel || '';
+        document.getElementById('qrEmail').value = el.qrFields.email || '';
+        document.getElementById('qrOrg').value = el.qrFields.org || '';
+        document.getElementById('qrTitle').value = el.qrFields.title || '';
+        document.getElementById('qrURLPattern').value = el.qrFields.pattern || '';
+        document.getElementById('qrSSID').value = el.qrFields.ssid || '';
+        document.getElementById('qrPass').value = el.qrFields.pass || '';
+        document.getElementById('qrSecurity').value = el.qrFields.security || 'WPA';
       }
-    });
-    html += '</div>';
-  });
-  html += '</div>';
-  container.innerHTML = html;
-}
+    }
+  },
 
-async function generatePreview() {
-  renderColumnMapping();
-  renderVisualPreview();
+  updateFromProps() {
+    if (!this.selected) return;
+    const el = this.selected;
+    el.x = parseFloat(document.getElementById('propX').value) || 0;
+    el.y = parseFloat(document.getElementById('propY').value) || 0;
+    el.w = Math.max(1, parseFloat(document.getElementById('propW').value) || 1);
+    el.h = Math.max(0.5, parseFloat(document.getElementById('propH').value) || 0.5);
+    el.content = document.getElementById('propContent').value;
+    el.font = document.getElementById('propFont').value;
+    el.fontMult = parseInt(document.getElementById('propFontMult').value) || 1;
+    el.rotation = parseInt(document.getElementById('propRotation').value) || 0;
+    el.alignment = document.getElementById('propAlign').value;
+    el.barcodeType = document.getElementById('propBarcodeType').value;
+    this.render();
+    this.updateTSPL();
+    validateStandard();
+  },
 
-  // Fetch TSPL preview
-  if (selectedTemplateMode === 'backend' || selectedTemplateMode === 'local') {
+  updateQRType() {
+    if (!this.selected) return;
+    this.selected.qrType = document.getElementById('propQRType').value;
+    this.showQRSubPanel(this.selected.qrType);
+    this.updateQRFields();
+  },
+
+  showQRSubPanel(type) {
+    document.getElementById('qrFreeWrap').style.display = type === 'free' ? '' : 'none';
+    document.getElementById('qrVcardWrap').style.display = type === 'vcard' ? '' : 'none';
+    document.getElementById('qrUrlWrap').style.display = type === 'url' ? '' : 'none';
+    document.getElementById('qrWifiWrap').style.display = type === 'wifi' ? '' : 'none';
+  },
+
+  updateQRFields() {
+    if (!this.selected || this.selected.type !== 'qrcode') return;
+    const el = this.selected;
+    el.qrFields = {
+      fn: document.getElementById('qrFN').value,
+      ln: document.getElementById('qrLN').value,
+      tel: document.getElementById('qrTel').value,
+      email: document.getElementById('qrEmail').value,
+      org: document.getElementById('qrOrg').value,
+      title: document.getElementById('qrTitle').value,
+      pattern: document.getElementById('qrURLPattern').value,
+      ssid: document.getElementById('qrSSID').value,
+      pass: document.getElementById('qrPass').value,
+      security: document.getElementById('qrSecurity').value,
+    };
+    // Auto-update content based on type
+    if (el.qrType === 'vcard') {
+      el.content = QRBuilder.generateVCard(el.qrFields);
+    } else if (el.qrType === 'wifi') {
+      el.content = QRBuilder.generateWiFi(el.qrFields);
+    } else if (el.qrType === 'url') {
+      el.content = el.qrFields.pattern || el.content;
+    }
+    document.getElementById('propContent').value = el.content;
+    this.updateTSPL();
+  },
+
+  generateTSPL() {
+    const dpi = AppState.dpi;
+    const lines = [];
+    lines.push('SIZE ' + this.labelW + ' mm, ' + this.labelH + ' mm');
+    lines.push('GAP 2 mm, 0 mm');
+    lines.push('DIRECTION 0,0');
+    lines.push('SPEED 4');
+    lines.push('DENSITY 8');
+    lines.push('CLS');
+    for (const el of this.elements) {
+      const x = Math.round(el.x / 25.4 * dpi);
+      const y = Math.round(el.y / 25.4 * dpi);
+      const w = Math.round(el.w / 25.4 * dpi);
+      const h = Math.round(el.h / 25.4 * dpi);
+      const rot = el.rotation || 0;
+      switch (el.type) {
+        case 'text':
+          lines.push('TEXT ' + x + ',' + y + ',"' + (el.font || '3') + '",' + rot + ',' + (el.fontMult || 1) + ',' + (el.fontMult || 1) + ',"' + (el.content || '') + '"');
+          break;
+        case 'qrcode': {
+          const cell = Math.max(2, Math.round(Math.min(w, h) / 25));
+          let qrContent = el.content;
+          if (el.qrType === 'vcard') qrContent = QRBuilder.generateVCard(el.qrFields);
+          else if (el.qrType === 'wifi') qrContent = QRBuilder.generateWiFi(el.qrFields);
+          else if (el.qrType === 'url') qrContent = el.qrFields.pattern || el.content;
+          lines.push('QRCODE ' + x + ',' + y + ',M,' + cell + ',A,' + rot + ',"' + qrContent + '"');
+          break;
+        }
+        case 'barcode':
+          lines.push('BARCODE ' + x + ',' + y + ',"' + (el.barcodeType || '128') + '",' + h + ',' + rot + ',2,2,"' + (el.content || '') + '"');
+          break;
+        case 'line':
+          lines.push('BAR ' + x + ',' + y + ',' + w + ',' + Math.max(2, h));
+          break;
+        case 'rectangle':
+          lines.push('BOX ' + x + ',' + y + ',' + (x + w) + ',' + (y + h) + ',2');
+          break;
+      }
+    }
+    lines.push('PRINT 1');
+    return lines.join('\r\n');
+  },
+
+  updateTSPL() {
+    document.getElementById('tsplPreview').textContent = this.generateTSPL();
+  },
+
+  toPdfmeSchema() {
+    return {
+      schemas: [this.elements.map(el => ({
+        name: el.id, type: el.type,
+        position: { x: el.x, y: el.y },
+        width: el.w, height: el.h,
+        content: el.content || '',
+        fontSize: 12, alignment: el.alignment || 'left',
+        rotate: el.rotation || 0,
+      }))],
+      basePdf: { width: this.labelW, height: this.labelH, padding: [0, 0, 0, 0] }
+    };
+  },
+
+  toLocalTemplate() {
+    return {
+      id: 'designer-' + Date.now(),
+      name: 'Diseno ' + new Date().toLocaleString('es'),
+      preset_id: AppState.selectedPreset,
+      fields: this.elements.map(el => ({
+        name: el.content.replace(/[{}]/g, '') || el.type,
+        type: el.type,
+        x: Math.round(el.x / 25.4 * AppState.dpi),
+        y: Math.round(el.y / 25.4 * AppState.dpi),
+        font: el.font || '3',
+        font_size: el.fontMult || 1,
+        height: el.type === 'qrcode' ? Math.max(2, Math.round(Math.min(el.w, el.h) / 25.4 * AppState.dpi / 25)) :
+                el.type === 'barcode' ? Math.round(el.h / 25.4 * AppState.dpi) : 0,
+        cell_width: el.type === 'barcode' ? 2 : 0,
+      }))
+    };
+  },
+
+  async saveLocal() {
+    if (this.elements.length === 0) { showToast('No hay elementos para guardar', 'warning'); return; }
+    const tmpl = this.toLocalTemplate();
+    const name = prompt('Nombre de la plantilla:', tmpl.name);
+    if (!name) return;
+    tmpl.name = name;
     try {
-      const mappedRows = applyMapping(excelData.rows.slice(0, 3));
-      const body = {
-        template_id: selectedTemplateId,
-        preset_id: document.getElementById('batchPreset')?.value || '',
-        rows: mappedRows,
-        copies: 1,
-        mode: selectedTemplateMode
-      };
-      const r = await fetch('/batch-preview', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body)});
-      const d = await r.json();
-      if (d.tspl) {
-        document.getElementById('tsplPreviewVisual').innerHTML = renderTsplVisual(d.tspl);
-        document.getElementById('tsplPreviewRaw').value = d.tspl;
-      }
+      await api('POST', '/templates', tmpl);
+      showToast('Plantilla guardada: ' + name);
+    } catch(e) { showToast('Error: ' + e.message, 'error'); }
+  },
+
+  exportJSON() {
+    const data = {
+      labelW: this.labelW, labelH: this.labelH,
+      elements: this.elements,
+      preset: AppState.selectedPreset,
+    };
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'label-design.json';
+    a.click();
+  },
+
+  importJSON() {
+    document.getElementById('importJSONInput').click();
+  },
+
+  handleImportJSON(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      try {
+        const data = JSON.parse(ev.target.result);
+        if (data.elements) {
+          this.elements = data.elements;
+          this.labelW = data.labelW || 30;
+          this.labelH = data.labelH || 22;
+          this.selected = null;
+          this.resizeCanvas();
+          this.render();
+          this.updateProperties();
+          this.updateTSPL();
+          showToast('Diseno importado (' + this.elements.length + ' elementos)');
+        }
+      } catch(err) { showToast('JSON invalido: ' + err.message, 'error'); }
+    };
+    reader.readAsText(file);
+    e.target.value = '';
+  }
+};
+
+function validateStandard() {
+  const std = document.getElementById('designerStandard').value;
+  const container = document.getElementById('standardWarnings');
+  if (!std) { container.innerHTML = ''; return; }
+  const result = Standards.validate(std, Designer.elements);
+  if (result.warnings.length === 0) {
+    container.innerHTML = '<div class="alert alert-success alert-sm py-1 px-2" style="font-size:12px;"><i class="bi bi-check-circle me-1"></i>Cumple con estandar ' + std + '</div>';
+  } else {
+    container.innerHTML = result.warnings.map(w =>
+      '<div class="alert alert-warning alert-sm py-1 px-2 mb-1" style="font-size:12px;"><i class="bi bi-exclamation-triangle me-1"></i>' + esc(w) + '</div>'
+    ).join('');
+  }
+}
+
+// ===================== TAB 3: BATCH =====================
+function goToStep(step) {
+  if (step > 1 && AppState.batchRows.length === 0) { showToast('Primero sube un Excel', 'warning'); return; }
+  if (step > 2 && !AppState.batchTemplate) { showToast('Selecciona una plantilla', 'warning'); return; }
+  if (step === 3) buildMappingUI();
+  AppState.batchStep = step;
+  document.querySelectorAll('.wizard-step').forEach(s => {
+    const sn = parseInt(s.dataset.step);
+    s.classList.toggle('active', sn === step);
+    s.classList.toggle('done', sn < step);
+  });
+  document.querySelectorAll('.wizard-panel').forEach((p, i) => p.classList.toggle('active', i === step - 1));
+}
+
+async function uploadExcel(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const formData = new FormData();
+  formData.append('file', file);
+  try {
+    const data = await api('POST', '/excel/upload', formData);
+    AppState.batchColumns = data.headers || [];
+    AppState.batchRows = data.rows || [];
+    document.getElementById('excelRowCount').textContent = AppState.batchRows.length;
+    // Render preview
+    const table = document.getElementById('excelPreviewTable');
+    const previewRows = AppState.batchRows.slice(0, 5);
+    let html = '<thead class="table-light"><tr>' + AppState.batchColumns.map(c => '<th>' + esc(c) + '</th>').join('') + '</tr></thead><tbody>';
+    previewRows.forEach(row => {
+      html += '<tr>' + AppState.batchColumns.map(c => '<td>' + esc(row[c] || '') + '</td>').join('') + '</tr>';
+    });
+    html += '</tbody>';
+    table.innerHTML = html;
+    document.getElementById('excelPreview').style.display = '';
+    showToast('Excel cargado: ' + AppState.batchRows.length + ' filas, ' + AppState.batchColumns.length + ' columnas');
+  } catch(err) { showToast('Error: ' + err.message, 'error'); }
+}
+
+async function loadAllTemplatesForBatch() {
+  const grid = document.getElementById('batchTemplateGrid');
+  grid.innerHTML = '<div class="col-12 text-center py-3"><div class="spinner-border spinner-border-sm text-primary"></div></div>';
+  const all = [];
+
+  // Local templates
+  try {
+    const res = await api('GET', '/templates');
+    (res.templates || []).forEach(t => all.push({ ...t, source: 'local' }));
+  } catch(e) {}
+
+  // Backend templates
+  if (AppState.authState.configured) {
+    try {
+      const res = await api('GET', '/api/templates');
+      (res.templates || []).forEach(t => all.push({
+        id: t.id || t.uuid, name: t.titulo || t.name,
+        fields: t.fields || [], source: 'server',
+        thermal_printable: t.thermal_printable,
+        categoria: t.categoria,
+      }));
     } catch(e) {}
   }
-}
 
-// ═══════════════════════════════════════════════════
-// TSPL visual renderer
-// ═══════════════════════════════════════════════════
-function parseTspl(tspl) {
-  const lines = tspl.split(/\r?\n/);
-  let w = 300, h = 200;
-  const els = [];
-  lines.forEach(line => {
-    const t = line.trim();
-    const sizeMatch = t.match(/^SIZE\s+(\d+)\s*mm?\s*,\s*(\d+)/i);
-    if (sizeMatch) { w = parseInt(sizeMatch[1]) * 3; h = parseInt(sizeMatch[2]) * 3; return; }
-    const textMatch = t.match(/^TEXT\s+(\d+)\s*,\s*(\d+)\s*,\s*"(\d+)"\s*,\s*\d+\s*,\s*\d+\s*,\s*\d+\s*,\s*"(.*)"/i);
-    if (textMatch) { els.push({type:'text', x:parseInt(textMatch[1]), y:parseInt(textMatch[2]), font:textMatch[3], text:textMatch[4]}); return; }
-    const bcMatch = t.match(/^BARCODE\s+(\d+)\s*,\s*(\d+)\s*,\s*"(\w+)"\s*,\s*(\d+)/i);
-    if (bcMatch) { els.push({type:'barcode', x:parseInt(bcMatch[1]), y:parseInt(bcMatch[2]), bcType:bcMatch[3], h:parseInt(bcMatch[4])}); return; }
-    const qrMatch = t.match(/^QRCODE\s+(\d+)\s*,\s*(\d+)/i);
-    if (qrMatch) { els.push({type:'qr', x:parseInt(qrMatch[1]), y:parseInt(qrMatch[2])}); }
-  });
-  return {w, h, els};
-}
-
-function renderTsplVisual(tspl) {
-  const pages = tspl.split(/PRINT\s+\d+/i).filter(p => p.trim());
-  if (!pages.length) return '<div class="text-dim text-sm">Sin contenido TSPL</div>';
-  let html = '';
-  pages.slice(0, 3).forEach(page => {
-    const {w, h, els} = parseTspl(page);
-    const scale = Math.min(300/w, 200/h, 1);
-    html += `<div style="display:inline-block;width:${w*scale}px;height:${h*scale}px;border:1px solid var(--border);border-radius:4px;position:relative;margin:4px;background:#fff;overflow:hidden">`;
-    els.forEach(el => {
-      const x = el.x * scale, y = el.y * scale;
-      if (el.type === 'text') {
-        const fs = Math.max(8, parseInt(el.font||'2') * 4 * scale);
-        html += `<div style="position:absolute;left:${x}px;top:${y}px;font-size:${fs}px;white-space:nowrap;font-family:var(--mono)">${esc(el.text)}</div>`;
-      } else if (el.type === 'barcode') {
-        const bh = (el.h||40) * scale;
-        html += `<div style="position:absolute;left:${x}px;top:${y}px;width:80px;height:${bh}px;background:repeating-linear-gradient(90deg,#000 0,#000 1px,#fff 1px,#fff 3px);opacity:0.6"></div>`;
-      } else if (el.type === 'qr') {
-        html += `<div style="position:absolute;left:${x}px;top:${y}px;width:40px;height:40px;border:2px solid #333;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700">QR</div>`;
-      }
-    });
-    html += '</div>';
-  });
-  return html;
-}
-
-// ═══════════════════════════════════════════════════
-// Step 4: Execute
-// ═══════════════════════════════════════════════════
-function setOutputMode(mode) {
-  outputMode = mode;
-  document.getElementById('outPrint').classList.toggle('active', mode === 'print');
-  document.getElementById('outPdf').classList.toggle('active', mode === 'pdf');
-  document.getElementById('printOptions').style.display = mode === 'print' ? '' : 'none';
-  document.getElementById('executeBtn').textContent = mode === 'print' ? 'Imprimir' : 'Generar PDF';
-}
-
-function preparePrintTab() {
-  // Populate printer select
-  const opts = printers.map(p => `<option value="${esc(p.name)}">${esc(p.name)} (${p.type})</option>`).join('');
-  document.getElementById('batchPrinter').innerHTML = '<option value="">Auto</option>' + opts;
-  // Set row range
-  if (excelData) {
-    document.getElementById('rowEnd').value = excelData.rows.length;
-    document.getElementById('rowEnd').max = excelData.rows.length;
-    document.getElementById('rowStart').max = excelData.rows.length;
+  if (all.length === 0) {
+    grid.innerHTML = '<div class="col-12 text-center text-muted py-4">No se encontraron plantillas</div>';
+    return;
   }
-  updateBatchSummary();
-  // Listeners
-  ['rowStart','rowEnd','batchCopies'].forEach(id => {
-    document.getElementById(id).addEventListener('input', updateBatchSummary);
-  });
+
+  grid.innerHTML = all.map(t => {
+    const isSelected = AppState.batchTemplate && AppState.batchTemplate.id === t.id;
+    const fieldCount = t.fields ? t.fields.length : 0;
+    const sourceBadge = t.source === 'server' ? '<span class="badge bg-info text-dark">Servidor</span>' : '<span class="badge bg-secondary">Local</span>';
+    return `<div class="col-md-4 col-sm-6">
+      <div class="template-card${isSelected ? ' selected' : ''}" onclick="selectBatchTemplate(${esc(JSON.stringify(t).replace(/"/g, '&quot;'))})">
+        <div class="d-flex justify-content-between align-items-start mb-2">
+          <strong style="font-size:13px;">${esc(t.name)}</strong>
+          ${sourceBadge}
+        </div>
+        <small class="text-muted">${fieldCount} campos | ID: ${esc((t.id || '').substring(0, 8))}...</small>
+      </div>
+    </div>`;
+  }).join('');
 }
 
-function updateBatchSummary() {
-  const start = parseInt(document.getElementById('rowStart').value) || 1;
-  const end = parseInt(document.getElementById('rowEnd').value) || 1;
-  const copies = parseInt(document.getElementById('batchCopies').value) || 1;
-  const rows = Math.max(0, end - start + 1);
-  const total = rows * copies;
-  document.getElementById('batchSummary').textContent = `${rows} filas × ${copies} copias = ${total} etiquetas`;
+function selectBatchTemplate(tmpl) {
+  if (typeof tmpl === 'string') tmpl = JSON.parse(tmpl);
+  AppState.batchTemplate = tmpl;
+  document.getElementById('btnNextStep3').disabled = false;
+  // Update card selection
+  document.querySelectorAll('#batchTemplateGrid .template-card').forEach(c => c.classList.remove('selected'));
+  event.target.closest('.template-card').classList.add('selected');
 }
 
-function getSelectedRows() {
-  if (!excelData) return [];
-  const start = Math.max(1, parseInt(document.getElementById('rowStart').value) || 1);
-  const end = Math.min(excelData.rows.length, parseInt(document.getElementById('rowEnd').value) || 1);
-  return excelData.rows.slice(start - 1, end);
-}
+function buildMappingUI() {
+  const container = document.getElementById('mappingContainer');
+  const tmpl = AppState.batchTemplate;
+  if (!tmpl) return;
 
-function executeBatch() {
-  if (outputMode === 'pdf') {
-    executeBatchPdf();
+  // Get field names from template
+  let fields = [];
+  if (tmpl.fields && tmpl.fields.length) {
+    fields = tmpl.fields.map(f => f.name || f.Name || f.nombre);
   } else {
-    executeBatchPrint();
+    // For server templates, fetch details
+    fields = ['campo1'];
   }
-}
+  // Deduplicate
+  fields = [...new Set(fields.filter(f => f))];
 
-async function executeBatchPrint() {
-  const rows = getSelectedRows();
-  if (!rows.length) return toast('Sin filas seleccionadas', 'error');
-  const mappedRows = applyMapping(rows);
-  const copies = parseInt(document.getElementById('batchCopies').value) || 1;
+  const colOptions = AppState.batchColumns.map(c => `<option value="${esc(c)}">${esc(c)}</option>`).join('');
+  container.innerHTML = fields.map(field => {
+    return `<div class="row g-2 mb-2 align-items-center mapping-row" data-field="${esc(field)}">
+      <div class="col-md-3">
+        <span class="badge bg-dark">{${esc(field)}}</span>
+      </div>
+      <div class="col-md-3">
+        <select class="form-select form-select-sm mapping-mode" onchange="onMappingModeChange(this)">
+          <option value="column">Columna</option>
+          <option value="formula">Formula</option>
+          <option value="vcard">vCard</option>
+          <option value="url">URL Pattern</option>
+          <option value="static">Estatico</option>
+        </select>
+      </div>
+      <div class="col-md-6 mapping-value-col">
+        <select class="form-select form-select-sm mapping-value">${colOptions}</select>
+      </div>
+    </div>`;
+  }).join('');
 
-  const prog = document.getElementById('batchProgress');
-  const fill = document.getElementById('batchProgressFill');
-  prog.style.display = 'block';
-  fill.style.width = '30%';
-
-  try {
-    const body = {
-      template_id: selectedTemplateId,
-      preset_id: document.getElementById('batchPreset')?.value || '',
-      rows: mappedRows,
-      copies: copies,
-      printer: document.getElementById('batchPrinter').value,
-      mode: selectedTemplateMode
-    };
-    fill.style.width = '60%';
-    const r = await fetch('/batch-print', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body)});
-    const d = await r.json();
-    fill.style.width = '100%';
-
-    const resultEl = document.getElementById('batchResult');
-    if (r.ok && !d.error) {
-      resultEl.innerHTML = `<div class="badge badge-green">✓ Impreso — ${d.total_sent||mappedRows.length} etiquetas, ${d.total_bytes||'?'} bytes</div>`;
-      toast('Impresión completada', 'success');
-    } else {
-      resultEl.innerHTML = `<div class="badge badge-red">✕ Error: ${esc(d.error||'desconocido')}</div>`;
-      toast(d.error || 'Error', 'error');
+  // Auto-match columns by name
+  container.querySelectorAll('.mapping-row').forEach(row => {
+    const field = row.dataset.field.toLowerCase();
+    const sel = row.querySelector('.mapping-value');
+    for (const opt of sel.options) {
+      if (opt.value.toLowerCase() === field || opt.value.toLowerCase().includes(field)) {
+        opt.selected = true;
+        break;
+      }
     }
-    setTimeout(() => { prog.style.display = 'none'; fill.style.width = '0'; }, 2000);
-  } catch(e) {
-    toast('Error de conexión', 'error');
-    prog.style.display = 'none';
-  }
+  });
+
+  updateMappingPreview();
 }
 
-async function executeBatchPdf() {
-  const rows = getSelectedRows();
-  if (!rows.length) return toast('Sin filas seleccionadas', 'error');
-  const mappedRows = applyMapping(rows);
+function onMappingModeChange(select) {
+  const row = select.closest('.mapping-row');
+  const valueCol = row.querySelector('.mapping-value-col');
+  const mode = select.value;
+  const colOptions = AppState.batchColumns.map(c => `<option value="${esc(c)}">${esc(c)}</option>`).join('');
 
-  const prog = document.getElementById('batchProgress');
-  const fill = document.getElementById('batchProgressFill');
-  prog.style.display = 'block';
-  fill.style.width = '40%';
+  switch (mode) {
+    case 'column':
+      valueCol.innerHTML = `<select class="form-select form-select-sm mapping-value">${colOptions}</select>`;
+      break;
+    case 'formula':
+      valueCol.innerHTML = `<input type="text" class="form-control form-control-sm mapping-value" placeholder='{Col_A} + " " + {Col_B}'>`;
+      break;
+    case 'vcard':
+      valueCol.innerHTML = `
+        <input type="text" class="form-control form-control-sm mb-1 mapping-vcard-fn" placeholder="Nombre: {columna}">
+        <input type="text" class="form-control form-control-sm mb-1 mapping-vcard-ln" placeholder="Apellido: {columna}">
+        <input type="text" class="form-control form-control-sm mb-1 mapping-vcard-tel" placeholder="Tel: {columna}">
+        <input type="text" class="form-control form-control-sm mb-1 mapping-vcard-email" placeholder="Email: {columna}">
+        <input type="text" class="form-control form-control-sm mb-1 mapping-vcard-org" placeholder="Empresa: {columna}">
+        <input type="text" class="form-control form-control-sm mapping-vcard-title" placeholder="Cargo: {columna}">`;
+      break;
+    case 'url':
+      valueCol.innerHTML = `<input type="text" class="form-control form-control-sm mapping-value" placeholder="https://example.com/{Col_G}">`;
+      break;
+    case 'static':
+      valueCol.innerHTML = `<input type="text" class="form-control form-control-sm mapping-value" placeholder="Texto fijo">`;
+      break;
+  }
+  updateMappingPreview();
+}
+
+// Formula engine
+const FormulaEngine = {
+  compile(formula) {
+    if (!formula) return () => '';
+    const tokens = [];
+    let current = '', inQuote = false;
+    for (let i = 0; i < formula.length; i++) {
+      const ch = formula[i];
+      if (ch === '"' || ch === "'") { inQuote = !inQuote; current += ch; }
+      else if (ch === '+' && !inQuote) { tokens.push(current.trim()); current = ''; }
+      else { current += ch; }
+    }
+    if (current.trim()) tokens.push(current.trim());
+    return (row) => tokens.map(t => {
+      t = t.trim();
+      if ((t.startsWith('"') && t.endsWith('"')) || (t.startsWith("'") && t.endsWith("'")))
+        return t.slice(1, -1);
+      const m = t.match(/^\{?(.+?)\}?$/);
+      return m ? (row[m[1]] || '') : t;
+    }).join('');
+  },
+  compileVCard(mappings) {
+    return (row) => {
+      const r = (expr) => expr ? this.compile(expr)(row) : '';
+      return ['BEGIN:VCARD','VERSION:3.0',
+        'FN:' + r(mappings.fn), 'N:' + r(mappings.ln) + ';' + r(mappings.fn) + ';',
+        'TEL;TYPE=CELL:' + r(mappings.tel), 'EMAIL:' + r(mappings.email),
+        'ORG:' + r(mappings.org), 'TITLE:' + r(mappings.title),
+        'END:VCARD'].join('\n');
+    };
+  },
+  compileURL(pattern) {
+    return (row) => pattern.replace(/\{(.+?)\}/g, (_, col) => row[col] || '');
+  }
+};
+
+function getMappings() {
+  const mappings = {};
+  document.querySelectorAll('.mapping-row').forEach(row => {
+    const field = row.dataset.field;
+    const mode = row.querySelector('.mapping-mode').value;
+    switch (mode) {
+      case 'column': {
+        const val = row.querySelector('.mapping-value');
+        mappings[field] = { mode: 'column', column: val ? val.value : '' };
+        break;
+      }
+      case 'formula': {
+        const val = row.querySelector('.mapping-value');
+        mappings[field] = { mode: 'formula', formula: val ? val.value : '' };
+        break;
+      }
+      case 'vcard': {
+        mappings[field] = {
+          mode: 'vcard',
+          fn: row.querySelector('.mapping-vcard-fn')?.value || '',
+          ln: row.querySelector('.mapping-vcard-ln')?.value || '',
+          tel: row.querySelector('.mapping-vcard-tel')?.value || '',
+          email: row.querySelector('.mapping-vcard-email')?.value || '',
+          org: row.querySelector('.mapping-vcard-org')?.value || '',
+          title: row.querySelector('.mapping-vcard-title')?.value || '',
+        };
+        break;
+      }
+      case 'url': {
+        const val = row.querySelector('.mapping-value');
+        mappings[field] = { mode: 'url', pattern: val ? val.value : '' };
+        break;
+      }
+      case 'static': {
+        const val = row.querySelector('.mapping-value');
+        mappings[field] = { mode: 'static', value: val ? val.value : '' };
+        break;
+      }
+    }
+  });
+  return mappings;
+}
+
+function applyMapping(mappings, row) {
+  const result = {};
+  for (const [field, mapping] of Object.entries(mappings)) {
+    switch (mapping.mode) {
+      case 'column':
+        result[field] = row[mapping.column] || '';
+        break;
+      case 'formula':
+        result[field] = FormulaEngine.compile(mapping.formula)(row);
+        break;
+      case 'vcard':
+        result[field] = FormulaEngine.compileVCard(mapping)(row);
+        break;
+      case 'url':
+        result[field] = FormulaEngine.compileURL(mapping.pattern)(row);
+        break;
+      case 'static':
+        result[field] = mapping.value || '';
+        break;
+    }
+  }
+  return result;
+}
+
+function updateMappingPreview() {
+  const preview = document.getElementById('mappingPreview');
+  const mappings = getMappings();
+  const fields = Object.keys(mappings);
+  if (fields.length === 0 || AppState.batchRows.length === 0) { preview.style.display = 'none'; return; }
+
+  const rows = AppState.batchRows.slice(0, 4);
+  const table = document.getElementById('mappingPreviewTable');
+  let html = '<thead class="table-light"><tr>' + fields.map(f => '<th>' + esc(f) + '</th>').join('') + '</tr></thead><tbody>';
+  rows.forEach(row => {
+    const mapped = applyMapping(mappings, row);
+    html += '<tr>' + fields.map(f => '<td><small>' + esc((mapped[f] || '').substring(0, 60)) + '</small></td>').join('') + '</tr>';
+  });
+  html += '</tbody>';
+  table.innerHTML = html;
+  preview.style.display = '';
+}
+
+// Listen for mapping changes
+document.addEventListener('input', e => {
+  if (e.target.closest('.mapping-row')) updateMappingPreview();
+});
+document.addEventListener('change', e => {
+  if (e.target.closest('.mapping-row')) updateMappingPreview();
+});
+
+async function executeBatch(action) {
+  const mappings = getMappings();
+  const mappedRows = AppState.batchRows.map(row => applyMapping(mappings, row));
+  const tmpl = AppState.batchTemplate;
+  const copies = parseInt(document.getElementById('batchCopies').value) || 1;
+  const mode = document.getElementById('batchMode').value;
+
+  const progressEl = document.getElementById('batchProgress');
+  const progressBar = document.getElementById('batchProgressBar');
+  const resultEl = document.getElementById('batchResult');
+  const tsplPreviewEl = document.getElementById('batchTsplPreview');
+  progressEl.style.display = '';
+  progressBar.style.width = '50%';
+  resultEl.style.display = 'none';
+  tsplPreviewEl.style.display = 'none';
 
   try {
-    const body = {
-      template_id: selectedTemplateId,
-      rows: mappedRows,
-      mapping: columnMapping
-    };
-    fill.style.width = '70%';
-    const r = await fetch('/batch-pdf', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body)});
-
-    if (r.ok) {
-      fill.style.width = '100%';
-      const blob = await r.blob();
+    if (action === 'print' || action === 'preview') {
+      // Determine if local or backend template
+      const isLocal = tmpl.source === 'local';
+      if (isLocal) {
+        // Use batch-print endpoint for local templates
+        const body = {
+          template_id: tmpl.id,
+          preset_id: tmpl.preset_id || AppState.selectedPreset,
+          rows: mappedRows,
+          copies: copies,
+          printer: AppState.selectedPrinter,
+          mode: 'local',
+        };
+        if (action === 'preview') {
+          const res = await api('POST', '/batch-preview', body);
+          progressBar.style.width = '100%';
+          progressEl.style.display = 'none';
+          tsplPreviewEl.style.display = '';
+          document.getElementById('batchTsplCode').textContent = res.tspl;
+          showToast('Vista previa generada');
+          return;
+        }
+        const res = await api('POST', '/batch-print', body);
+        progressBar.style.width = '100%';
+        setTimeout(() => progressEl.style.display = 'none', 500);
+        resultEl.style.display = '';
+        resultEl.innerHTML = `<div class="alert alert-success"><i class="bi bi-check-circle me-2"></i>
+          Impreso: ${res.printed || mappedRows.length} etiquetas (${res.bytes || 0} bytes)</div>`;
+        showToast('Lote impreso correctamente');
+      } else {
+        // Backend template - use batch-tspl
+        const body = {
+          template_id: tmpl.id,
+          rows: mappedRows,
+          copies: copies,
+          printer: AppState.selectedPrinter,
+          mode: action === 'preview' ? 'preview' : mode === 'raster' ? 'raster' : 'print',
+          dpi: AppState.dpi,
+        };
+        if (action === 'preview') {
+          const text = await api('POST', '/batch-tspl', body, { raw: true }).then(r => r.text());
+          progressBar.style.width = '100%';
+          progressEl.style.display = 'none';
+          tsplPreviewEl.style.display = '';
+          document.getElementById('batchTsplCode').textContent = text;
+          showToast('Vista previa generada');
+          return;
+        }
+        const res = await api('POST', '/batch-tspl', body);
+        progressBar.style.width = '100%';
+        setTimeout(() => progressEl.style.display = 'none', 500);
+        resultEl.style.display = '';
+        resultEl.innerHTML = `<div class="alert alert-success"><i class="bi bi-check-circle me-2"></i>
+          Impreso: ${res.rows || mappedRows.length} etiquetas (${res.bytes || 0} bytes)</div>`;
+        showToast('Lote impreso correctamente');
+      }
+    } else if (action === 'pdf') {
+      const body = {
+        template_id: tmpl.id,
+        rows: mappedRows,
+        mapping: {},
+      };
+      const res = await fetch('/batch-pdf', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+      if (!res.ok) throw new Error(await res.text());
+      const blob = await res.blob();
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `batch_${mappedRows.length}.pdf`;
+      a.download = 'batch_' + mappedRows.length + '.pdf';
       a.click();
-      URL.revokeObjectURL(url);
-      document.getElementById('batchResult').innerHTML = '<div class="badge badge-green">✓ PDF generado y descargado</div>';
-      toast('PDF descargado', 'success');
-    } else {
-      const d = await r.json();
-      document.getElementById('batchResult').innerHTML = `<div class="badge badge-red">✕ ${esc(d.error||'Error')}</div>`;
-      toast(d.error || 'Error', 'error');
+      progressBar.style.width = '100%';
+      setTimeout(() => progressEl.style.display = 'none', 500);
+      resultEl.style.display = '';
+      resultEl.innerHTML = `<div class="alert alert-success"><i class="bi bi-check-circle me-2"></i>PDF generado: ${mappedRows.length} paginas</div>`;
+      showToast('PDF descargado');
     }
-    setTimeout(() => { prog.style.display = 'none'; fill.style.width = '0'; }, 2000);
   } catch(e) {
-    toast('Error de conexión', 'error');
-    prog.style.display = 'none';
+    progressEl.style.display = 'none';
+    resultEl.style.display = '';
+    resultEl.innerHTML = `<div class="alert alert-danger"><i class="bi bi-exclamation-triangle me-2"></i>Error: ${esc(e.message)}</div>`;
+    showToast('Error: ' + e.message, 'error');
   }
 }
 
-async function executeBatchPreview() {
-  const rows = getSelectedRows();
-  if (!rows.length) return toast('Sin filas', 'error');
-  const mappedRows = applyMapping(rows);
+// ===================== TAB 4: TEMPLATES =====================
+async function loadTemplates() {
+  // Local templates
+  try {
+    const res = await api('GET', '/templates');
+    AppState.localTemplates = res.templates || [];
+    renderLocalTemplates();
+  } catch(e) {}
+
+  // Server templates
+  if (AppState.authState.configured) {
+    document.getElementById('serverTemplatesNotConnected').style.display = 'none';
+    try {
+      const res = await api('GET', '/api/templates');
+      AppState.backendTemplates = res.templates || [];
+      renderServerTemplates();
+    } catch(e) {
+      document.getElementById('serverTemplatesGrid').innerHTML = '<div class="col-12"><div class="alert alert-warning">Error al cargar plantillas del servidor</div></div>';
+    }
+  } else {
+    document.getElementById('serverTemplatesNotConnected').style.display = '';
+    document.getElementById('serverTemplatesGrid').innerHTML = '';
+  }
+}
+
+function renderLocalTemplates() {
+  const grid = document.getElementById('localTemplatesGrid');
+  document.getElementById('localTemplateCount').textContent = AppState.localTemplates.length;
+  if (AppState.localTemplates.length === 0) {
+    grid.innerHTML = '<div class="col-12 text-center text-muted py-3">Sin plantillas locales</div>';
+    return;
+  }
+  grid.innerHTML = AppState.localTemplates.map(t => `
+    <div class="col-md-4 col-sm-6">
+      <div class="card">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-start">
+            <div>
+              <strong>${esc(t.name)}</strong>
+              ${t.builtin ? '<span class="badge bg-secondary ms-1">built-in</span>' : ''}
+              <br><small class="text-muted">${(t.fields || []).length} campos | Preset: ${esc(t.preset_id || '?')}</small>
+            </div>
+          </div>
+          <div class="mt-2 d-flex gap-1">
+            <button class="btn btn-sm btn-outline-primary" onclick="useTemplateInBatch('${esc(t.id)}')" title="Usar en Batch"><i class="bi bi-grid-3x3-gap"></i></button>
+            ${!t.builtin ? `<button class="btn btn-sm btn-outline-danger" onclick="deleteLocalTemplate('${esc(t.id)}')" title="Eliminar"><i class="bi bi-trash"></i></button>` : ''}
+          </div>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderServerTemplates() {
+  const grid = document.getElementById('serverTemplatesGrid');
+  document.getElementById('serverTemplateCount').textContent = AppState.backendTemplates.length;
+  if (AppState.backendTemplates.length === 0) {
+    grid.innerHTML = '<div class="col-12 text-center text-muted py-3">Sin plantillas en el servidor</div>';
+    return;
+  }
+  grid.innerHTML = AppState.backendTemplates.map(t => {
+    const name = t.titulo || t.name || 'Sin nombre';
+    const id = t.id || t.uuid || '';
+    const cat = t.categoria || '';
+    return `<div class="col-md-4 col-sm-6">
+      <div class="card">
+        <div class="card-body">
+          <strong>${esc(name)}</strong>
+          ${cat ? '<span class="badge bg-info text-dark ms-1">' + esc(cat) + '</span>' : ''}
+          <br><small class="text-muted">ID: ${esc(id.substring(0, 12))}...</small>
+          <div class="mt-2 d-flex gap-1">
+            <button class="btn btn-sm btn-outline-secondary" onclick="previewTemplate('${esc(id)}')" title="Vista previa"><i class="bi bi-eye"></i></button>
+            <button class="btn btn-sm btn-outline-primary" onclick="useTemplateInBatch('${esc(id)}')" title="Usar en Batch"><i class="bi bi-grid-3x3-gap"></i></button>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function previewTemplate(id) {
+  const modal = new bootstrap.Modal(document.getElementById('templatePreviewModal'));
+  document.getElementById('previewModalTitle').textContent = 'Vista Previa';
+  document.getElementById('previewModalBody').innerHTML = '<div class="spinner-border text-primary" role="status"></div>';
+  modal.show();
+  try {
+    const res = await fetch('/batch-preview-image', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ template_id: id, rows: [{ texto: 'Test', codigo: '1234567890', descripcion: 'Producto de prueba' }], dpi: 203 }),
+    });
+    if (!res.ok) throw new Error(await res.text());
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    document.getElementById('previewModalBody').innerHTML = `<img src="${url}" class="img-fluid border" alt="Preview" style="max-height:400px;">`;
+  } catch(e) {
+    document.getElementById('previewModalBody').innerHTML = `<div class="alert alert-danger">${esc(e.message)}</div>`;
+  }
+}
+
+function useTemplateInBatch(id) {
+  // Find the template
+  const local = AppState.localTemplates.find(t => t.id === id);
+  const server = AppState.backendTemplates.find(t => (t.id || t.uuid) === id);
+  if (local) {
+    AppState.batchTemplate = { ...local, source: 'local' };
+  } else if (server) {
+    AppState.batchTemplate = { id: server.id || server.uuid, name: server.titulo || server.name, fields: server.fields || [], source: 'server' };
+  }
+  switchTab('batch');
+  goToStep(2);
+}
+
+async function deleteLocalTemplate(id) {
+  if (!confirm('Eliminar esta plantilla?')) return;
+  try {
+    await api('DELETE', '/templates/' + id);
+    showToast('Plantilla eliminada');
+    loadTemplates();
+  } catch(e) { showToast('Error: ' + e.message, 'error'); }
+}
+
+// ===================== TAB 5: CONFIG =====================
+function renderConfigTab() {
+  const cfg = AppState.config;
+  document.getElementById('cfgApiUrl').value = cfg.api_url || '';
+  document.getElementById('cfgWLName').textContent = cfg.whitelabel?.name || 'No configurado';
+  document.getElementById('cfgPort').value = cfg.port || 9638;
+  document.getElementById('cfgNetScan').checked = cfg.network_scan_enabled || false;
+  document.getElementById('cfgNetInterval').value = cfg.network_scan_interval || 30;
+  document.getElementById('cfgShareEnabled').checked = cfg.share_enabled || false;
+  document.getElementById('cfgSharePort').value = cfg.share_port || 9100;
+
+  // Default preset selector
+  const presetSel = document.getElementById('cfgDefaultPreset');
+  presetSel.innerHTML = AppState.presets.map(p =>
+    `<option value="${esc(p.id)}" ${p.id === cfg.default_preset ? 'selected' : ''}>${esc(p.name)}</option>`
+  ).join('');
+
+  // Default printer selector
+  const printerSel = document.getElementById('cfgDefaultPrinter');
+  printerSel.innerHTML = '<option value="">Auto (primera disponible)</option>' +
+    AppState.printers.map(p =>
+      `<option value="${esc(p.Name)}" ${p.Name === cfg.default_printer ? 'selected' : ''}>${esc(p.Name)}</option>`
+    ).join('');
+
+  // DPI table
+  renderDPITable();
+}
+
+function renderDPITable() {
+  const el = document.getElementById('cfgDPITable');
+  if (AppState.printers.length === 0) {
+    el.innerHTML = '<small class="text-muted">Sin impresoras</small>';
+    return;
+  }
+  el.innerHTML = `<table class="table table-sm mb-0"><tbody>` +
+    AppState.printers.map(p => {
+      const dpi = AppState.printerDPI[p.Name] || AppState.dpi;
+      return `<tr>
+        <td>${esc(p.Name)}</td>
+        <td>
+          <select class="form-select form-select-sm" style="width:100px;" onchange="setDPI('${esc(p.Name)}', parseInt(this.value))">
+            ${[200, 203, 300, 600].map(d => `<option value="${d}" ${dpi === d ? 'selected' : ''}>${d}</option>`).join('')}
+          </select>
+        </td>
+        <td><button class="btn btn-sm btn-outline-secondary" onclick="detectDPI('${esc(p.Name)}')"><i class="bi bi-search"></i></button></td>
+      </tr>`;
+    }).join('') + '</tbody></table>';
+}
+
+async function saveDefaultPreset(id) {
+  try {
+    await api('PUT', '/config', { default_preset: id });
+    AppState.selectedPreset = id;
+    AppState.config.default_preset = id;
+    populatePresetSelector();
+    showToast('Preset default: ' + id);
+  } catch(e) { showToast('Error: ' + e.message, 'error'); }
+}
+
+async function saveDefaultPrinter(name) {
+  try {
+    await api('PUT', '/config', { default_printer: name });
+    AppState.selectedPrinter = name;
+    AppState.config.default_printer = name;
+    populatePrinterSelector();
+    updateDPIBadge();
+    showToast('Impresora default: ' + (name || 'Auto'));
+  } catch(e) { showToast('Error: ' + e.message, 'error'); }
+}
+
+async function saveSystemConfig() {
   try {
     const body = {
-      template_id: selectedTemplateId,
-      preset_id: document.getElementById('batchPreset')?.value || '',
-      rows: mappedRows,
-      copies: parseInt(document.getElementById('batchCopies').value) || 1,
-      mode: selectedTemplateMode
+      network_scan_enabled: document.getElementById('cfgNetScan').checked,
+      network_scan_interval: parseInt(document.getElementById('cfgNetInterval').value) || 30,
+      share_enabled: document.getElementById('cfgShareEnabled').checked,
+      share_port: parseInt(document.getElementById('cfgSharePort').value) || 9100,
     };
-    const r = await fetch('/batch-preview', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body)});
-    const d = await r.json();
-    if (d.tspl) {
-      document.getElementById('tsplPreviewVisual').innerHTML = renderTsplVisual(d.tspl);
-      document.getElementById('tsplPreviewRaw').value = d.tspl;
-      goToWizardStep(3);
-    }
-  } catch(e) { toast('Error', 'error'); }
+    await api('PUT', '/config', body);
+    showToast('Configuracion guardada');
+  } catch(e) { showToast('Error: ' + e.message, 'error'); }
 }
 
-// ═══════════════════════════════════════════════════
-// Utilities
-// ═══════════════════════════════════════════════════
-function esc(s) { if (!s) return ''; const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
-
-function toast(msg, type) {
-  const el = document.getElementById('toast');
-  el.textContent = msg;
-  el.className = 'toast toast-' + (type || 'success') + ' show';
-  setTimeout(() => el.classList.remove('show'), 3000);
+async function reconnectAuth() {
+  try {
+    const auth = await api('GET', '/auth/state');
+    AppState.authState = auth;
+    updateAuthBadge();
+    if (auth.connected) showToast('Conexion verificada');
+    else showToast('No se pudo conectar: ' + (auth.error || ''), 'error');
+  } catch(e) { showToast('Error: ' + e.message, 'error'); }
 }
+
+async function logoutAuth() {
+  if (!confirm('Cerrar sesion? Se eliminaran las credenciales guardadas.')) return;
+  try {
+    await api('POST', '/auth/logout');
+    AppState.authState = { configured: false, connected: false };
+    updateAuthBadge();
+    document.getElementById('cfgApiUrl').value = '';
+    document.getElementById('cfgWLName').textContent = 'No configurado';
+    showToast('Sesion cerrada');
+  } catch(e) { showToast('Error: ' + e.message, 'error'); }
+}
+
+// ===================== SETUP WIZARD =====================
+async function setupConnect() {
+  const url = document.getElementById('setup-url').value.trim();
+  const key = document.getElementById('setup-key').value.trim();
+  const secret = document.getElementById('setup-secret').value.trim();
+  const wl = parseInt(document.getElementById('setup-wl').value) || 0;
+
+  const errEl = document.getElementById('setup-error');
+  const successEl = document.getElementById('setup-success');
+  errEl.classList.add('d-none');
+  successEl.classList.add('d-none');
+
+  if (!url || !key || !secret) {
+    errEl.textContent = 'Todos los campos son requeridos';
+    errEl.classList.remove('d-none');
+    return;
+  }
+
+  try {
+    await api('POST', '/auth/login', { api_url: url, api_key: key, api_secret: secret, wl_id: wl });
+    successEl.textContent = 'Conexion exitosa!';
+    successEl.classList.remove('d-none');
+
+    // Refresh state
+    const auth = await api('GET', '/auth/state');
+    AppState.authState = auth;
+    updateAuthBadge();
+
+    const config = await api('GET', '/config');
+    AppState.config = config;
+    renderConfigTab();
+
+    // Close modal after delay
+    setTimeout(() => {
+      bootstrap.Modal.getInstance(document.getElementById('setupWizard')).hide();
+    }, 1500);
+
+    showToast('Conectado al servidor');
+  } catch(e) {
+    let msg = e.message;
+    try { msg = JSON.parse(msg).error || msg; } catch(x) {}
+    errEl.textContent = 'Error: ' + msg;
+    errEl.classList.remove('d-none');
+  }
+}
+
+// ===================== UTILITY =====================
+function esc(str) {
+  if (str === null || str === undefined) return '';
+  const div = document.createElement('div');
+  div.textContent = String(str);
+  return div.innerHTML;
+}
+
+// ===================== BOOT =====================
+document.addEventListener('DOMContentLoaded', init);
 </script>
 </body>
 </html>
