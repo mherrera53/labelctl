@@ -24,9 +24,53 @@ package main
 }
 @end
 
+// ─── WKUIDelegate: handle JS alert(), confirm(), prompt() in WKWebView ───
+@interface BridgeUIDelegate : NSObject <WKUIDelegate>
+@end
+
+@implementation BridgeUIDelegate
+- (void)webView:(WKWebView *)webView runJavaScriptAlertPanelWithMessage:(NSString *)message
+        initiatedByFrame:(WKFrameInfo *)frame completionHandler:(void (^)(void))completionHandler {
+	NSAlert *alert = [[NSAlert alloc] init];
+	[alert setMessageText:message];
+	[alert addButtonWithTitle:@"OK"];
+	[alert runModal];
+	completionHandler();
+}
+
+- (void)webView:(WKWebView *)webView runJavaScriptConfirmPanelWithMessage:(NSString *)message
+        initiatedByFrame:(WKFrameInfo *)frame completionHandler:(void (^)(BOOL))completionHandler {
+	NSAlert *alert = [[NSAlert alloc] init];
+	[alert setMessageText:message];
+	[alert addButtonWithTitle:@"OK"];
+	[alert addButtonWithTitle:@"Cancelar"];
+	NSModalResponse response = [alert runModal];
+	completionHandler(response == NSAlertFirstButtonReturn);
+}
+
+- (void)webView:(WKWebView *)webView runJavaScriptTextInputPanelWithPrompt:(NSString *)prompt
+        defaultText:(NSString *)defaultText initiatedByFrame:(WKFrameInfo *)frame
+        completionHandler:(void (^)(NSString *))completionHandler {
+	NSAlert *alert = [[NSAlert alloc] init];
+	[alert setMessageText:prompt];
+	[alert addButtonWithTitle:@"OK"];
+	[alert addButtonWithTitle:@"Cancelar"];
+	NSTextField *input = [[NSTextField alloc] initWithFrame:NSMakeRect(0, 0, 200, 24)];
+	[input setStringValue:defaultText ?: @""];
+	[alert setAccessoryView:input];
+	NSModalResponse response = [alert runModal];
+	if (response == NSAlertFirstButtonReturn) {
+		completionHandler([input stringValue]);
+	} else {
+		completionHandler(nil);
+	}
+}
+@end
+
 static NSWindow *bridgeWindow = nil;
 static WKWebView *bridgeWebView = nil;
 static BridgeWindowDelegate *bridgeDelegate = nil;
+static BridgeUIDelegate *bridgeUIDelegate = nil;
 
 // nativeCreateWindow creates an NSWindow with WKWebView and shows it.
 // Safe to call from any thread — dispatches to main queue.
@@ -62,10 +106,12 @@ void nativeCreateWindow(const char* title, const char* url, int width, int heigh
 		bridgeDelegate = [[BridgeWindowDelegate alloc] init];
 		[bridgeWindow setDelegate:bridgeDelegate];
 
-		// Create WKWebView
+		// Create WKWebView with UI delegate for JS dialogs (alert, confirm, prompt)
 		WKWebViewConfiguration *config = [[WKWebViewConfiguration alloc] init];
 		bridgeWebView = [[WKWebView alloc] initWithFrame:frame configuration:config];
 		[bridgeWebView setAutoresizingMask:NSViewWidthSizable | NSViewHeightSizable];
+		bridgeUIDelegate = [[BridgeUIDelegate alloc] init];
+		[bridgeWebView setUIDelegate:bridgeUIDelegate];
 		[bridgeWindow setContentView:bridgeWebView];
 
 		// Navigate
