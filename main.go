@@ -1,9 +1,11 @@
 package main
 
 import (
+	"bytes"
 	"crypto/tls"
 	"encoding/json"
 	"fmt"
+	"image/png"
 	"io"
 	"log"
 	"net"
@@ -74,9 +76,10 @@ func corsMiddleware(next http.HandlerFunc) http.HandlerFunc {
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
 		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With")
+		w.Header().Set("Access-Control-Allow-Private-Network", "true")
 
 		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusOK)
+			w.WriteHeader(http.StatusNoContent)
 			return
 		}
 		next(w, r)
@@ -326,6 +329,12 @@ func handlePrint(w http.ResponseWriter, r *http.Request) {
 		printerName = targetPrinter.Name
 	} else {
 		targetPrinter = findPrinter(printerName, allPrinters)
+		if targetPrinter == nil {
+			log.Printf("[print] WARNING: printer %q not found in %d available printers", printerName, len(allPrinters))
+			for _, p := range allPrinters {
+				log.Printf("[print]   available: %q (type=%s, online=%v)", p.Name, p.Type, p.Online)
+			}
+		}
 	}
 
 	// Apply preset header if requested
@@ -544,6 +553,7 @@ func main() {
 	// Load configuration
 	initConfig()
 	LoadTemplates()
+	startUploadCleanup()
 
 	port := os.Getenv("TSC_BRIDGE_PORT")
 	if port == "" {
@@ -596,6 +606,10 @@ func main() {
 	// Run system tray — blocks until user clicks "Salir"
 	// autoOpen=true when NOT headless → spawns dashboard window on first run
 	log.Printf("Starting system tray (headless=%v)", headless)
+	if headless {
+		log.Printf("Headless mode — skipping systray, blocking forever")
+		select {}
+	}
 	runTray(dashURL, !headless)
 }
 
@@ -630,13 +644,31 @@ func startServers(port string) error {
 	mux.HandleFunc("/batch-print", corsMiddleware(handleBatchPrint))
 	mux.HandleFunc("/batch-preview", corsMiddleware(handleBatchPreview))
 	mux.HandleFunc("/batch-pdf", corsMiddleware(handleBatchPdf))
+	mux.HandleFunc("/batch-tspl", corsMiddleware(handleBatchTspl))
+	mux.HandleFunc("/batch-preview-image", corsMiddleware(handleBatchPreviewImage))
+	mux.HandleFunc("/debug-template", corsMiddleware(handleDebugTemplate))
 	mux.HandleFunc("/bridge/download", corsMiddleware(handleBridgeDownload))
+	mux.HandleFunc("/print-preview-thumb", corsMiddleware(handlePrintPreviewThumb))
+	mux.HandleFunc("/print-job", corsMiddleware(handlePrintJob))
+	mux.HandleFunc("/upload-pdf", corsMiddleware(handleUploadPdf))
+
+	// Auth routes
+	mux.HandleFunc("/auth/state", corsMiddleware(handleAuthState))
+	mux.HandleFunc("/auth/login", corsMiddleware(handleAuthLogin))
+	mux.HandleFunc("/auth/logout", corsMiddleware(handleAuthLogout))
 
 	// HTTP server — bind synchronously so we catch port-in-use errors immediately
 	httpAddr := "127.0.0.1:" + port
 	httpLn, err := net.Listen("tcp", httpAddr)
 	if err != nil {
 		return fmt.Errorf("HTTP bind %s: %w", httpAddr, err)
+	}
+
+	// Also bind IPv6 loopback — on Windows "localhost" resolves to [::1]
+	httpAddr6 := "[::1]:" + port
+	httpLn6, err6 := net.Listen("tcp", httpAddr6)
+	if err6 != nil {
+		log.Printf("IPv6 HTTP bind %s failed (non-fatal): %v", httpAddr6, err6)
 	}
 
 	// Start HTTP server on a DEDICATED OS thread.
@@ -654,15 +686,27 @@ func startServers(port string) error {
 	}()
 	<-httpReady // wait until the HTTP goroutine has its own thread
 
+	// IPv6 HTTP server
+	if httpLn6 != nil {
+		go func() {
+			runtime.LockOSThread()
+			log.Printf("HTTP server on %s (IPv6)", httpAddr6)
+			if err := http.Serve(httpLn6, mux); err != nil {
+				log.Printf("HTTP IPv6 server error: %v", err)
+			}
+		}()
+	}
+
 	// HTTPS server with auto-generated certs (also on dedicated thread)
 	httpsPort := fmt.Sprintf("%d", portInt(port)+1)
 	httpsAddr := "127.0.0.1:" + httpsPort
-	certFile, keyFile, _, err := ensureCerts(defaultHostname)
+	certFile, keyFile, caFile, err := ensureCerts(defaultHostname)
 	if err != nil {
 		log.Printf("[tls] Could not generate certs: %v — HTTPS disabled", err)
 		return nil // HTTP is running, HTTPS is optional
 	}
-	tlsCert, err := tls.LoadX509KeyPair(certFile, keyFile)
+	go installCACert(caFile)
+	tlsCert, err := loadCertWithCA(certFile, keyFile, caFile)
 	if err != nil {
 		log.Printf("[tls] Could not load certs: %v — HTTPS disabled", err)
 		return nil
@@ -672,9 +716,8 @@ func startServers(port string) error {
 		log.Printf("[tls] Could not bind %s: %v — HTTPS disabled", httpsAddr, err)
 		return nil
 	}
-	tlsListener := tls.NewListener(httpsLn, &tls.Config{
-		Certificates: []tls.Certificate{tlsCert},
-	})
+	tlsCfg := &tls.Config{Certificates: []tls.Certificate{tlsCert}}
+	tlsListener := tls.NewListener(httpsLn, tlsCfg)
 	httpsReady := make(chan struct{})
 	go func() {
 		runtime.LockOSThread()
@@ -685,6 +728,20 @@ func startServers(port string) error {
 		}
 	}()
 	<-httpsReady
+
+	// IPv6 HTTPS
+	httpsAddr6 := "[::1]:" + httpsPort
+	httpsLn6, err6 := net.Listen("tcp", httpsAddr6)
+	if err6 == nil {
+		tlsListener6 := tls.NewListener(httpsLn6, tlsCfg)
+		go func() {
+			runtime.LockOSThread()
+			log.Printf("HTTPS server on %s (IPv6)", httpsAddr6)
+			if err := http.Serve(tlsListener6, mux); err != nil {
+				log.Printf("[tls] HTTPS IPv6 server error: %v", err)
+			}
+		}()
+	}
 
 	return nil
 }
@@ -1029,9 +1086,109 @@ func handleBatchPdf(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var req struct {
+		TemplateID   string              `json:"template_id"`
+		TemplateFile string              `json:"template_file"` // local JSON file path (bypasses API)
+		TemplateJSON json.RawMessage     `json:"template_json"` // inline template JSON (bypasses API)
+		Rows         []map[string]string `json:"rows"`
+		Mapping      map[string]string   `json:"mapping"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		jsonResponse(w, http.StatusBadRequest, map[string]string{"error": "invalid JSON"})
+		return
+	}
+	if len(req.Rows) == 0 {
+		jsonResponse(w, http.StatusBadRequest, map[string]string{"error": "rows required"})
+		return
+	}
+
+	var schemaRaw json.RawMessage
+
+	// Priority: template_json > template_file > template_id (API)
+	if len(req.TemplateJSON) > 0 {
+		schemaRaw = req.TemplateJSON
+		log.Printf("[pdf] Using inline template_json (%d bytes)", len(schemaRaw))
+	} else if req.TemplateFile != "" {
+		data, err := os.ReadFile(req.TemplateFile)
+		if err != nil {
+			jsonResponse(w, http.StatusBadRequest, map[string]string{"error": "read template_file: " + err.Error()})
+			return
+		}
+		schemaRaw = json.RawMessage(data)
+		log.Printf("[pdf] Using local template_file: %s (%d bytes)", req.TemplateFile, len(data))
+	} else if req.TemplateID != "" {
+		cfg := getConfig()
+		client := NewApiClient(cfg)
+		detail, err := client.FetchTemplateDetail(req.TemplateID)
+		if err != nil {
+			jsonResponse(w, http.StatusBadGateway, map[string]string{"error": "fetch template: " + err.Error()})
+			return
+		}
+		if detail.Schema == nil {
+			jsonResponse(w, http.StatusBadRequest, map[string]string{"error": "template has no pdfme schema"})
+			return
+		}
+		schemaRaw = detail.Schema
+		log.Printf("[pdf] Using API template_id: %s", req.TemplateID)
+	} else {
+		jsonResponse(w, http.StatusBadRequest, map[string]string{"error": "template_id, template_file, or template_json required"})
+		return
+	}
+
+	schema, err := ParsePdfmeSchema(schemaRaw)
+	if err != nil {
+		jsonResponse(w, http.StatusInternalServerError, map[string]string{"error": "parse schema: " + err.Error()})
+		return
+	}
+
+	// Log field summary for debugging
+	if len(schema.Schemas) > 0 {
+		qrCount := 0
+		for _, f := range schema.Schemas[0] {
+			if f.Type == "qrcode" {
+				qrCount++
+				log.Printf("[pdf] QR field found: %q content=%q", f.Name, f.Content)
+			}
+		}
+		if qrCount == 0 {
+			log.Printf("[pdf] WARNING: No QR fields found in template!")
+		}
+	}
+
+	// Rows arrive already mapped by the dashboard frontend (applyMapping).
+	// The mapping dict is informational only — do NOT re-apply it.
+	mappedRows := req.Rows
+
+	outputDir := filepath.Join(configDir(), "output")
+	os.MkdirAll(outputDir, 0755)
+	outputPath := filepath.Join(outputDir, fmt.Sprintf("batch_%d.pdf", time.Now().UnixMilli()))
+
+	if err := RenderBulkPDF(schema, mappedRows, outputPath); err != nil {
+		jsonResponse(w, http.StatusInternalServerError, map[string]string{"error": "render PDF: " + err.Error()})
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/pdf")
+	w.Header().Set("Content-Disposition", fmt.Sprintf(`attachment; filename="batch_%d.pdf"`, len(mappedRows)))
+	http.ServeFile(w, r, outputPath)
+}
+
+// handleBatchTspl generates TSPL2 from a pdfme template and prints or previews.
+// POST /batch-tspl { template_id, rows, mapping, printer?, copies?, mode?, dpi? }
+// mode: "print" (default) sends to printer; "preview" returns TSPL text; "raster" uses full bitmap mode.
+func handleBatchTspl(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		jsonResponse(w, http.StatusMethodNotAllowed, map[string]string{"error": "POST only"})
+		return
+	}
+
+	var req struct {
 		TemplateID string              `json:"template_id"`
 		Rows       []map[string]string `json:"rows"`
 		Mapping    map[string]string   `json:"mapping"`
+		Printer    string              `json:"printer"`
+		Copies     int                 `json:"copies"`
+		Mode       string              `json:"mode"` // "print", "preview", "raster"
+		DPI        int                 `json:"dpi"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		jsonResponse(w, http.StatusBadRequest, map[string]string{"error": "invalid JSON"})
@@ -1039,6 +1196,165 @@ func handleBatchPdf(w http.ResponseWriter, r *http.Request) {
 	}
 	if req.TemplateID == "" || len(req.Rows) == 0 {
 		jsonResponse(w, http.StatusBadRequest, map[string]string{"error": "template_id and rows required"})
+		return
+	}
+	if req.Copies < 1 {
+		req.Copies = 1
+	}
+
+	cfg := getConfig()
+	client := NewApiClient(cfg)
+	detail, err := client.FetchTemplateDetail(req.TemplateID)
+	if err != nil {
+		jsonResponse(w, http.StatusBadGateway, map[string]string{"error": "fetch template: " + err.Error()})
+		return
+	}
+	if detail.Schema == nil {
+		jsonResponse(w, http.StatusBadRequest, map[string]string{"error": "template has no pdfme schema"})
+		return
+	}
+
+	schema, err := ParsePdfmeSchema(detail.Schema)
+	if err != nil {
+		jsonResponse(w, http.StatusInternalServerError, map[string]string{"error": "parse schema: " + err.Error()})
+		return
+	}
+
+	var tsplData []byte
+	if req.Mode == "raster" {
+		tsplData = RenderBulkTSPLRaster(schema, req.Rows, req.DPI, req.Copies)
+	} else {
+		tsplData = RenderBulkTSPL(schema, req.Rows, req.DPI, req.Copies)
+	}
+
+	if req.Mode == "preview" {
+		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+		w.Write(tsplData)
+		return
+	}
+
+	// Send to printer (do NOT sanitize — may contain binary BITMAP data)
+	allPrinters, _ := listAllPrinters()
+	printerName := req.Printer
+	if printerName == "" {
+		printerName = cfg.DefaultPrinter
+	}
+
+	var targetPrinter *PrinterInfo
+	if printerName == "" {
+		if len(allPrinters) > 0 {
+			targetPrinter = &allPrinters[0]
+			printerName = targetPrinter.Name
+		}
+	} else {
+		targetPrinter = findPrinter(printerName, allPrinters)
+	}
+	if printerName == "" {
+		jsonResponse(w, http.StatusBadRequest, map[string]string{"error": "no printer found"})
+		return
+	}
+
+	var printErr error
+	if targetPrinter != nil && (targetPrinter.Type == "network" || targetPrinter.Type == "manual" || targetPrinter.Type == "raw") {
+		printErr = networkRawPrint(targetPrinter.Address, tsplData)
+	} else {
+		printErr = rawPrint(printerName, tsplData)
+	}
+
+	if printErr != nil {
+		jsonResponse(w, http.StatusInternalServerError, map[string]string{"error": "print failed: " + printErr.Error()})
+		return
+	}
+
+	jsonResponse(w, http.StatusOK, map[string]interface{}{
+		"status":  "ok",
+		"rows":    len(req.Rows),
+		"bytes":   len(tsplData),
+		"printer": printerName,
+		"mode":    req.Mode,
+	})
+}
+
+// handleBatchPreviewImage generates a PNG preview of what the thermal printer would output.
+// POST /batch-preview-image { template_id, rows, mapping, dpi?, row_index? }
+// Returns PNG image (monochrome raster at specified DPI, default 203).
+func handleBatchPreviewImage(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		jsonResponse(w, http.StatusMethodNotAllowed, map[string]string{"error": "POST only"})
+		return
+	}
+
+	var req struct {
+		TemplateID string              `json:"template_id"`
+		Rows       []map[string]string `json:"rows"`
+		Mapping    map[string]string   `json:"mapping"`
+		DPI        int                 `json:"dpi"`
+		RowIndex   int                 `json:"row_index"` // which row to preview (default 0)
+	}
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		jsonResponse(w, http.StatusBadRequest, map[string]string{"error": "invalid JSON"})
+		return
+	}
+	if req.TemplateID == "" || len(req.Rows) == 0 {
+		jsonResponse(w, http.StatusBadRequest, map[string]string{"error": "template_id and rows required"})
+		return
+	}
+	if req.DPI <= 0 {
+		req.DPI = 203
+	}
+	if req.RowIndex >= len(req.Rows) {
+		req.RowIndex = 0
+	}
+
+	cfg := getConfig()
+	client := NewApiClient(cfg)
+	detail, err := client.FetchTemplateDetail(req.TemplateID)
+	if err != nil {
+		jsonResponse(w, http.StatusBadGateway, map[string]string{"error": "fetch template: " + err.Error()})
+		return
+	}
+	if detail.Schema == nil {
+		jsonResponse(w, http.StatusBadRequest, map[string]string{"error": "template has no pdfme schema"})
+		return
+	}
+
+	schema, err := ParsePdfmeSchema(detail.Schema)
+	if err != nil {
+		jsonResponse(w, http.StatusInternalServerError, map[string]string{"error": "parse schema: " + err.Error()})
+		return
+	}
+
+	row := req.Rows[req.RowIndex]
+	img := rasterizePage(schema, row, 0, req.DPI)
+
+	var buf bytes.Buffer
+	if err := png.Encode(&buf, img); err != nil {
+		jsonResponse(w, http.StatusInternalServerError, map[string]string{"error": "encode PNG: " + err.Error()})
+		return
+	}
+
+	w.Header().Set("Content-Type", "image/png")
+	w.Header().Set("Content-Disposition", `inline; filename="preview.png"`)
+	w.Write(buf.Bytes())
+}
+
+// handleDebugTemplate returns parsed field details for a template (debugging).
+// POST /debug-template { template_id }
+func handleDebugTemplate(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		jsonResponse(w, http.StatusMethodNotAllowed, map[string]string{"error": "POST only"})
+		return
+	}
+
+	var req struct {
+		TemplateID string `json:"template_id"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		jsonResponse(w, http.StatusBadRequest, map[string]string{"error": "invalid JSON"})
+		return
+	}
+	if req.TemplateID == "" {
+		jsonResponse(w, http.StatusBadRequest, map[string]string{"error": "template_id required"})
 		return
 	}
 
@@ -1060,31 +1376,324 @@ func handleBatchPdf(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Apply column mapping if provided
-	mappedRows := req.Rows
-	if len(req.Mapping) > 0 {
-		mappedRows = make([]map[string]string, len(req.Rows))
-		for i, row := range req.Rows {
-			mapped := make(map[string]string)
-			for fieldName, colName := range req.Mapping {
-				if val, ok := row[colName]; ok {
-					mapped[fieldName] = val
-				}
-			}
-			mappedRows[i] = mapped
-		}
+	type fieldDebug struct {
+		Index   int     `json:"index"`
+		Name    string  `json:"name"`
+		Type    string  `json:"type"`
+		X       float64 `json:"x"`
+		Y       float64 `json:"y"`
+		Width   float64 `json:"width"`
+		Height  float64 `json:"height"`
+		Content string  `json:"content,omitempty"`
+		Opacity float64 `json:"opacity"`
 	}
 
-	outputDir := filepath.Join(configDir(), "output")
-	os.MkdirAll(outputDir, 0755)
-	outputPath := filepath.Join(outputDir, fmt.Sprintf("batch_%d.pdf", time.Now().UnixMilli()))
+	var pages [][]fieldDebug
+	for _, page := range schema.Schemas {
+		var fields []fieldDebug
+		for i, f := range page {
+			fields = append(fields, fieldDebug{
+				Index:   i,
+				Name:    f.Name,
+				Type:    f.Type,
+				X:       f.Position.X,
+				Y:       f.Position.Y,
+				Width:   f.Width,
+				Height:  f.Height,
+				Content: f.Content,
+				Opacity: f.Opacity,
+			})
+		}
+		pages = append(pages, fields)
+	}
 
-	if err := RenderBulkPDF(schema, mappedRows, outputPath); err != nil {
-		jsonResponse(w, http.StatusInternalServerError, map[string]string{"error": "render PDF: " + err.Error()})
+	jsonResponse(w, http.StatusOK, map[string]interface{}{
+		"template_id": req.TemplateID,
+		"name":        detail.Name,
+		"base_pdf": map[string]float64{
+			"width":  schema.BasePdf.Width,
+			"height": schema.BasePdf.Height,
+		},
+		"pages":       pages,
+		"total_fields": len(pages[0]),
+	})
+}
+
+// ════════════════════════════════════════════════════
+// Print Dialog endpoints
+// ════════════════════════════════════════════════════
+
+// POST /print-preview-thumb — returns a PNG thumbnail for one page
+func handlePrintPreviewThumb(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		jsonResponse(w, http.StatusMethodNotAllowed, map[string]string{"error": "POST only"})
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/pdf")
-	w.Header().Set("Content-Disposition", fmt.Sprintf(`attachment; filename="batch_%d.pdf"`, len(mappedRows)))
-	http.ServeFile(w, r, outputPath)
+	var req struct {
+		Source       string              `json:"source"` // "batch" or "upload"
+		TemplateID   string              `json:"template_id"`
+		TemplateJSON json.RawMessage     `json:"template_json"`
+		Rows         []map[string]string `json:"rows"`
+		RowIndex     int                 `json:"row_index"`
+		PageIndex    int                 `json:"page_index"`
+		DPI          int                 `json:"dpi"`
+		UploadID     string              `json:"upload_id"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		jsonResponse(w, http.StatusBadRequest, map[string]string{"error": "invalid JSON"})
+		return
+	}
+	if req.DPI <= 0 {
+		req.DPI = 72
+	}
+
+	if req.Source == "upload" {
+		// Serve pre-rasterized PNG from upload directory
+		pngPath := getUploadPagePath(req.UploadID, req.PageIndex)
+		if pngPath == "" {
+			jsonResponse(w, http.StatusNotFound, map[string]string{"error": "page not found"})
+			return
+		}
+		w.Header().Set("Content-Type", "image/png")
+		http.ServeFile(w, r, pngPath)
+		return
+	}
+
+	// Batch mode: rasterize a single page from schema + row data
+	var schema *PdfmeSchema
+	var err error
+
+	if len(req.TemplateJSON) > 0 {
+		schema, err = ParsePdfmeSchema(req.TemplateJSON)
+	} else if req.TemplateID != "" {
+		cfg := getConfig()
+		client := NewApiClient(cfg)
+		detail, fetchErr := client.FetchTemplateDetail(req.TemplateID)
+		if fetchErr != nil {
+			jsonResponse(w, http.StatusBadGateway, map[string]string{"error": "fetch template: " + fetchErr.Error()})
+			return
+		}
+		if detail.Schema == nil {
+			jsonResponse(w, http.StatusBadRequest, map[string]string{"error": "template has no pdfme schema"})
+			return
+		}
+		schema, err = ParsePdfmeSchema(detail.Schema)
+	} else {
+		jsonResponse(w, http.StatusBadRequest, map[string]string{"error": "template_json or template_id required"})
+		return
+	}
+	if err != nil {
+		jsonResponse(w, http.StatusInternalServerError, map[string]string{"error": "parse schema: " + err.Error()})
+		return
+	}
+
+	if req.RowIndex >= len(req.Rows) {
+		req.RowIndex = 0
+	}
+	row := req.Rows[req.RowIndex]
+	img := rasterizePage(schema, row, req.PageIndex, req.DPI)
+
+	var buf bytes.Buffer
+	if err := png.Encode(&buf, img); err != nil {
+		jsonResponse(w, http.StatusInternalServerError, map[string]string{"error": "encode PNG: " + err.Error()})
+		return
+	}
+
+	w.Header().Set("Content-Type", "image/png")
+	w.Header().Set("Cache-Control", "public, max-age=60")
+	w.Write(buf.Bytes())
+}
+
+// POST /print-job — SSE stream that prints selected pages with progress
+func handlePrintJob(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		jsonResponse(w, http.StatusMethodNotAllowed, map[string]string{"error": "POST only"})
+		return
+	}
+
+	var req struct {
+		Source       string              `json:"source"` // "batch" or "upload"
+		TemplateID   string              `json:"template_id"`
+		TemplateJSON json.RawMessage     `json:"template_json"`
+		Rows         []map[string]string `json:"rows"`
+		Pages        []int               `json:"pages"`   // absolute page indices
+		Copies       int                 `json:"copies"`
+		Printer      string              `json:"printer"`
+		UploadID     string              `json:"upload_id"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		jsonResponse(w, http.StatusBadRequest, map[string]string{"error": "invalid JSON"})
+		return
+	}
+	if len(req.Pages) == 0 {
+		jsonResponse(w, http.StatusBadRequest, map[string]string{"error": "pages required"})
+		return
+	}
+	if req.Copies < 1 {
+		req.Copies = 1
+	}
+
+	// Setup SSE headers
+	w.Header().Set("Content-Type", "text/event-stream")
+	w.Header().Set("Cache-Control", "no-cache")
+	w.Header().Set("Connection", "keep-alive")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	flusher, ok := w.(http.Flusher)
+	if !ok {
+		jsonResponse(w, http.StatusInternalServerError, map[string]string{"error": "streaming not supported"})
+		return
+	}
+
+	sseWrite := func(event string, data interface{}) {
+		jsonData, _ := json.Marshal(data)
+		fmt.Fprintf(w, "event: %s\ndata: %s\n\n", event, jsonData)
+		flusher.Flush()
+	}
+
+	// Parse schema for batch mode
+	var schema *PdfmeSchema
+	pagesPerRow := 1
+
+	if req.Source != "upload" {
+		var err error
+		if len(req.TemplateJSON) > 0 {
+			schema, err = ParsePdfmeSchema(req.TemplateJSON)
+		} else if req.TemplateID != "" {
+			cfg := getConfig()
+			client := NewApiClient(cfg)
+			detail, fetchErr := client.FetchTemplateDetail(req.TemplateID)
+			if fetchErr != nil {
+				sseWrite("error", map[string]string{"message": "fetch template: " + fetchErr.Error()})
+				return
+			}
+			if detail.Schema == nil {
+				sseWrite("error", map[string]string{"message": "template has no pdfme schema"})
+				return
+			}
+			schema, err = ParsePdfmeSchema(detail.Schema)
+		}
+		if err != nil {
+			sseWrite("error", map[string]string{"message": "parse schema: " + err.Error()})
+			return
+		}
+		if schema != nil {
+			pagesPerRow = len(schema.Schemas)
+			if pagesPerRow < 1 {
+				pagesPerRow = 1
+			}
+		}
+	}
+
+	totalPages := len(req.Pages)
+	printerName := req.Printer
+
+	sseWrite("start", map[string]any{
+		"total_pages": totalPages,
+		"printer":     printerName,
+	})
+
+	startTime := time.Now()
+	totalBytes := 0
+	printed := 0
+
+	for i, absPage := range req.Pages {
+		// Check if client disconnected
+		select {
+		case <-r.Context().Done():
+			sseWrite("error", map[string]string{"message": "cancelled by client"})
+			return
+		default:
+		}
+
+		var tsplData []byte
+
+		if req.Source == "upload" {
+			// Upload mode: read rasterized PNG and convert to TSPL bitmap
+			tsplData = renderUploadedPageTSPL(req.UploadID, absPage, req.Copies)
+		} else {
+			// Batch mode: render single page TSPL
+			rowIdx := absPage / pagesPerRow
+			pageIdx := absPage % pagesPerRow
+			if rowIdx < len(req.Rows) {
+				tsplData = renderSinglePageTSPL(schema, req.Rows[rowIdx], pageIdx, defaultDPI, req.Copies)
+			}
+		}
+
+		if len(tsplData) == 0 {
+			sseWrite("error", map[string]string{"message": fmt.Sprintf("empty TSPL for page %d", absPage+1), "page": strconv.Itoa(absPage + 1)})
+			continue
+		}
+
+		// Send to printer
+		err := sendToPrinterByName(string(tsplData), printerName)
+		if err != nil {
+			sseWrite("error", map[string]string{"message": "printer error: " + err.Error(), "page": strconv.Itoa(absPage + 1)})
+			return
+		}
+
+		totalBytes += len(tsplData)
+		printed++
+
+		pct := int(float64(i+1) / float64(totalPages) * 100)
+		sseWrite("progress", map[string]any{
+			"page":       i + 1,
+			"of":         totalPages,
+			"percent":    pct,
+			"bytes_sent": len(tsplData),
+		})
+	}
+
+	elapsed := time.Since(startTime).Milliseconds()
+	sseWrite("complete", map[string]any{
+		"printed":     printed,
+		"total_bytes": totalBytes,
+		"elapsed_ms":  elapsed,
+	})
+}
+
+// POST /upload-pdf — accepts PDF file, rasterizes pages, returns metadata
+func handleUploadPdf(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		jsonResponse(w, http.StatusMethodNotAllowed, map[string]string{"error": "POST only"})
+		return
+	}
+
+	// Limit to 20MB
+	r.ParseMultipartForm(20 << 20)
+	file, _, err := r.FormFile("file")
+	if err != nil {
+		jsonResponse(w, http.StatusBadRequest, map[string]string{"error": "file required: " + err.Error()})
+		return
+	}
+	defer file.Close()
+
+	// Read into temp file
+	uploadID := fmt.Sprintf("up_%d", time.Now().UnixMilli())
+	uploadsDir := filepath.Join(configDir(), "uploads", uploadID)
+	os.MkdirAll(uploadsDir, 0755)
+
+	pdfPath := filepath.Join(uploadsDir, "input.pdf")
+	outFile, err := os.Create(pdfPath)
+	if err != nil {
+		jsonResponse(w, http.StatusInternalServerError, map[string]string{"error": "create file: " + err.Error()})
+		return
+	}
+	io.Copy(outFile, file)
+	outFile.Close()
+
+	// Rasterize
+	outDir, pageCount, err := rasterizeUploadedPDF(pdfPath, 203)
+	if err != nil {
+		os.RemoveAll(uploadsDir)
+		jsonResponse(w, http.StatusInternalServerError, map[string]string{"error": "rasterize: " + err.Error()})
+		return
+	}
+
+	log.Printf("[upload-pdf] Rasterized %d pages from upload %s to %s", pageCount, uploadID, outDir)
+
+	jsonResponse(w, http.StatusOK, map[string]any{
+		"upload_id":   uploadID,
+		"total_pages": pageCount,
+	})
 }
