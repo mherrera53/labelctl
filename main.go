@@ -144,6 +144,16 @@ func handleStatus(w http.ResponseWriter, r *http.Request) {
 		"default_printer": cfg.DefaultPrinter,
 		"default_preset":  cfg.DefaultPreset,
 		"share":           getShareStatus(),
+		"printer_dpi": func() map[string]int {
+			configMu.RLock()
+			defer configMu.RUnlock()
+			flat := make(map[string]int, len(appConfig.PrinterDPI))
+			for name, entry := range appConfig.PrinterDPI {
+				flat[name] = entry.DPI
+			}
+			return flat
+		}(),
+		"default_dpi": defaultDPI,
 	})
 }
 
@@ -594,6 +604,7 @@ func main() {
 	}
 	go startNetworkScanner()
 	go startShareServer()
+	go DetectAllPrinterDPIs()
 
 	// Verify HTTP server is actually accepting connections before proceeding.
 	// Critical on Windows: systray.Run() enters a Win32 message loop that can
@@ -634,6 +645,10 @@ func startServers(port string) error {
 	mux.HandleFunc("/driver/status", corsMiddleware(handleDriverStatus))
 	mux.HandleFunc("/driver/setup", corsMiddleware(handleDriverSetup))
 	mux.HandleFunc("/driver/progress", corsMiddleware(handleDriverProgress))
+
+	// DPI detection & management
+	mux.HandleFunc("/dpi/detect", corsMiddleware(handleDPIDetect))
+	mux.HandleFunc("/dpi", corsMiddleware(handleDPISet))
 
 	// Batch printing routes
 	mux.HandleFunc("/api/test", corsMiddleware(handleApiTest))
