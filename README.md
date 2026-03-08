@@ -103,22 +103,14 @@ curl -X POST http://127.0.0.1:9638/print \
 
 ## How It Works
 
-```
-Web Application
-      |
-      | HTTP POST (JSON)
-      v
-+------------------+
-|   TSC Bridge     |
-|                  |
-|  HTTP Server     |
-|  Label Renderer  |---> PDF / TSPL / ZPL / EPL
-|  Driver Layer    |
-+------------------+
-      |
-      | USB / CUPS / Win32 RAW
-      v
-  Thermal Printer
+```mermaid
+graph TD
+    A[Web Application] -->|HTTP POST JSON| B[TSC Bridge]
+    B --> C[HTTP Server]
+    B --> D[Label Renderer]
+    B --> E[Driver Layer]
+    D -->|PDF / TSPL / ZPL / EPL| E
+    E -->|USB / CUPS / Win32 RAW| F[Thermal Printer]
 ```
 
 The bridge runs on `127.0.0.1:9638` (configurable). Web applications send

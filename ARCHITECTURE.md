@@ -13,26 +13,23 @@ subsystems concurrently:
 3. **Native Window** -- platform-specific dashboard window (WKWebView on macOS,
    webview_go on Windows/Linux, browser fallback)
 
-```
-main.go
-  |
-  +-- tray.go           System tray lifecycle (fyne.io/systray)
-  |
-  +-- HTTP Server        net/http on 127.0.0.1:PORT
-  |     |
-  |     +-- /status      Bridge status
-  |     +-- /printers    Printer enumeration
-  |     +-- /print       Raw print job
-  |     +-- /batch-pdf   PDF generation from template + rows
-  |     +-- /batch-tspl  TSPL generation and printing
-  |     +-- /dashboard   Embedded HTML (go:embed)
-  |     +-- /output/     Serve generated files
-  |     +-- /templates   Local template CRUD
-  |     +-- ...          40+ endpoints
-  |
-  +-- webview_*.go       Native window (platform-specific)
-  +-- config.go          Configuration management
-  +-- auth.go            Backend authentication
+```mermaid
+graph TD
+    M[main.go] --> T[tray.go<br/>System tray lifecycle]
+    M --> H[HTTP Server<br/>net/http on 127.0.0.1:PORT]
+    M --> W[webview_*.go<br/>Native window]
+    M --> CFG[config.go<br/>Configuration]
+    M --> AUTH[auth.go<br/>Backend authentication]
+
+    H --> S[/status]
+    H --> P[/printers]
+    H --> PR[/print]
+    H --> BP[/batch-pdf]
+    H --> BT[/batch-tspl]
+    H --> D[/dashboard]
+    H --> O[/output/]
+    H --> TM[/templates]
+    H --> ETC[... 40+ endpoints]
 ```
 
 ## Source Organization
@@ -129,20 +126,13 @@ directory on first run. Key settings:
 
 When a print job arrives:
 
-```
-JSON request
-    |
-    v
-Parse template (label_template.go)
-    |
-    v
-Resolve variables (pdf_renderer.go: enrichRowForVariables)
-    |
-    +---> PDF path: RenderBulkPDF() -> gopdf -> .pdf file
-    |
-    +---> TSPL path: RenderBulkTSPL() -> TSPL2 commands -> rawPrint()
-    |
-    +---> [Future] ZPL path: RenderBulkZPL() -> ZPL commands -> rawPrint()
+```mermaid
+graph TD
+    REQ[JSON request] --> PARSE[Parse template<br/>label_template.go]
+    PARSE --> VARS[Resolve variables<br/>enrichRowForVariables]
+    VARS --> PDF[PDF path<br/>RenderBulkPDF → gopdf → .pdf]
+    VARS --> TSPL[TSPL path<br/>RenderBulkTSPL → TSPL2 → rawPrint]
+    VARS --> ZPL[Future: ZPL path<br/>RenderBulkZPL → ZPL → rawPrint]
 ```
 
 ### Variable Resolution
