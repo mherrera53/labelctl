@@ -20,6 +20,12 @@ type WhitelabelConfig struct {
 	AccentColor  string `json:"accent_color,omitempty"`
 }
 
+// PrinterDPIEntry stores the DPI for a printer along with how it was determined.
+type PrinterDPIEntry struct {
+	DPI    int    `json:"dpi"`
+	Source string `json:"source"` // "driver", "tspl_probe", "manual"
+}
+
 // AppConfig is the persisted configuration for tsc-bridge.
 type AppConfig struct {
 	Port                int              `json:"port"`
@@ -38,7 +44,8 @@ type AppConfig struct {
 	ApiKey              string           `json:"api_key"`
 	ApiSecret           string           `json:"api_secret"`
 	ApiWhiteLabel       int              `json:"api_wl"`
-	Whitelabel          WhitelabelConfig `json:"whitelabel"`
+	Whitelabel          WhitelabelConfig            `json:"whitelabel"`
+	PrinterDPI          map[string]PrinterDPIEntry  `json:"printer_dpi"`
 }
 
 var (
@@ -60,6 +67,7 @@ func defaultConfig() AppConfig {
 		ShareEnabled:        false,
 		SharePort:           9100,
 		SharePrinter:        "",
+		PrinterDPI:          map[string]PrinterDPIEntry{},
 	}
 }
 
@@ -98,6 +106,9 @@ func initConfig() {
 	}
 	if appConfig.ManualPrinters == nil {
 		appConfig.ManualPrinters = []string{}
+	}
+	if appConfig.PrinterDPI == nil {
+		appConfig.PrinterDPI = map[string]PrinterDPIEntry{}
 	}
 
 	// Decrypt secrets (supports plaintext migration — unencrypted values pass through)
@@ -203,6 +214,13 @@ func safeConfigForClient() map[string]any {
 		"api_configured":      cfg.ApiURL != "" && (cfg.ApiKey != "" || cfg.ApiToken != ""),
 		"api_url":             cfg.ApiURL,
 		"whitelabel":          cfg.Whitelabel,
+		"printer_dpi": func() map[string]int {
+			flat := make(map[string]int, len(cfg.PrinterDPI))
+			for name, entry := range cfg.PrinterDPI {
+				flat[name] = entry.DPI
+			}
+			return flat
+		}(),
 	}
 }
 
