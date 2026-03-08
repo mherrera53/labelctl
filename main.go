@@ -706,6 +706,7 @@ func startServers(port string) error {
 	// Auth routes
 	mux.HandleFunc("/auth/state", corsMiddleware(handleAuthState))
 	mux.HandleFunc("/auth/login", corsMiddleware(handleAuthLogin))
+	mux.HandleFunc("/auth/login-password", corsMiddleware(handleAuthLoginPassword))
 	mux.HandleFunc("/auth/logout", corsMiddleware(handleAuthLogout))
 
 	// HTTP server — bind synchronously so we catch port-in-use errors immediately

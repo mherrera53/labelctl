@@ -717,27 +717,65 @@ html, body { height: 100%; margin: 0; overflow: hidden; font-family: -apple-syst
         <h5 class="modal-title"><i class="bi bi-gear me-2"></i>Configurar TSC Bridge</h5>
       </div>
       <div class="modal-body">
-        <div class="mb-3">
-          <label class="form-label">URL del servidor</label>
-          <input type="url" id="setup-url" class="form-control" placeholder="https://latam.paygateway-api.com/api">
+        <!-- Login method tabs -->
+        <ul class="nav nav-tabs mb-3" role="tablist">
+          <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="tab-password" data-bs-toggle="tab" data-bs-target="#setup-password-pane" type="button" role="tab">
+              <i class="bi bi-person-lock me-1"></i>Usuario y contraseña
+            </button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link" id="tab-apikey" data-bs-toggle="tab" data-bs-target="#setup-apikey-pane" type="button" role="tab">
+              <i class="bi bi-key me-1"></i>API Key
+            </button>
+          </li>
+        </ul>
+        <div class="tab-content">
+          <!-- Password login pane -->
+          <div class="tab-pane fade show active" id="setup-password-pane" role="tabpanel">
+            <div class="mb-3">
+              <label class="form-label">URL del servidor</label>
+              <input type="url" id="setup-pwd-url" class="form-control" placeholder="https://latam.paygateway-api.com/api">
+            </div>
+            <div class="mb-3">
+              <label class="form-label">White-label ID</label>
+              <input type="number" id="setup-pwd-wl" class="form-control" value="20">
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Email</label>
+              <input type="email" id="setup-pwd-email" class="form-control" placeholder="tu@email.com">
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Contraseña</label>
+              <input type="password" id="setup-pwd-password" class="form-control">
+            </div>
+            <small class="text-muted"><i class="bi bi-info-circle me-1"></i>Solo el dueño de la tienda puede conectar. Usuarios staff no tienen permiso.</small>
+          </div>
+          <!-- API Key pane -->
+          <div class="tab-pane fade" id="setup-apikey-pane" role="tabpanel">
+            <div class="mb-3">
+              <label class="form-label">URL del servidor</label>
+              <input type="url" id="setup-url" class="form-control" placeholder="https://latam.paygateway-api.com/api">
+            </div>
+            <div class="mb-3">
+              <label class="form-label">API Key</label>
+              <input type="text" id="setup-key" class="form-control">
+            </div>
+            <div class="mb-3">
+              <label class="form-label">API Secret</label>
+              <input type="password" id="setup-secret" class="form-control">
+            </div>
+            <div class="mb-3">
+              <label class="form-label">White-label ID (opcional)</label>
+              <input type="number" id="setup-wl" class="form-control" value="20">
+            </div>
+          </div>
         </div>
-        <div class="mb-3">
-          <label class="form-label">API Key</label>
-          <input type="text" id="setup-key" class="form-control">
-        </div>
-        <div class="mb-3">
-          <label class="form-label">API Secret</label>
-          <input type="password" id="setup-secret" class="form-control">
-        </div>
-        <div class="mb-3">
-          <label class="form-label">White-label ID (opcional)</label>
-          <input type="number" id="setup-wl" class="form-control" value="20">
-        </div>
-        <div id="setup-error" class="alert alert-danger d-none"></div>
-        <div id="setup-success" class="alert alert-success d-none"></div>
+        <div id="setup-error" class="alert alert-danger d-none mt-3"></div>
+        <div id="setup-success" class="alert alert-success d-none mt-3"></div>
       </div>
       <div class="modal-footer">
-        <button class="btn btn-primary" onclick="setupConnect()"><i class="bi bi-plug me-1"></i>Conectar</button>
+        <button class="btn btn-primary" id="setup-connect-btn" onclick="setupConnectDispatch()"><i class="bi bi-plug me-1"></i>Conectar</button>
         <button class="btn btn-secondary" data-bs-dismiss="modal">Omitir</button>
       </div>
     </div>
@@ -3474,6 +3512,68 @@ async function setupConnect() {
     try { msg = JSON.parse(msg).error || msg; } catch(x) {}
     errEl.textContent = 'Error: ' + msg;
     errEl.classList.remove('d-none');
+  }
+}
+
+// ===================== SETUP DISPATCH =====================
+function setupConnectDispatch() {
+  const activeTab = document.querySelector('#setupWizard .nav-link.active');
+  if (activeTab && activeTab.id === 'tab-password') {
+    setupConnectPassword();
+  } else {
+    setupConnect();
+  }
+}
+
+async function setupConnectPassword() {
+  const url = document.getElementById('setup-pwd-url').value.trim();
+  const wl = parseInt(document.getElementById('setup-pwd-wl').value) || 0;
+  const email = document.getElementById('setup-pwd-email').value.trim();
+  const password = document.getElementById('setup-pwd-password').value;
+
+  const errEl = document.getElementById('setup-error');
+  const successEl = document.getElementById('setup-success');
+  errEl.classList.add('d-none');
+  successEl.classList.add('d-none');
+
+  if (!url || !email || !password) {
+    errEl.textContent = 'URL, email y contraseña son requeridos';
+    errEl.classList.remove('d-none');
+    return;
+  }
+
+  const btn = document.getElementById('setup-connect-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Conectando...';
+
+  try {
+    await api('POST', '/auth/login-password', { api_url: url, wl_id: wl, email, password });
+    successEl.textContent = 'Conexion exitosa!';
+    successEl.classList.remove('d-none');
+
+    // Refresh state
+    const auth = await api('GET', '/auth/state');
+    AppState.authState = auth;
+    updateAuthBadge();
+
+    const config = await api('GET', '/config');
+    AppState.config = config;
+    renderConfigTab();
+
+    // Close modal after delay
+    setTimeout(() => {
+      bootstrap.Modal.getInstance(document.getElementById('setupWizard')).hide();
+    }, 1500);
+
+    showToast('Conectado al servidor');
+  } catch(e) {
+    let msg = e.message;
+    try { msg = JSON.parse(msg).error || msg; } catch(x) {}
+    errEl.textContent = msg;
+    errEl.classList.remove('d-none');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<i class="bi bi-plug me-1"></i>Conectar';
   }
 }
 
