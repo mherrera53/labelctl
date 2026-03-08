@@ -95,6 +95,36 @@ func handleAuthLogin(w http.ResponseWriter, r *http.Request) {
 	}
 	configMu.Unlock()
 
+	// Fetch brand info (name, logo, colors) from backend
+	brand, err := client.FetchBrandInfo()
+	if err != nil {
+		log.Printf("[auth] brand fetch failed (non-fatal): %v", err)
+	} else if brand != nil {
+		configMu.Lock()
+		name := brand.BrandName
+		if name == "" {
+			name = brand.WLName
+		}
+		logo := brand.BrandLogo
+		if logo == "" {
+			logo = brand.WLLogo
+		}
+		if name != "" {
+			appConfig.Whitelabel.Name = name
+		}
+		if logo != "" {
+			appConfig.Whitelabel.LogoURL = logo
+		}
+		if brand.PrimaryColor != "" {
+			appConfig.Whitelabel.PrimaryColor = brand.PrimaryColor
+		}
+		if brand.SecondaryColor != "" {
+			appConfig.Whitelabel.AccentColor = brand.SecondaryColor
+		}
+		configMu.Unlock()
+		log.Printf("[auth] brand detected: %s (logo=%s)", name, logo)
+	}
+
 	if err := saveConfig(); err != nil {
 		jsonResponse(w, http.StatusInternalServerError, map[string]string{"error": "save failed"})
 		return

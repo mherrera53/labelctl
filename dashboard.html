@@ -11,106 +11,126 @@
 :root {
   --primary: #2563eb;
   --primary-hover: #1d4ed8;
-  --primary-light: rgba(37,99,235,0.08);
-  --surface: #ffffff;
-  --surface-2: #f8f9fa;
+  --primary-light: rgba(37,99,235,0.06);
+  --surface: #fff;
+  --surface-2: #f8f9fb;
   --text: #1a1d2e;
-  --text-dim: #6c757d;
-  --text-muted: #adb5bd;
-  --border: #dee2e6;
-  --green: #198754;
-  --red: #dc3545;
-  --orange: #fd7e14;
+  --text-dim: #64748b;
+  --text-muted: #94a3b8;
+  --border: #e2e8f0;
+  --green: #16a34a;
+  --red: #dc2626;
   --font-mono: 'SF Mono','JetBrains Mono','Cascadia Code','Consolas',monospace;
 }
-body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; background: #f0f2f5; }
+*,*::before,*::after { box-sizing: border-box; }
+html, body { height: 100%; margin: 0; overflow: hidden; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; font-size: 13px; color: var(--text); background: var(--surface-2); }
 
-/* Header */
+/* === FULL-HEIGHT APP SHELL === */
+.app-shell { display: flex; flex-direction: column; height: 100vh; }
+
+/* Header — compact */
 .app-header {
-  background: var(--surface);
-  border-bottom: 1px solid var(--border);
-  padding: 10px 20px;
-  position: sticky; top: 0; z-index: 1030;
-  display: flex; align-items: center; justify-content: space-between;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  background: var(--surface); border-bottom: 1px solid var(--border);
+  padding: 6px 16px; display: flex; align-items: center; justify-content: space-between;
+  flex-shrink: 0; z-index: 10;
 }
-.app-header .brand { display: flex; align-items: center; gap: 10px; }
-.app-header .brand img { height: 28px; border-radius: 6px; }
+.app-header .brand { display: flex; align-items: center; gap: 8px; }
 .app-header .brand .brand-icon {
-  width: 28px; height: 28px; background: var(--primary); border-radius: 6px;
-  display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 800; font-size: 12px;
+  width: 24px; height: 24px; background: var(--primary); border-radius: 5px;
+  display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 800; font-size: 10px;
 }
-.app-header .brand h1 { font-size: 15px; font-weight: 700; margin: 0; }
-.header-controls { display: flex; align-items: center; gap: 10px; }
-.header-controls select { font-size: 13px; max-width: 200px; }
-.header-controls .badge { font-size: 11px; }
+.app-header .brand img { height: 24px; border-radius: 5px; }
+.app-header .brand h1 { font-size: 13px; font-weight: 700; margin: 0; letter-spacing: -0.01em; }
+.header-controls { display: flex; align-items: center; gap: 6px; }
+.header-controls select { font-size: 12px; padding: 2px 24px 2px 8px; height: 28px; max-width: 160px; border-color: var(--border); }
+.header-controls .badge { font-size: 10px; padding: 3px 6px; }
 
-/* Tab nav */
+/* Tab nav — slim */
 .tab-nav {
-  background: var(--surface);
-  border-bottom: 1px solid var(--border);
-  padding: 0 20px;
-  display: flex; gap: 0;
-  overflow-x: auto;
+  background: var(--surface); border-bottom: 1px solid var(--border);
+  padding: 0 16px; display: flex; gap: 0; flex-shrink: 0;
 }
 .tab-nav .nav-link {
-  padding: 12px 18px; font-size: 13px; font-weight: 600;
+  padding: 8px 14px; font-size: 12px; font-weight: 600;
   color: var(--text-dim); border: none; background: none;
   border-bottom: 2px solid transparent; cursor: pointer;
-  white-space: nowrap; display: flex; align-items: center; gap: 6px;
-  transition: all 0.15s;
+  white-space: nowrap; display: flex; align-items: center; gap: 5px;
+  transition: all 0.12s;
 }
-.tab-nav .nav-link:hover { color: var(--text); background: var(--primary-light); }
+.tab-nav .nav-link:hover { color: var(--text); }
 .tab-nav .nav-link.active { color: var(--primary); border-bottom-color: var(--primary); }
-.tab-nav .nav-link .bi { font-size: 15px; }
+.tab-nav .nav-link .bi { font-size: 13px; }
 
-/* Main */
-.app-main { max-width: 1200px; margin: 0 auto; padding: 20px; }
-.tab-panel { display: none; }
-.tab-panel.active { display: block; }
+/* Content area — fills remaining space */
+.app-content { flex: 1; overflow: hidden; position: relative; }
+.tab-panel { display: none; height: 100%; overflow-y: auto; padding: 12px 16px; }
+.tab-panel.active { display: flex; flex-direction: column; }
 
-/* Cards */
-.card { border: 1px solid var(--border); border-radius: 10px; box-shadow: 0 1px 2px rgba(0,0,0,0.04); }
-.card-header { font-weight: 600; font-size: 14px; background: var(--surface-2); }
+/* === COMPACT COMPONENTS === */
+.section-title { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-dim); margin: 0 0 8px; }
+.card { border: 1px solid var(--border); border-radius: 8px; background: var(--surface); overflow: visible; }
+.card-header { font-weight: 600; font-size: 12px; background: var(--surface-2); padding: 8px 12px; }
+.card-body { padding: 10px 12px; overflow: visible; }
+.table { font-size: 12px; margin: 0; }
+.table th { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.03em; color: var(--text-dim); padding: 6px 8px; }
+.table td { padding: 6px 8px; vertical-align: middle; }
+.btn-sm { font-size: 11px; padding: 3px 8px; }
+.form-control-sm, .form-select-sm { font-size: 12px; padding: 3px 8px; height: 28px; }
+.form-label { font-size: 11px; font-weight: 600; color: var(--text-dim); margin-bottom: 2px; }
 
-/* Printer table */
-.printer-row { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid #f0f0f0; }
-.printer-row:last-child { border-bottom: none; }
+/* Drop zone */
+#excelDropZone { transition: all 0.2s; }
+#excelDropZone.drag-over { border-color: var(--primary) !important; background: var(--primary-light); }
 
-/* Designer */
-.designer-wrap { display: flex; gap: 0; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; background: var(--surface); min-height: 500px; }
+/* Column chips for mapping */
+.col-chip {
+  display: inline-block; padding: 1px 6px; font-size: 10px; font-weight: 500;
+  background: #f1f5f9; border: 1px solid var(--border); border-radius: 4px;
+  cursor: pointer; transition: all 0.1s; font-family: var(--font-mono);
+}
+.col-chip:hover { background: var(--primary-light); border-color: var(--primary); color: var(--primary); }
+
+/* Designer — fills tab panel height */
+#tab-designer.active { padding: 0; gap: 0; }
+.designer-wrap { display: flex; flex: 1; overflow: hidden; background: var(--surface); border-top: 1px solid var(--border); }
+.designer-top-bar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 6px 12px; background: var(--surface); border-bottom: 1px solid var(--border); flex-shrink: 0;
+}
 .designer-toolbar {
-  width: 56px; background: #f8f9fa; border-right: 1px solid var(--border);
-  display: flex; flex-direction: column; align-items: center; padding: 8px 0; gap: 4px;
+  width: 44px; background: var(--surface-2); border-right: 1px solid var(--border);
+  display: flex; flex-direction: column; align-items: center; padding: 6px 0; gap: 2px; flex-shrink: 0;
 }
 .designer-toolbar button {
-  width: 40px; height: 40px; border: none; background: none; border-radius: 8px;
+  width: 32px; height: 32px; border: none; background: none; border-radius: 6px;
   display: flex; align-items: center; justify-content: center;
-  font-size: 15px; color: var(--text-dim); cursor: pointer;
+  font-size: 14px; color: var(--text-dim); cursor: pointer;
 }
 .designer-toolbar button:hover { background: var(--primary-light); color: var(--primary); }
 .designer-canvas-wrap {
-  flex: 1; display: flex; align-items: flex-start; justify-content: center;
-  padding: 20px; background: #e9ecef; overflow: auto; position: relative;
+  flex: 1; display: flex; align-items: center; justify-content: center;
+  padding: 12px; background: #f1f5f9; overflow: auto; position: relative;
 }
-.designer-canvas-wrap canvas { cursor: crosshair; box-shadow: 0 2px 12px rgba(0,0,0,0.12); }
+.designer-canvas-wrap canvas { cursor: crosshair; box-shadow: 0 1px 8px rgba(0,0,0,0.08); border-radius: 2px; }
 .designer-props {
-  width: 280px; border-left: 1px solid var(--border); background: var(--surface);
-  padding: 16px; overflow-y: auto; font-size: 13px;
+  width: 240px; border-left: 1px solid var(--border); background: var(--surface);
+  padding: 10px; overflow-y: auto; font-size: 12px; flex-shrink: 0;
 }
-.designer-props label { font-weight: 600; font-size: 11px; text-transform: uppercase; color: var(--text-dim); margin-bottom: 2px; }
-.designer-props .form-control, .designer-props .form-select { font-size: 13px; }
+.designer-props label { font-weight: 600; font-size: 10px; text-transform: uppercase; color: var(--text-dim); margin-bottom: 1px; }
+.designer-props .form-control, .designer-props .form-select { font-size: 12px; padding: 2px 6px; height: 26px; }
+.designer-props textarea.form-control { height: auto; }
 .designer-tspl {
-  border-top: 1px solid var(--border); background: #1e1e2e; color: #cdd6f4;
-  padding: 12px 16px; font-family: var(--font-mono); font-size: 11px;
-  max-height: 160px; overflow-y: auto; white-space: pre-wrap;
+  background: #1e293b; color: #94a3b8; padding: 6px 12px; font-family: var(--font-mono);
+  font-size: 10px; max-height: 80px; overflow-y: auto; white-space: pre-wrap;
+  flex-shrink: 0; border-top: 1px solid var(--border);
 }
+.designer-actions { padding: 4px 12px; background: var(--surface); border-top: 1px solid var(--border); display: flex; gap: 4px; flex-shrink: 0; }
 
-/* Batch wizard */
-.wizard-steps { display: flex; gap: 0; margin-bottom: 20px; }
+/* Batch wizard — compact */
+.wizard-steps { display: flex; gap: 0; margin-bottom: 10px; }
 .wizard-step {
-  flex: 1; text-align: center; padding: 12px; font-size: 13px; font-weight: 600;
-  color: var(--text-muted); border-bottom: 3px solid var(--border); cursor: pointer;
+  flex: 1; text-align: center; padding: 8px; font-size: 11px; font-weight: 600;
+  color: var(--text-muted); border-bottom: 2px solid var(--border); cursor: pointer;
 }
 .wizard-step.active { color: var(--primary); border-bottom-color: var(--primary); }
 .wizard-step.done { color: var(--green); border-bottom-color: var(--green); }
@@ -119,17 +139,27 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sa
 
 /* Template cards */
 .template-card {
-  border: 2px solid var(--border); border-radius: 10px; padding: 16px;
-  cursor: pointer; transition: all 0.15s; background: var(--surface);
+  border: 1px solid var(--border); border-radius: 8px; padding: 10px;
+  cursor: pointer; transition: all 0.12s; background: var(--surface); font-size: 12px;
 }
 .template-card:hover { border-color: var(--primary); }
 .template-card.selected { border-color: var(--primary); background: var(--primary-light); }
 
 /* Toast */
-.toast-container { position: fixed; bottom: 20px; right: 20px; z-index: 9999; }
+.toast-container { position: fixed; bottom: 12px; right: 12px; z-index: 9999; }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+/* Utility */
+.gap-1 { gap: 4px !important; }
+.gap-2 { gap: 6px !important; }
 </style>
 </head>
 <body>
+<div class="app-shell">
 
 <!-- ==================== HEADER ==================== -->
 <header class="app-header">
@@ -145,7 +175,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sa
     <select id="headerPreset" class="form-select form-select-sm" onchange="onPresetChange(this.value)" title="Preset de etiqueta">
       <option value="">Sin preset</option>
     </select>
-    <span class="badge bg-primary" id="dpiBadge" title="DPI de la impresora seleccionada">203 DPI</span>
+    <span class="badge bg-primary" id="dpiBadge">203 DPI</span>
     <span class="badge bg-secondary" id="versionBadge">v--</span>
   </div>
 </header>
@@ -153,106 +183,116 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sa
 <!-- ==================== TAB NAV ==================== -->
 <nav class="tab-nav" id="tabNav">
   <button class="nav-link active" data-tab="printers"><i class="bi bi-printer"></i> Impresoras</button>
-  <button class="nav-link" data-tab="designer"><i class="bi bi-pencil-square"></i> Disenar</button>
+  <button class="nav-link" data-tab="designer"><i class="bi bi-pencil-square"></i> Diseñar</button>
   <button class="nav-link" data-tab="batch"><i class="bi bi-grid-3x3-gap"></i> Batch</button>
   <button class="nav-link" data-tab="templates"><i class="bi bi-file-earmark-text"></i> Templates</button>
   <button class="nav-link" data-tab="config"><i class="bi bi-gear"></i> Config</button>
 </nav>
 
-<!-- ==================== MAIN ==================== -->
-<div class="app-main">
+<!-- ==================== CONTENT ==================== -->
+<div class="app-content">
 
 <!-- ========== TAB 1: IMPRESORAS ========== -->
 <div class="tab-panel active" id="tab-printers">
-  <div class="d-flex justify-content-between align-items-center mb-3">
-    <h5 class="mb-0"><i class="bi bi-printer me-2"></i>Impresoras Detectadas</h5>
-    <div class="d-flex gap-2">
-      <button class="btn btn-sm btn-outline-primary" onclick="discoverPrinters()"><i class="bi bi-arrow-clockwise me-1"></i>Escanear Red</button>
-    </div>
+  <div class="d-flex justify-content-between align-items-center mb-2">
+    <span class="section-title">Impresoras</span>
+    <button class="btn btn-sm btn-outline-primary" onclick="discoverPrinters()"><i class="bi bi-arrow-clockwise me-1"></i>Escanear</button>
   </div>
 
-  <div class="card mb-3">
-    <div class="table-responsive">
-      <table class="table table-hover mb-0" id="printerTable">
-        <thead class="table-light">
-          <tr>
-            <th>Nombre</th>
-            <th>Tipo</th>
-            <th>DPI</th>
-            <th>Estado</th>
-            <th class="text-end">Acciones</th>
-          </tr>
-        </thead>
-        <tbody id="printerTableBody">
-          <tr><td colspan="5" class="text-center text-muted py-4">Cargando impresoras...</td></tr>
-        </tbody>
-      </table>
-    </div>
+  <div class="card" style="flex:1;overflow:auto;">
+    <table class="table table-hover mb-0" id="printerTable">
+      <thead class="table-light" style="position:sticky;top:0;">
+        <tr><th>Nombre</th><th>Tipo</th><th>DPI</th><th>Estado</th><th class="text-end">Acciones</th></tr>
+      </thead>
+      <tbody id="printerTableBody">
+        <tr><td colspan="5" class="text-center text-muted py-3">Cargando...</td></tr>
+      </tbody>
+    </table>
   </div>
 
-  <!-- Add Manual IP -->
-  <div class="card mb-3">
-    <div class="card-body">
-      <h6 class="card-title"><i class="bi bi-plus-circle me-2"></i>Agregar Impresora Manual (IP)</h6>
-      <div class="d-flex gap-2">
-        <input type="text" id="manualIP" class="form-control form-control-sm" placeholder="192.168.1.100:9100" style="max-width:250px;">
-        <button class="btn btn-sm btn-primary" onclick="addManualPrinter()">Agregar</button>
-      </div>
-      <div id="manualPrintersList" class="mt-2"></div>
-    </div>
-  </div>
-
-  <!-- System toggles -->
-  <div class="row g-3">
-    <div class="col-md-6">
-      <div class="card">
-        <div class="card-body">
-          <div class="d-flex justify-content-between align-items-center">
-            <div>
-              <h6 class="mb-1"><i class="bi bi-share me-2"></i>Compartir USB</h6>
-              <small class="text-muted">Exponer impresora USB como servidor de red</small>
-            </div>
-            <div class="form-check form-switch">
-              <input class="form-check-input" type="checkbox" id="shareToggle" onchange="toggleShare(this.checked)">
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="col-md-6">
-      <div class="card">
-        <div class="card-body">
-          <div class="d-flex justify-content-between align-items-center">
-            <div>
-              <h6 class="mb-1"><i class="bi bi-power me-2"></i>Inicio Automatico</h6>
-              <small class="text-muted">Iniciar TSC Bridge al encender la computadora</small>
-            </div>
-            <div class="form-check form-switch">
-              <input class="form-check-input" type="checkbox" id="autostartToggle" onchange="toggleAutostart(this.checked)">
-            </div>
-          </div>
-        </div>
-      </div>
+  <div class="d-flex gap-2 align-items-center mt-2" style="flex-shrink:0;">
+    <input type="text" id="manualIP" class="form-control form-control-sm" placeholder="IP:puerto" style="max-width:180px;">
+    <button class="btn btn-sm btn-outline-primary" onclick="addManualPrinter()">+ Manual</button>
+    <div id="manualPrintersList" class="d-flex gap-1 flex-wrap" style="flex:1;"></div>
+    <div class="d-flex gap-2 ms-auto align-items-center">
+      <div class="form-check form-switch mb-0"><input class="form-check-input" type="checkbox" id="shareToggle" onchange="toggleShare(this.checked)"><label class="form-check-label" style="font-size:11px;">USB Share</label></div>
+      <div class="form-check form-switch mb-0"><input class="form-check-input" type="checkbox" id="autostartToggle" onchange="toggleAutostart(this.checked)"><label class="form-check-label" style="font-size:11px;">Autostart</label></div>
     </div>
   </div>
 </div>
 
 <!-- ========== TAB 2: DISENAR ========== -->
 <div class="tab-panel" id="tab-designer">
-  <!-- Standard selector -->
-  <div class="d-flex justify-content-between align-items-center mb-3">
-    <h5 class="mb-0"><i class="bi bi-pencil-square me-2"></i>Disenador de Etiquetas</h5>
+  <div class="designer-top-bar">
     <div class="d-flex gap-2 align-items-center">
-      <label class="form-label mb-0 me-1 text-muted" style="font-size:12px;">Estandar:</label>
-      <select id="designerStandard" class="form-select form-select-sm" style="width:auto;" onchange="validateStandard()">
-        <option value="">Ninguno</option>
+      <span class="section-title" style="margin:0;">Diseñador</span>
+      <select id="designerStandard" class="form-select form-select-sm" style="width:auto;height:24px;font-size:11px;padding:0 20px 0 6px;" onchange="applyStandardPreset()">
+        <option value="">Sin estandar</option>
         <option value="gafete">Gafete</option>
         <option value="gs1-128">GS1-128</option>
         <option value="iso-15223">ISO 15223</option>
       </select>
+      <div id="standardWarnings" style="display:contents;"></div>
+    </div>
+    <div class="d-flex gap-1">
+      <button class="btn btn-sm btn-outline-secondary" onclick="toggleLabelConfig()" title="Configurar etiqueta"><i class="bi bi-gear"></i></button>
+      <button class="btn btn-sm btn-primary" onclick="showVariableInputModal('print')"><i class="bi bi-printer"></i> Imprimir</button>
+      <button class="btn btn-sm btn-outline-primary" onclick="showVariableInputModal('preview')"><i class="bi bi-eye"></i></button>
+      <button class="btn btn-sm btn-outline-secondary" onclick="Designer.saveLocal()"><i class="bi bi-save"></i></button>
+      <button class="btn btn-sm btn-outline-secondary" onclick="Designer.exportJSON()"><i class="bi bi-filetype-json"></i></button>
+      <button class="btn btn-sm btn-outline-secondary" onclick="Designer.importJSON()"><i class="bi bi-upload"></i></button>
+      <input type="file" id="importJSONInput" accept=".json" style="display:none;" onchange="Designer.handleImportJSON(event)">
     </div>
   </div>
-  <div id="standardWarnings" class="mb-2"></div>
+
+  <!-- Label Configurator -->
+  <div id="labelConfigPanel" style="display:none;background:var(--surface);border-bottom:1px solid var(--border);padding:8px 16px;flex-shrink:0;">
+    <div class="d-flex gap-4 align-items-end flex-wrap">
+      <div>
+        <label class="form-label">Tamano etiqueta</label>
+        <div class="d-flex gap-1 align-items-center">
+          <input type="number" id="cfgLabelW" class="form-control form-control-sm" style="width:65px;" value="30" step="1" min="10" max="200" onchange="applyLabelConfig()">
+          <span style="font-size:11px;color:var(--text-muted);">x</span>
+          <input type="number" id="cfgLabelH" class="form-control form-control-sm" style="width:65px;" value="22" step="1" min="5" max="200" onchange="applyLabelConfig()">
+          <span style="font-size:11px;color:var(--text-muted);">mm</span>
+        </div>
+      </div>
+      <div>
+        <label class="form-label">Borde etiqueta</label>
+        <select id="cfgLabelBorder" class="form-select form-select-sm" style="width:auto;" onchange="applyLabelConfig()">
+          <option value="none">Sin borde</option>
+          <option value="simple">Simple</option>
+          <option value="double">Doble línea</option>
+          <option value="thick">Grueso</option>
+          <option value="rounded">Redondeado</option>
+          <option value="shadow">Con sombra</option>
+          <option value="inset">Doble inset</option>
+          <option value="ornate">Ornamental</option>
+          <option value="deco">Art Déco</option>
+          <option value="ticket">Ticket / Cupón</option>
+          <option value="dashed">Línea cortada</option>
+          <option value="certificate">Certificado</option>
+          <option value="filigree">Filigrana</option>
+          <option value="dotted">Punteado</option>
+        </select>
+      </div>
+      <div>
+        <label class="form-label">Grosor borde</label>
+        <input type="number" id="cfgBorderWidth" class="form-control form-control-sm" style="width:55px;" value="2" min="1" max="10" step="1" onchange="applyLabelConfig()">
+      </div>
+      <div>
+        <label class="form-label">Radio esquina</label>
+        <input type="number" id="cfgBorderRadius" class="form-control form-control-sm" style="width:55px;" value="0" min="0" max="20" step="1" onchange="applyLabelConfig()">
+      </div>
+      <div>
+        <label class="form-label">Margen interno</label>
+        <input type="number" id="cfgPadding" class="form-control form-control-sm" style="width:55px;" value="2" min="0" max="20" step="0.5" onchange="applyLabelConfig()">
+      </div>
+      <div class="d-flex gap-1">
+        <button class="btn btn-sm btn-outline-primary" onclick="previewLabelBorder()"><i class="bi bi-eye me-1"></i>Preview</button>
+      </div>
+    </div>
+  </div>
 
   <div class="designer-wrap">
     <!-- Left toolbar -->
@@ -263,9 +303,11 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sa
       <button onclick="Designer.addElement('line')" title="Linea (L)"><i class="bi bi-dash-lg"></i></button>
       <button onclick="Designer.addElement('rectangle')" title="Rectangulo (R)"><i class="bi bi-square"></i></button>
       <button onclick="Designer.addElement('image')" title="Imagen (I)"><i class="bi bi-image"></i></button>
+      <button onclick="Designer.addElement('anticopy')" title="Patron anti-fotocopia"><i class="bi bi-shield-lock"></i></button>
       <hr style="width:80%;margin:4px 0;border-color:var(--border);">
       <button onclick="Designer.deleteSelected()" title="Eliminar seleccionado"><i class="bi bi-trash text-danger"></i></button>
       <button onclick="Designer.toggleGrid()" title="Toggle grid" id="btnGrid"><i class="bi bi-grid-3x3"></i></button>
+      <button onclick="Designer.autoFitElements()" title="Auto-ajustar al lienzo"><i class="bi bi-aspect-ratio"></i></button>
     </div>
 
     <!-- Center canvas -->
@@ -335,6 +377,50 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sa
             </select>
           </div>
         </div>
+        <div class="row g-2 mb-2" id="propStrokeWrap">
+          <div class="col-6">
+            <label>Grosor (dots)</label>
+            <input type="number" id="propStrokeWidth" class="form-control form-control-sm" value="2" min="1" max="20" step="1" onchange="Designer.updateFromProps()">
+          </div>
+          <div class="col-6">
+            <label>Borde</label>
+            <select id="propBorder" class="form-select form-select-sm" onchange="Designer.updateFromProps()">
+              <option value="none">Sin borde</option>
+              <option value="solid">Solido</option>
+              <option value="dashed">Punteado</option>
+              <option value="double">Doble</option>
+            </select>
+          </div>
+        </div>
+        <div id="propDataWrap" class="mb-2" style="display:none;">
+          <label>Campo de datos</label>
+          <select id="propDataField" class="form-select form-select-sm" onchange="Designer.insertDataField()">
+            <option value="">Insertar {variable}...</option>
+          </select>
+          <small class="text-muted">Inserta un campo que se reemplaza en batch</small>
+        </div>
+        <div id="propAnticopyWrap" style="display:none;" class="mb-2">
+          <label>Texto anti-fotocopia</label>
+          <input type="text" id="propAnticopyText" class="form-control form-control-sm" value="COPIA" onchange="Designer.updateFromProps()">
+          <div class="row g-2 mt-1">
+            <div class="col-6">
+              <label>Densidad</label>
+              <select id="propAnticopyDensity" class="form-select form-select-sm" onchange="Designer.updateFromProps()">
+                <option value="light">Ligera</option>
+                <option value="medium" selected>Media</option>
+                <option value="heavy">Densa</option>
+              </select>
+            </div>
+            <div class="col-6">
+              <label>Angulo</label>
+              <select id="propAnticopyAngle" class="form-select form-select-sm" onchange="Designer.updateFromProps()">
+                <option value="45">45°</option>
+                <option value="30">30°</option>
+                <option value="60">60°</option>
+              </select>
+            </div>
+          </div>
+        </div>
         <div id="propBarcodeWrap" style="display:none;" class="mb-2">
           <label>Tipo Barcode</label>
           <select id="propBarcodeType" class="form-select form-select-sm" onchange="Designer.updateFromProps()">
@@ -379,19 +465,12 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sa
     </div>
   </div>
 
-  <!-- TSPL Preview + actions -->
-  <div class="designer-tspl" id="tsplPreview">-- TSPL preview --</div>
-  <div class="d-flex gap-2 mt-2">
-    <button class="btn btn-sm btn-outline-primary" onclick="Designer.saveLocal()"><i class="bi bi-download me-1"></i>Guardar Local</button>
-    <button class="btn btn-sm btn-outline-success" onclick="Designer.exportJSON()"><i class="bi bi-filetype-json me-1"></i>Exportar JSON</button>
-    <button class="btn btn-sm btn-outline-secondary" onclick="Designer.importJSON()"><i class="bi bi-upload me-1"></i>Importar JSON</button>
-    <input type="file" id="importJSONInput" accept=".json" style="display:none;" onchange="Designer.handleImportJSON(event)">
-  </div>
+  <div class="designer-tspl" id="tsplPreview">-- TSPL --</div>
 </div>
 
 <!-- ========== TAB 3: BATCH ========== -->
 <div class="tab-panel" id="tab-batch">
-  <h5 class="mb-3"><i class="bi bi-grid-3x3-gap me-2"></i>Impresion por Lote</h5>
+  <span class="section-title">Impresion por Lote</span>
 
   <!-- Wizard steps -->
   <div class="wizard-steps">
@@ -404,11 +483,24 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sa
   <!-- Step 1: Upload Excel -->
   <div class="wizard-panel active" id="batchStep1">
     <div class="card">
-      <div class="card-body text-center py-5">
-        <i class="bi bi-file-earmark-spreadsheet" style="font-size:48px;color:var(--green);"></i>
-        <h6 class="mt-3">Selecciona un archivo Excel</h6>
-        <p class="text-muted">Formatos: .xlsx, .xls, .csv</p>
-        <input type="file" id="excelFile" accept=".xlsx,.xls,.csv" class="form-control mx-auto" style="max-width:400px;" onchange="uploadExcel(event)">
+      <div class="card-body text-center py-4" id="excelDropZone" style="border:2px dashed var(--border);border-radius:8px;cursor:pointer;transition:all .2s;" onclick="openFileUpload('excel')">
+        <div style="width:56px;height:56px;border-radius:12px;background:linear-gradient(135deg,#dcfce7,#bbf7d0);margin:0 auto 10px;display:flex;align-items:center;justify-content:center;">
+          <i class="bi bi-cloud-arrow-up" style="font-size:26px;color:var(--green);"></i>
+        </div>
+        <h6 class="mb-1" style="font-size:13px;font-weight:600;">Arrastra tu archivo aqui</h6>
+        <p class="text-muted mb-3" style="font-size:11px;">o haz clic para seleccionar</p>
+        <div class="d-flex gap-2 justify-content-center" style="font-size:11px;">
+          <span class="badge bg-light text-dark border" style="font-weight:500;">.xlsx</span>
+          <span class="badge bg-light text-dark border" style="font-weight:500;">.xls</span>
+          <span class="badge bg-light text-dark border" style="font-weight:500;">.csv</span>
+          <span class="badge bg-light text-dark border" style="font-weight:500;">.pdf</span>
+        </div>
+        <input type="file" id="excelFile" accept=".xlsx,.xls,.csv,.pdf" style="display:none;" onchange="handleFileSelected(event)">
+        <input type="file" id="pdfFile" accept=".pdf" style="display:none;" onchange="handlePdfUpload(event)">
+        <div id="uploadProgress" style="display:none;margin-top:12px;">
+          <div class="progress" style="height:4px;"><div class="progress-bar" style="width:0%"></div></div>
+          <p class="text-muted mt-1" style="font-size:11px;" id="uploadFileName">Cargando...</p>
+        </div>
       </div>
     </div>
     <div id="excelPreview" class="mt-3" style="display:none;">
@@ -493,9 +585,9 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sa
 
 <!-- ========== TAB 4: TEMPLATES ========== -->
 <div class="tab-panel" id="tab-templates">
-  <div class="d-flex justify-content-between align-items-center mb-3">
-    <h5 class="mb-0"><i class="bi bi-file-earmark-text me-2"></i>Plantillas</h5>
-    <button class="btn btn-sm btn-outline-primary" onclick="loadTemplates()"><i class="bi bi-arrow-clockwise me-1"></i>Recargar</button>
+  <div class="d-flex justify-content-between align-items-center mb-2">
+    <span class="section-title">Plantillas</span>
+    <button class="btn btn-sm btn-outline-primary" onclick="loadTemplates()"><i class="bi bi-arrow-clockwise"></i></button>
   </div>
 
   <!-- Server templates -->
@@ -526,7 +618,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sa
 
 <!-- ========== TAB 5: CONFIG ========== -->
 <div class="tab-panel" id="tab-config">
-  <h5 class="mb-3"><i class="bi bi-gear me-2"></i>Configuracion</h5>
+  <span class="section-title">Configuracion</span>
 
   <!-- Account -->
   <div class="card mb-3">
@@ -612,19 +704,10 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sa
     </div>
   </div>
 
-  <!-- Downloads -->
-  <div class="card">
-    <div class="card-header"><i class="bi bi-download me-2"></i>Descargar TSC Bridge</div>
-    <div class="card-body">
-      <div class="d-flex gap-3">
-        <a href="/download?os=mac" class="btn btn-outline-dark"><i class="bi bi-apple me-1"></i>macOS</a>
-        <a href="/download?os=windows" class="btn btn-outline-primary"><i class="bi bi-windows me-1"></i>Windows</a>
-      </div>
-    </div>
-  </div>
 </div>
 
-</div><!-- /app-main -->
+</div><!-- /app-content -->
+</div><!-- /app-shell -->
 
 <!-- ==================== SETUP WIZARD MODAL ==================== -->
 <div class="modal fade" id="setupWizard" data-bs-backdrop="static" tabindex="-1">
@@ -671,6 +754,24 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sa
       </div>
       <div class="modal-body text-center" id="previewModalBody">
         <div class="spinner-border text-primary" role="status"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== VARIABLE INPUT MODAL ==================== -->
+<div class="modal fade" id="variableInputModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="bi bi-input-cursor-text me-2"></i>Datos de la etiqueta</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body" id="variableInputBody"></div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button class="btn btn-outline-secondary" id="btnPreviewVars"><i class="bi bi-eye me-1"></i>Preview</button>
+        <button class="btn btn-primary" id="btnPrintVars"><i class="bi bi-printer me-1"></i>Imprimir</button>
       </div>
     </div>
   </div>
@@ -764,9 +865,9 @@ function populatePrinterSelector() {
   }
   AppState.printers.forEach(p => {
     const opt = document.createElement('option');
-    opt.value = p.Name;
-    opt.textContent = p.Name + (p.Online === false ? ' (offline)' : '');
-    opt.selected = p.Name === AppState.selectedPrinter;
+    opt.value = p.name;
+    opt.textContent = p.name + (p.online === false ? ' (offline)' : '');
+    opt.selected = p.name === AppState.selectedPrinter;
     sel.appendChild(opt);
   });
 }
@@ -833,7 +934,7 @@ async function init() {
     // Config
     const config = await api('GET', '/config');
     AppState.config = config;
-    AppState.selectedPrinter = config.default_printer || (AppState.printers.length ? AppState.printers[0].Name : '');
+    AppState.selectedPrinter = config.default_printer || (AppState.printers.length ? AppState.printers[0].name : '');
     AppState.selectedPreset = config.default_preset || '';
 
     // Presets
@@ -917,49 +1018,70 @@ async function pollStatus() {
 }
 
 // ===================== TAB 1: PRINTERS =====================
+function renderPrinterRow(p) {
+  const typeBadge = p.type === 'usb' ? '<span class="badge bg-primary">USB</span>' :
+                    p.type === 'network' ? '<span class="badge bg-info text-dark">Red</span>' :
+                    p.type === 'manual' ? '<span class="badge bg-warning text-dark">Manual</span>' :
+                    p.type === 'raw' ? '<span class="badge bg-info text-dark">Raw</span>' :
+                    `<span class="badge bg-secondary">${p.type || '?'}</span>`;
+  const dpi = AppState.printerDPI[p.name] || AppState.dpi;
+  const statusBadge = p.online !== false ?
+    '<span class="badge bg-success"><i class="bi bi-circle-fill me-1" style="font-size:6px;"></i>Online</span>' :
+    '<span class="badge bg-danger"><i class="bi bi-circle-fill me-1" style="font-size:6px;"></i>Offline</span>';
+  const isDefault = p.name === AppState.selectedPrinter;
+  return `<tr>
+    <td><strong>${esc(p.name)}</strong>${isDefault ? ' <span class="badge bg-primary bg-opacity-10 text-primary">default</span>' : ''}
+      ${p.address ? '<br><small class="text-muted">' + esc(p.address) + '</small>' : ''}
+      ${p.model ? '<br><small class="text-muted">' + esc(p.model) + '</small>' : ''}
+    </td>
+    <td>${typeBadge}</td>
+    <td><span class="badge bg-dark">${dpi}</span></td>
+    <td>${statusBadge}</td>
+    <td class="text-end">
+      <div class="btn-group btn-group-sm">
+        ${!isDefault ? `<button class="btn btn-outline-primary" onclick="setDefaultPrinter('${esc(p.name)}')" title="Hacer default"><i class="bi bi-star"></i></button>` : ''}
+        <button class="btn btn-outline-success" onclick="testPrint('${esc(p.name)}')" title="Test print"><i class="bi bi-printer"></i></button>
+        <div class="btn-group btn-group-sm">
+          <button class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown" title="Set DPI">DPI</button>
+          <ul class="dropdown-menu dropdown-menu-end">
+            <li><button class="dropdown-item" onclick="setDPI('${esc(p.name)}',200)">200</button></li>
+            <li><button class="dropdown-item" onclick="setDPI('${esc(p.name)}',203)">203</button></li>
+            <li><button class="dropdown-item" onclick="setDPI('${esc(p.name)}',300)">300</button></li>
+            <li><button class="dropdown-item" onclick="setDPI('${esc(p.name)}',600)">600</button></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><button class="dropdown-item" onclick="detectDPI('${esc(p.name)}')"><i class="bi bi-search me-1"></i>Auto-detectar</button></li>
+          </ul>
+        </div>
+      </div>
+    </td>
+  </tr>`;
+}
+
 function renderPrinterTable() {
   const tbody = document.getElementById('printerTableBody');
   if (AppState.printers.length === 0) {
     tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted py-4"><i class="bi bi-printer me-2"></i>No se encontraron impresoras TSC</td></tr>';
     return;
   }
-  tbody.innerHTML = AppState.printers.map(p => {
-    const typeBadge = p.Type === 'usb' ? '<span class="badge bg-primary">USB</span>' :
-                      p.Type === 'network' ? '<span class="badge bg-info text-dark">Red</span>' :
-                      p.Type === 'manual' ? '<span class="badge bg-warning text-dark">Manual</span>' :
-                      `<span class="badge bg-secondary">${p.Type || '?'}</span>`;
-    const dpi = AppState.printerDPI[p.Name] || AppState.dpi;
-    const statusBadge = p.Online !== false ?
-      '<span class="badge bg-success"><i class="bi bi-circle-fill me-1" style="font-size:6px;"></i>Online</span>' :
-      '<span class="badge bg-danger"><i class="bi bi-circle-fill me-1" style="font-size:6px;"></i>Offline</span>';
-    const isDefault = p.Name === AppState.selectedPrinter;
-    return `<tr>
-      <td><strong>${esc(p.Name)}</strong>${isDefault ? ' <span class="badge bg-primary bg-opacity-10 text-primary">default</span>' : ''}
-        ${p.Address ? '<br><small class="text-muted">' + esc(p.Address) + '</small>' : ''}
-        ${p.Model ? '<br><small class="text-muted">' + esc(p.Model) + '</small>' : ''}
-      </td>
-      <td>${typeBadge}</td>
-      <td><span class="badge bg-dark">${dpi}</span></td>
-      <td>${statusBadge}</td>
-      <td class="text-end">
-        <div class="btn-group btn-group-sm">
-          ${!isDefault ? `<button class="btn btn-outline-primary" onclick="setDefaultPrinter('${esc(p.Name)}')" title="Hacer default"><i class="bi bi-star"></i></button>` : ''}
-          <button class="btn btn-outline-success" onclick="testPrint('${esc(p.Name)}')" title="Test print"><i class="bi bi-printer"></i></button>
-          <div class="btn-group btn-group-sm">
-            <button class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown" title="Set DPI">DPI</button>
-            <ul class="dropdown-menu dropdown-menu-end">
-              <li><button class="dropdown-item" onclick="setDPI('${esc(p.Name)}',200)">200</button></li>
-              <li><button class="dropdown-item" onclick="setDPI('${esc(p.Name)}',203)">203</button></li>
-              <li><button class="dropdown-item" onclick="setDPI('${esc(p.Name)}',300)">300</button></li>
-              <li><button class="dropdown-item" onclick="setDPI('${esc(p.Name)}',600)">600</button></li>
-              <li><hr class="dropdown-divider"></li>
-              <li><button class="dropdown-item" onclick="detectDPI('${esc(p.Name)}')"><i class="bi bi-search me-1"></i>Auto-detectar</button></li>
-            </ul>
-          </div>
-        </div>
-      </td>
-    </tr>`;
-  }).join('');
+
+  const localPrinters = AppState.printers.filter(p => p.type === 'usb' || (!p.type));
+  const networkPrinters = AppState.printers.filter(p => p.type === 'network' || p.type === 'manual' || p.type === 'raw');
+
+  let html = '';
+
+  if (localPrinters.length > 0) {
+    html += `<tr class="table-light"><td colspan="5" style="font-size:11px;font-weight:700;letter-spacing:0.04em;color:var(--text-dim);padding:6px 8px;">
+      <i class="bi bi-usb-drive me-1"></i>LOCALES (${localPrinters.length})</td></tr>`;
+    html += localPrinters.map(renderPrinterRow).join('');
+  }
+
+  if (networkPrinters.length > 0) {
+    html += `<tr class="table-light"><td colspan="5" style="font-size:11px;font-weight:700;letter-spacing:0.04em;color:var(--text-dim);padding:6px 8px;">
+      <i class="bi bi-wifi me-1"></i>RED (${networkPrinters.length})</td></tr>`;
+    html += networkPrinters.map(renderPrinterRow).join('');
+  }
+
+  tbody.innerHTML = html;
 }
 
 async function setDefaultPrinter(name) {
@@ -1112,6 +1234,40 @@ const Standards = {
     const w = [];
     if (!els.some(e => e.type === 'text' && /mrn|expediente/i.test(e.content))) w.push('Se requiere campo MRN/Expediente');
     return { valid: w.length === 0, warnings: w };
+  },
+
+  // Returns preset elements with sample data for each standard
+  getPresetElements(standard, labelW, labelH) {
+    const mkId = () => 'el_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4);
+    const base = { font: '3', fontMult: 1, rotation: 0, alignment: 'left', barcodeType: '128', qrType: 'free', qrFields: {}, strokeWidth: 2, border: 'none', anticopyDensity: 'medium', anticopyAngle: 45 };
+
+    switch(standard) {
+      case 'gafete': return [
+        { ...base, id: mkId(), type: 'text', x: 2, y: 1, w: labelW - 4, h: 3, content: 'Hospital San Juan', font: '4', fontMult: 1, alignment: 'center' },
+        { ...base, id: mkId(), type: 'line', x: 2, y: 4.5, w: labelW - 4, h: 0.3, content: '', strokeWidth: 2 },
+        { ...base, id: mkId(), type: 'text', x: 2, y: 5.5, w: labelW - 14, h: 4, content: '{nombre}', font: '4', fontMult: 1 },
+        { ...base, id: mkId(), type: 'text', x: 2, y: 9.5, w: labelW - 14, h: 3, content: '{cargo}', font: '3', fontMult: 1 },
+        { ...base, id: mkId(), type: 'text', x: 2, y: 12.5, w: labelW - 14, h: 3, content: '{departamento}', font: '2', fontMult: 1 },
+        { ...base, id: mkId(), type: 'qrcode', x: labelW - 12, y: 5.5, w: 10, h: 10, content: '{codigo}', qrType: 'free' },
+        { ...base, id: mkId(), type: 'barcode', x: 2, y: 16, w: labelW - 4, h: 4, content: '{codigo}', barcodeType: '128' },
+      ];
+      case 'gs1-128': return [
+        { ...base, id: mkId(), type: 'text', x: 1, y: 1, w: labelW - 2, h: 3, content: '{producto}', font: '3', fontMult: 1 },
+        { ...base, id: mkId(), type: 'barcode', x: 1, y: 5, w: labelW - 2, h: 8, content: '{gs1_code}', barcodeType: '128' },
+        { ...base, id: mkId(), type: 'text', x: 1, y: 14, w: (labelW - 2) / 2, h: 3, content: 'LOT: {lote}', font: '2', fontMult: 1 },
+        { ...base, id: mkId(), type: 'text', x: labelW / 2, y: 14, w: (labelW - 2) / 2, h: 3, content: 'EXP: {vencimiento}', font: '2', fontMult: 1 },
+        { ...base, id: mkId(), type: 'text', x: 1, y: 17.5, w: labelW - 2, h: 3, content: '{descripcion}', font: '2', fontMult: 1 },
+      ];
+      case 'iso-15223': return [
+        { ...base, id: mkId(), type: 'text', x: 1, y: 1, w: labelW - 2, h: 3, content: '{dispositivo}', font: '3', fontMult: 1 },
+        { ...base, id: mkId(), type: 'text', x: 1, y: 4.5, w: labelW / 2 - 1, h: 2.5, content: 'REF: {referencia}', font: '2', fontMult: 1 },
+        { ...base, id: mkId(), type: 'text', x: labelW / 2, y: 4.5, w: labelW / 2 - 1, h: 2.5, content: 'MRN: {expediente}', font: '2', fontMult: 1 },
+        { ...base, id: mkId(), type: 'barcode', x: 1, y: 8, w: labelW - 12, h: 6, content: '{expediente}', barcodeType: '128' },
+        { ...base, id: mkId(), type: 'qrcode', x: labelW - 10, y: 8, w: 8, h: 8, content: '{expediente}', qrType: 'free' },
+        { ...base, id: mkId(), type: 'text', x: 1, y: 15, w: labelW - 2, h: 2.5, content: '{fecha} - {responsable}', font: '2', fontMult: 1 },
+      ];
+      default: return [];
+    }
   }
 };
 
@@ -1124,18 +1280,24 @@ const Designer = {
   dragOffset: { x: 0, y: 0 },
   resizeHandle: -1,
 
+  _initialized: false,
+
   init(canvasId) {
     this.canvas = document.getElementById(canvasId);
     if (!this.canvas) return;
     this.ctx = this.canvas.getContext('2d');
-    // Set label size from preset
-    const preset = AppState.presets.find(p => p.id === AppState.selectedPreset);
-    if (preset) {
-      this.labelW = preset.label_width || 30;
-      this.labelH = preset.label_height || 22;
+
+    if (!this._initialized) {
+      // First-time init: set label size from preset and bind events
+      const preset = AppState.presets.find(p => p.id === AppState.selectedPreset);
+      if (preset) {
+        this.labelW = preset.label_width || 30;
+        this.labelH = preset.label_height || 22;
+      }
+      this.bindEvents();
+      this._initialized = true;
     }
     this.resizeCanvas();
-    this.bindEvents();
     this.render();
   },
 
@@ -1155,10 +1317,30 @@ const Designer = {
     this.canvas.onmousemove = e => this.onMouseMove(e);
     this.canvas.onmouseup = e => this.onMouseUp(e);
     document.addEventListener('keydown', e => {
+      // Skip if focus is on an input element
+      const tag = document.activeElement.tagName;
+      if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+      if (!this.selected) return;
+
       if (e.key === 'Delete' || e.key === 'Backspace') {
-        if (this.selected && document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA' && document.activeElement.tagName !== 'SELECT') {
-          this.deleteSelected();
-        }
+        e.preventDefault();
+        this.deleteSelected();
+        return;
+      }
+
+      // Arrow keys: move selected element (Shift = 0.5mm, default = 1mm grid step)
+      const step = e.shiftKey ? 0.5 : this.gridSize;
+      let moved = false;
+      switch(e.key) {
+        case 'ArrowUp':    this.selected.y = Math.max(0, this.snap(this.selected.y - step)); moved = true; break;
+        case 'ArrowDown':  this.selected.y = Math.min(this.labelH - this.selected.h, this.snap(this.selected.y + step)); moved = true; break;
+        case 'ArrowLeft':  this.selected.x = Math.max(0, this.snap(this.selected.x - step)); moved = true; break;
+        case 'ArrowRight': this.selected.x = Math.min(this.labelW - this.selected.w, this.snap(this.selected.x + step)); moved = true; break;
+      }
+      if (moved) {
+        e.preventDefault();
+        this.render();
+        this.syncPropsFromElement();
       }
     });
   },
@@ -1172,20 +1354,277 @@ const Designer = {
     const el = {
       id: 'el_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
       type, x: 5, y: 5,
-      w: type === 'text' ? 20 : type === 'line' ? 20 : 10,
-      h: type === 'text' ? 5 : type === 'line' ? 1 : 10,
-      content: type === 'text' ? '{texto}' : type === 'qrcode' ? '{qr}' : type === 'barcode' ? '{codigo}' : '',
+      w: type === 'text' ? 20 : type === 'line' ? 20 : type === 'anticopy' ? this.labelW : 10,
+      h: type === 'text' ? 5 : type === 'line' ? 1 : type === 'anticopy' ? this.labelH : 10,
+      content: type === 'text' ? '{texto}' : type === 'qrcode' ? '{qr}' : type === 'barcode' ? '{codigo}' : type === 'anticopy' ? 'COPIA' : '',
       font: '3', fontMult: 1,
       rotation: 0, alignment: 'left',
       barcodeType: '128',
       qrType: 'free', qrFields: {},
+      strokeWidth: type === 'line' ? 3 : 2,
+      border: 'none',
+      anticopyDensity: 'medium',
+      anticopyAngle: 45,
     };
+    if (type === 'anticopy') { el.x = 0; el.y = 0; }
     this.elements.push(el);
     this.selected = el;
     this.render();
     this.updateProperties();
     this.updateTSPL();
     validateStandard();
+  },
+
+  renderLabelBorder(ctx, lw, lh) {
+    const cfg = _labelConfig;
+    if (!cfg || cfg.border === 'none') return;
+    const bw = cfg.borderWidth;
+    const r = cfg.borderRadius * (96 / 25.4) * this.zoom; // mm to px
+    const pad = cfg.padding * (96 / 25.4) * this.zoom;
+    const x = pad, y = pad, w = lw - pad * 2, h = lh - pad * 2;
+
+    ctx.save();
+    ctx.strokeStyle = '#000';
+    ctx.lineWidth = bw;
+
+    switch(cfg.border) {
+      case 'simple':
+        if (r > 0) { this._roundRect(ctx, x, y, w, h, r); ctx.stroke(); }
+        else ctx.strokeRect(x, y, w, h);
+        break;
+
+      case 'double':
+        if (r > 0) { this._roundRect(ctx, x, y, w, h, r); ctx.stroke(); this._roundRect(ctx, x + bw + 2, y + bw + 2, w - (bw + 2) * 2, h - (bw + 2) * 2, Math.max(0, r - bw - 2)); ctx.stroke(); }
+        else { ctx.strokeRect(x, y, w, h); ctx.strokeRect(x + bw + 2, y + bw + 2, w - (bw + 2) * 2, h - (bw + 2) * 2); }
+        break;
+
+      case 'thick':
+        ctx.lineWidth = bw * 3;
+        if (r > 0) { this._roundRect(ctx, x, y, w, h, r); ctx.stroke(); }
+        else ctx.strokeRect(x, y, w, h);
+        break;
+
+      case 'rounded':
+        this._roundRect(ctx, x, y, w, h, Math.max(r, 8));
+        ctx.stroke();
+        break;
+
+      case 'shadow':
+        // Shadow effect
+        ctx.fillStyle = 'rgba(0,0,0,0.15)';
+        ctx.fillRect(x + 3, y + 3, w, h);
+        ctx.fillStyle = '#fff';
+        ctx.fillRect(x, y, w, h);
+        ctx.strokeRect(x, y, w, h);
+        break;
+
+      case 'inset': {
+        // Outer border
+        ctx.lineWidth = bw;
+        ctx.strokeRect(x, y, w, h);
+        // Inner border with gap
+        const gap = bw + 3;
+        ctx.lineWidth = 1;
+        ctx.strokeRect(x + gap, y + gap, w - gap * 2, h - gap * 2);
+        // Corner dots
+        const d = 2;
+        [[x + gap, y + gap], [x + w - gap, y + gap], [x + gap, y + h - gap], [x + w - gap, y + h - gap]].forEach(([cx, cy]) => {
+          ctx.fillStyle = '#000';
+          ctx.beginPath(); ctx.arc(cx, cy, d, 0, Math.PI * 2); ctx.fill();
+        });
+        break;
+      }
+
+      case 'ornate': {
+        // Ornamental border with corner flourishes
+        ctx.lineWidth = bw;
+        ctx.strokeRect(x, y, w, h);
+        // Inner thin line
+        ctx.lineWidth = 0.5;
+        ctx.strokeRect(x + 4, y + 4, w - 8, h - 8);
+        // Corner brackets
+        const sz = Math.min(w, h) * 0.12;
+        ctx.lineWidth = bw;
+        // Top-left
+        ctx.beginPath(); ctx.moveTo(x, y + sz); ctx.lineTo(x, y); ctx.lineTo(x + sz, y); ctx.stroke();
+        // Top-right
+        ctx.beginPath(); ctx.moveTo(x + w - sz, y); ctx.lineTo(x + w, y); ctx.lineTo(x + w, y + sz); ctx.stroke();
+        // Bottom-left
+        ctx.beginPath(); ctx.moveTo(x, y + h - sz); ctx.lineTo(x, y + h); ctx.lineTo(x + sz, y + h); ctx.stroke();
+        // Bottom-right
+        ctx.beginPath(); ctx.moveTo(x + w - sz, y + h); ctx.lineTo(x + w, y + h); ctx.lineTo(x + w, y + h - sz); ctx.stroke();
+        break;
+      }
+
+      case 'deco': {
+        // Art Déco: thick outer + thin inner + geometric corner diamonds
+        ctx.lineWidth = bw * 2;
+        ctx.strokeRect(x, y, w, h);
+        const g = bw * 2 + 2;
+        ctx.lineWidth = 1;
+        ctx.strokeRect(x + g, y + g, w - g * 2, h - g * 2);
+        // Corner diamonds
+        const ds = Math.min(w, h) * 0.08;
+        const corners = [[x, y], [x + w, y], [x, y + h], [x + w, y + h]];
+        ctx.lineWidth = bw;
+        corners.forEach(([cx, cy]) => {
+          ctx.beginPath();
+          ctx.moveTo(cx, cy - ds); ctx.lineTo(cx + ds, cy);
+          ctx.lineTo(cx, cy + ds); ctx.lineTo(cx - ds, cy);
+          ctx.closePath(); ctx.stroke();
+        });
+        // Side midpoint notches
+        const ns = ds * 0.6;
+        ctx.lineWidth = bw * 0.8;
+        // Top & bottom midpoints
+        const mx = x + w / 2, my = y + h / 2;
+        [[mx, y], [mx, y + h]].forEach(([px, py]) => {
+          ctx.beginPath();
+          ctx.moveTo(px - ns, py); ctx.lineTo(px, py === y ? py + ns : py - ns);
+          ctx.lineTo(px + ns, py); ctx.stroke();
+        });
+        // Left & right midpoints
+        [[x, my], [x + w, my]].forEach(([px, py]) => {
+          ctx.beginPath();
+          ctx.moveTo(px, py - ns); ctx.lineTo(px === x ? px + ns : px - ns, py);
+          ctx.lineTo(px, py + ns); ctx.stroke();
+        });
+        break;
+      }
+
+      case 'ticket': {
+        // Ticket/coupon: outer rect + semicircle notches on edges
+        ctx.lineWidth = bw;
+        const nr = Math.min(w, h) * 0.04; // notch radius
+        const notchCount = Math.max(2, Math.floor(w / (nr * 6)));
+        // Draw top edge with semicircle notches
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        for (let i = 1; i <= notchCount; i++) {
+          const nx = x + (w * i) / (notchCount + 1);
+          ctx.lineTo(nx - nr, y);
+          ctx.arc(nx, y, nr, Math.PI, 0, true);
+          ctx.lineTo(nx + nr, y);
+        }
+        ctx.lineTo(x + w, y);
+        // Right edge
+        ctx.lineTo(x + w, y + h);
+        // Bottom edge with notches
+        for (let i = notchCount; i >= 1; i--) {
+          const nx = x + (w * i) / (notchCount + 1);
+          ctx.lineTo(nx + nr, y + h);
+          ctx.arc(nx, y + h, nr, 0, Math.PI, true);
+          ctx.lineTo(nx - nr, y + h);
+        }
+        ctx.lineTo(x, y + h);
+        ctx.closePath();
+        ctx.stroke();
+        // Inner dashed line
+        ctx.setLineDash([4, 3]);
+        ctx.lineWidth = 0.5;
+        ctx.strokeRect(x + nr * 2, y + nr * 2, w - nr * 4, h - nr * 4);
+        ctx.setLineDash([]);
+        break;
+      }
+
+      case 'dashed': {
+        // Dashed border with rounded corners
+        ctx.setLineDash([bw * 3, bw * 2]);
+        ctx.lineWidth = bw;
+        if (r > 0) { this._roundRect(ctx, x, y, w, h, r); ctx.stroke(); }
+        else ctx.strokeRect(x, y, w, h);
+        ctx.setLineDash([]);
+        break;
+      }
+
+      case 'certificate': {
+        // Certificate style: triple border (thick, gap, thin, gap, medium)
+        ctx.lineWidth = bw * 2.5;
+        ctx.strokeRect(x, y, w, h);
+        const g1 = bw * 2.5 + 2;
+        ctx.lineWidth = 0.5;
+        ctx.strokeRect(x + g1, y + g1, w - g1 * 2, h - g1 * 2);
+        const g2 = g1 + 3;
+        ctx.lineWidth = bw;
+        ctx.strokeRect(x + g2, y + g2, w - g2 * 2, h - g2 * 2);
+        // Corner rosettes (small circles)
+        const cr = Math.min(w, h) * 0.03;
+        const offset = g2 / 2;
+        [[x + offset, y + offset], [x + w - offset, y + offset],
+         [x + offset, y + h - offset], [x + w - offset, y + h - offset]].forEach(([cx, cy]) => {
+          ctx.beginPath(); ctx.arc(cx, cy, cr, 0, Math.PI * 2);
+          ctx.lineWidth = bw * 0.8; ctx.stroke();
+          ctx.beginPath(); ctx.arc(cx, cy, cr * 0.4, 0, Math.PI * 2);
+          ctx.fillStyle = '#000'; ctx.fill();
+        });
+        break;
+      }
+
+      case 'filigree': {
+        // Filigree: outer + inner rect with curly vine corners
+        ctx.lineWidth = bw;
+        ctx.strokeRect(x, y, w, h);
+        const ig = bw + 4;
+        ctx.lineWidth = 0.5;
+        ctx.strokeRect(x + ig, y + ig, w - ig * 2, h - ig * 2);
+        // Corner flourishes (bezier curves)
+        const fl = Math.min(w, h) * 0.15;
+        ctx.lineWidth = bw * 0.8;
+        // Top-left curl
+        ctx.beginPath();
+        ctx.moveTo(x + ig, y + ig + fl);
+        ctx.bezierCurveTo(x + ig, y + ig, x + ig + fl * 0.3, y + ig - fl * 0.1, x + ig + fl * 0.5, y + ig + fl * 0.3);
+        ctx.bezierCurveTo(x + ig + fl * 0.7, y + ig + fl * 0.5, x + ig + fl * 0.3, y + ig + fl * 0.7, x + ig + fl, y + ig);
+        ctx.stroke();
+        // Top-right curl (mirrored)
+        ctx.beginPath();
+        ctx.moveTo(x + w - ig, y + ig + fl);
+        ctx.bezierCurveTo(x + w - ig, y + ig, x + w - ig - fl * 0.3, y + ig - fl * 0.1, x + w - ig - fl * 0.5, y + ig + fl * 0.3);
+        ctx.bezierCurveTo(x + w - ig - fl * 0.7, y + ig + fl * 0.5, x + w - ig - fl * 0.3, y + ig + fl * 0.7, x + w - ig - fl, y + ig);
+        ctx.stroke();
+        // Bottom-left curl
+        ctx.beginPath();
+        ctx.moveTo(x + ig, y + h - ig - fl);
+        ctx.bezierCurveTo(x + ig, y + h - ig, x + ig + fl * 0.3, y + h - ig + fl * 0.1, x + ig + fl * 0.5, y + h - ig - fl * 0.3);
+        ctx.bezierCurveTo(x + ig + fl * 0.7, y + h - ig - fl * 0.5, x + ig + fl * 0.3, y + h - ig - fl * 0.7, x + ig + fl, y + h - ig);
+        ctx.stroke();
+        // Bottom-right curl
+        ctx.beginPath();
+        ctx.moveTo(x + w - ig, y + h - ig - fl);
+        ctx.bezierCurveTo(x + w - ig, y + h - ig, x + w - ig - fl * 0.3, y + h - ig + fl * 0.1, x + w - ig - fl * 0.5, y + h - ig - fl * 0.3);
+        ctx.bezierCurveTo(x + w - ig - fl * 0.7, y + h - ig - fl * 0.5, x + w - ig - fl * 0.3, y + h - ig - fl * 0.7, x + w - ig - fl, y + h - ig);
+        ctx.stroke();
+        break;
+      }
+
+      case 'dotted': {
+        // Dotted border
+        ctx.lineWidth = bw;
+        ctx.setLineDash([1, bw * 2]);
+        ctx.lineCap = 'round';
+        if (r > 0) { this._roundRect(ctx, x, y, w, h, r); ctx.stroke(); }
+        else ctx.strokeRect(x, y, w, h);
+        ctx.setLineDash([]);
+        ctx.lineCap = 'butt';
+        break;
+      }
+    }
+    ctx.restore();
+  },
+
+  _roundRect(ctx, x, y, w, h, r) {
+    r = Math.min(r, w / 2, h / 2);
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.lineTo(x + w - r, y);
+    ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+    ctx.lineTo(x + w, y + h - r);
+    ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+    ctx.lineTo(x + r, y + h);
+    ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+    ctx.lineTo(x, y + r);
+    ctx.quadraticCurveTo(x, y, x + r, y);
+    ctx.closePath();
   },
 
   render() {
@@ -1203,6 +1642,9 @@ const Designer = {
     ctx.strokeStyle = '#ccc';
     ctx.lineWidth = 1;
     ctx.strokeRect(0, 0, lw, lh);
+
+    // Render label border from config
+    this.renderLabelBorder(ctx, lw, lh);
 
     // Grid
     if (this.gridSnap) {
@@ -1222,19 +1664,36 @@ const Designer = {
     for (const el of this.elements) {
       const x = this.mmToPx(el.x), y = this.mmToPx(el.y);
       const w = this.mmToPx(el.w), h = this.mmToPx(el.h);
+      const sw = (el.strokeWidth || 2);
+      const rot = (el.rotation || 0) * Math.PI / 180;
       ctx.save();
 
+      // Apply rotation around element center
+      if (rot !== 0) {
+        ctx.translate(x + w / 2, y + h / 2);
+        ctx.rotate(rot);
+        ctx.translate(-(x + w / 2), -(y + h / 2));
+      }
+
       switch (el.type) {
-        case 'text':
-          ctx.fillStyle = '#333';
-          ctx.font = Math.max(10, Math.min(h * 0.7, 18)) + 'px monospace';
+        case 'text': {
+          const isDataField = /\{.+?\}/.test(el.content);
+          ctx.fillStyle = isDataField ? '#1a56db' : '#333';
+          const fontSize = Math.max(10, Math.min(h * 0.7, 22));
+          ctx.font = (isDataField ? 'italic ' : '') + fontSize + 'px monospace';
           ctx.textBaseline = 'middle';
-          ctx.fillText(el.content || '{texto}', x + 2, y + h / 2, w - 4);
-          ctx.strokeStyle = '#aaa';
+          if (el.alignment === 'center') { ctx.textAlign = 'center'; ctx.fillText(el.content || '{texto}', x + w / 2, y + h / 2, w - 4); }
+          else if (el.alignment === 'right') { ctx.textAlign = 'right'; ctx.fillText(el.content || '{texto}', x + w - 2, y + h / 2, w - 4); }
+          else { ctx.textAlign = 'left'; ctx.fillText(el.content || '{texto}', x + 2, y + h / 2, w - 4); }
+          ctx.textAlign = 'left';
+          // Dashed outline for text
+          ctx.strokeStyle = isDataField ? 'rgba(37,99,235,0.4)' : '#aaa';
           ctx.setLineDash([2, 2]);
           ctx.strokeRect(x, y, w, h);
+          ctx.setLineDash([]);
           break;
-        case 'qrcode':
+        }
+        case 'qrcode': {
           ctx.fillStyle = '#000';
           const sz = Math.min(w, h);
           const cells = 7;
@@ -1244,6 +1703,7 @@ const Designer = {
               ctx.fillRect(x + i * cellSz, y + j * cellSz, cellSz - 0.5, cellSz - 0.5);
           }
           break;
+        }
         case 'barcode':
           ctx.fillStyle = '#000';
           for (let i = 0; i < 24; i++) {
@@ -1252,7 +1712,7 @@ const Designer = {
           break;
         case 'line':
           ctx.strokeStyle = '#000';
-          ctx.lineWidth = Math.max(1, h * 0.5);
+          ctx.lineWidth = Math.max(1, sw * this.zoom * 0.5);
           ctx.beginPath();
           ctx.moveTo(x, y + h / 2);
           ctx.lineTo(x + w, y + h / 2);
@@ -1260,9 +1720,42 @@ const Designer = {
           break;
         case 'rectangle':
           ctx.strokeStyle = '#000';
-          ctx.lineWidth = 2;
+          ctx.lineWidth = Math.max(1, sw * this.zoom * 0.5);
           ctx.strokeRect(x, y, w, h);
           break;
+        case 'anticopy': {
+          // Anti-photocopy pattern: repeated faint text
+          const txt = el.content || 'COPIA';
+          const density = el.anticopyDensity || 'medium';
+          const angle = (el.anticopyAngle || 45) * Math.PI / 180;
+          const alpha = density === 'light' ? 0.04 : density === 'heavy' ? 0.12 : 0.07;
+          const step = density === 'light' ? 28 : density === 'heavy' ? 16 : 22;
+          ctx.save();
+          ctx.beginPath();
+          ctx.rect(x, y, w, h);
+          ctx.clip();
+          ctx.fillStyle = `rgba(0,0,0,${alpha})`;
+          ctx.font = 'bold 9px sans-serif';
+          ctx.textBaseline = 'middle';
+          ctx.textAlign = 'center';
+          // Draw rotated pattern
+          const cx = x + w / 2, cy = y + h / 2;
+          const diag = Math.sqrt(w * w + h * h);
+          ctx.translate(cx, cy);
+          ctx.rotate(angle);
+          for (let gy = -diag; gy < diag; gy += step) {
+            for (let gx = -diag; gx < diag; gx += step * 3) {
+              ctx.fillText(txt, gx, gy);
+            }
+          }
+          ctx.restore();
+          // Dashed border
+          ctx.strokeStyle = 'rgba(220,53,69,0.3)';
+          ctx.setLineDash([4, 4]);
+          ctx.strokeRect(x, y, w, h);
+          ctx.setLineDash([]);
+          break;
+        }
         case 'image':
           ctx.fillStyle = '#f0f0f0';
           ctx.fillRect(x, y, w, h);
@@ -1275,6 +1768,20 @@ const Designer = {
           ctx.fillText('IMG', x + w / 2, y + h / 2);
           ctx.textAlign = 'left';
           break;
+      }
+
+      // Element border (user-configured)
+      if (el.border && el.border !== 'none' && el.type !== 'anticopy') {
+        ctx.strokeStyle = '#000';
+        ctx.lineWidth = Math.max(1, sw * this.zoom * 0.4);
+        if (el.border === 'dashed') ctx.setLineDash([4, 3]);
+        else if (el.border === 'double') {
+          ctx.setLineDash([]);
+          ctx.strokeRect(x - 2, y - 2, w + 4, h + 4);
+        }
+        else ctx.setLineDash([]);
+        ctx.strokeRect(x, y, w, h);
+        ctx.setLineDash([]);
       }
 
       // Selection highlight
@@ -1348,8 +1855,10 @@ const Designer = {
     if (this.dragging && this.selected) {
       const newX = this.snap(this.pxToMm(x) - this.dragOffset.x);
       const newY = this.snap(this.pxToMm(y) - this.dragOffset.y);
-      this.selected.x = Math.max(0, Math.min(newX, this.labelW - this.selected.w));
-      this.selected.y = Math.max(0, Math.min(newY, this.labelH - this.selected.h));
+      // Allow elements near edges; rotated elements may extend beyond
+      const margin = (this.selected.rotation && this.selected.rotation % 180 !== 0) ? -this.selected.w : 0;
+      this.selected.x = Math.max(margin, Math.min(newX, this.labelW - this.selected.w - margin));
+      this.selected.y = Math.max(margin, Math.min(newY, this.labelH - this.selected.h - margin));
       this.render();
       this.syncPropsFromElement();
     }
@@ -1405,6 +1914,40 @@ const Designer = {
     this.render();
   },
 
+  autoFitElements() {
+    if (this.elements.length === 0) { showToast('No hay elementos', 'warning'); return; }
+    // Calculate bounding box of all elements
+    let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+    for (const el of this.elements) {
+      minX = Math.min(minX, el.x);
+      minY = Math.min(minY, el.y);
+      maxX = Math.max(maxX, el.x + el.w);
+      maxY = Math.max(maxY, el.y + el.h);
+    }
+    const contentW = maxX - minX;
+    const contentH = maxY - minY;
+    if (contentW <= 0 || contentH <= 0) return;
+
+    const margin = _labelConfig.padding || 1;
+    const availW = this.labelW - margin * 2;
+    const availH = this.labelH - margin * 2;
+    const scaleX = availW / contentW;
+    const scaleY = availH / contentH;
+    const scale = Math.min(scaleX, scaleY, 1); // never scale up beyond 1x
+
+    // Apply: translate origin to margin, then scale positions and sizes
+    for (const el of this.elements) {
+      el.x = this.snap(margin + (el.x - minX) * scale);
+      el.y = this.snap(margin + (el.y - minY) * scale);
+      el.w = Math.max(2, this.snap(el.w * scale));
+      el.h = Math.max(1, this.snap(el.h * scale));
+    }
+    this.selected = null;
+    this.render();
+    this.updateProperties();
+    showToast('Elementos ajustados al lienzo');
+  },
+
   updateProperties() {
     const empty = document.getElementById('propsEmpty');
     const panel = document.getElementById('propsPanel');
@@ -1423,7 +1966,16 @@ const Designer = {
     document.getElementById('propAlignWrap').style.display = el.type === 'text' ? '' : 'none';
     document.getElementById('propBarcodeWrap').style.display = el.type === 'barcode' ? '' : 'none';
     document.getElementById('propQRWrap').style.display = el.type === 'qrcode' ? '' : 'none';
-    document.getElementById('propContentWrap').style.display = (el.type === 'line' || el.type === 'rectangle' || el.type === 'image') ? 'none' : '';
+    document.getElementById('propContentWrap').style.display = (el.type === 'line' || el.type === 'rectangle' || el.type === 'image') ? 'none' : el.type === 'anticopy' ? 'none' : '';
+    document.getElementById('propStrokeWrap').style.display = (el.type === 'line' || el.type === 'rectangle') ? '' : 'none';
+    document.getElementById('propAnticopyWrap').style.display = el.type === 'anticopy' ? '' : 'none';
+    // Border visible for text, barcode, qrcode, image (not line/anticopy)
+    const borderSel = document.getElementById('propBorder');
+    borderSel.closest('.row').style.display = (el.type === 'line' || el.type === 'anticopy') ? 'none' : '';
+    // Data field dropdown for text/barcode/qrcode
+    const showData = (el.type === 'text' || el.type === 'barcode' || el.type === 'qrcode');
+    document.getElementById('propDataWrap').style.display = showData ? '' : 'none';
+    if (showData) this.populateDataFields();
   },
 
   syncPropsFromElement() {
@@ -1440,6 +1992,13 @@ const Designer = {
     document.getElementById('propRotation').value = el.rotation || 0;
     document.getElementById('propAlign').value = el.alignment || 'left';
     document.getElementById('propBarcodeType').value = el.barcodeType || '128';
+    document.getElementById('propStrokeWidth').value = el.strokeWidth || 2;
+    document.getElementById('propBorder').value = el.border || 'none';
+    if (el.type === 'anticopy') {
+      document.getElementById('propAnticopyText').value = el.content || 'COPIA';
+      document.getElementById('propAnticopyDensity').value = el.anticopyDensity || 'medium';
+      document.getElementById('propAnticopyAngle').value = el.anticopyAngle || 45;
+    }
 
     if (el.type === 'qrcode') {
       document.getElementById('propQRType').value = el.qrType || 'free';
@@ -1472,6 +2031,13 @@ const Designer = {
     el.rotation = parseInt(document.getElementById('propRotation').value) || 0;
     el.alignment = document.getElementById('propAlign').value;
     el.barcodeType = document.getElementById('propBarcodeType').value;
+    el.strokeWidth = parseInt(document.getElementById('propStrokeWidth').value) || 2;
+    el.border = document.getElementById('propBorder').value;
+    if (el.type === 'anticopy') {
+      el.content = document.getElementById('propAnticopyText').value || 'COPIA';
+      el.anticopyDensity = document.getElementById('propAnticopyDensity').value;
+      el.anticopyAngle = parseInt(document.getElementById('propAnticopyAngle').value) || 45;
+    }
     this.render();
     this.updateTSPL();
     validateStandard();
@@ -1550,11 +2116,31 @@ const Designer = {
           lines.push('BARCODE ' + x + ',' + y + ',"' + (el.barcodeType || '128') + '",' + h + ',' + rot + ',2,2,"' + (el.content || '') + '"');
           break;
         case 'line':
-          lines.push('BAR ' + x + ',' + y + ',' + w + ',' + Math.max(2, h));
+          lines.push('BAR ' + x + ',' + y + ',' + w + ',' + Math.max(2, el.strokeWidth || 2));
           break;
         case 'rectangle':
-          lines.push('BOX ' + x + ',' + y + ',' + (x + w) + ',' + (y + h) + ',2');
+          lines.push('BOX ' + x + ',' + y + ',' + (x + w) + ',' + (y + h) + ',' + (el.strokeWidth || 2));
           break;
+        case 'anticopy': {
+          // Anti-photocopy: repeated micro-text at angle using TSPL TEXT commands
+          const step = el.anticopyDensity === 'light' ? 60 : el.anticopyDensity === 'heavy' ? 25 : 40;
+          const aRot = el.anticopyAngle === 30 ? 0 : el.anticopyAngle === 60 ? 90 : 0;
+          for (let gy = y; gy < y + h; gy += step) {
+            for (let gx = x; gx < x + w; gx += step * 3) {
+              lines.push('TEXT ' + gx + ',' + gy + ',"1",' + aRot + ',1,1,"' + (el.content || 'COPIA') + '"');
+            }
+          }
+          break;
+        }
+      }
+      // Add border as BOX command if element has border
+      if (el.border && el.border !== 'none' && el.type !== 'line' && el.type !== 'rectangle' && el.type !== 'anticopy') {
+        const bw = el.border === 'double' ? (el.strokeWidth || 2) : Math.max(1, Math.round((el.strokeWidth || 2) / 2));
+        lines.push('BOX ' + x + ',' + y + ',' + (x + w) + ',' + (y + h) + ',' + bw);
+        if (el.border === 'double') {
+          const off = bw + 2;
+          lines.push('BOX ' + (x - off) + ',' + (y - off) + ',' + (x + w + off) + ',' + (y + h + off) + ',' + bw);
+        }
       }
     }
     lines.push('PRINT 1');
@@ -1582,7 +2168,7 @@ const Designer = {
   toLocalTemplate() {
     return {
       id: 'designer-' + Date.now(),
-      name: 'Diseno ' + new Date().toLocaleString('es'),
+      name: 'Diseño' + new Date().toLocaleString('es'),
       preset_id: AppState.selectedPreset,
       fields: this.elements.map(el => ({
         name: el.content.replace(/[{}]/g, '') || el.type,
@@ -1623,7 +2209,20 @@ const Designer = {
     a.click();
   },
 
-  importJSON() {
+  async importJSON() {
+    // Try native file dialog first (for webview)
+    try {
+      const res = await fetch('/native-file-dialog?type=json');
+      if (res.ok) {
+        const result = await res.json();
+        if (!result.cancelled && result.data) {
+          const json = atob(result.data);
+          this._loadDesignJSON(json);
+          return;
+        }
+        if (result.cancelled) return;
+      }
+    } catch(e) { /* fallback */ }
     document.getElementById('importJSONInput').click();
   },
 
@@ -1631,31 +2230,110 @@ const Designer = {
     const file = e.target.files[0];
     if (!file) return;
     const reader = new FileReader();
-    reader.onload = (ev) => {
-      try {
-        const data = JSON.parse(ev.target.result);
-        if (data.elements) {
-          this.elements = data.elements;
-          this.labelW = data.labelW || 30;
-          this.labelH = data.labelH || 22;
-          this.selected = null;
-          this.resizeCanvas();
-          this.render();
-          this.updateProperties();
-          this.updateTSPL();
-          showToast('Diseno importado (' + this.elements.length + ' elementos)');
-        }
-      } catch(err) { showToast('JSON invalido: ' + err.message, 'error'); }
-    };
+    reader.onload = (ev) => { this._loadDesignJSON(ev.target.result); };
     reader.readAsText(file);
     e.target.value = '';
+  },
+
+  _loadDesignJSON(jsonStr) {
+    try {
+      const data = JSON.parse(jsonStr);
+      if (data.elements) {
+        this.elements = data.elements;
+        this.labelW = data.labelW || 30;
+        this.labelH = data.labelH || 22;
+        this.selected = null;
+        this.resizeCanvas();
+        this.render();
+        this.updateProperties();
+        this.updateTSPL();
+        showToast('Diseñoimportado (' + this.elements.length + ' elementos)');
+      }
+    } catch(err) { showToast('JSON invalido: ' + err.message, 'error'); }
+  },
+
+  populateDataFields() {
+    const sel = document.getElementById('propDataField');
+    sel.innerHTML = '<option value="">Insertar {variable}...</option>';
+    // From batch columns
+    if (AppState.batchColumns && AppState.batchColumns.length) {
+      AppState.batchColumns.forEach(c => {
+        sel.innerHTML += `<option value="{${c}}">{${c}}</option>`;
+      });
+    }
+    // Common fields
+    const common = ['nombre', 'apellido', 'codigo', 'id', 'email', 'telefono', 'fecha', 'consecutivo'];
+    common.forEach(f => {
+      if (!AppState.batchColumns || !AppState.batchColumns.includes(f)) {
+        sel.innerHTML += `<option value="{${f}}">{${f}}</option>`;
+      }
+    });
+  },
+
+  insertDataField() {
+    const sel = document.getElementById('propDataField');
+    const val = sel.value;
+    if (!val || !this.selected) return;
+    const contentEl = document.getElementById('propContent');
+    const start = contentEl.selectionStart || contentEl.value.length;
+    const before = contentEl.value.substring(0, start);
+    const after = contentEl.value.substring(start);
+    contentEl.value = before + val + after;
+    this.selected.content = contentEl.value;
+    sel.value = '';
+    this.render();
+    this.updateTSPL();
   }
 };
 
+// applyStandardPreset — ONLY called from the standard dropdown onchange
+function applyStandardPreset() {
+  const std = document.getElementById('designerStandard').value;
+  if (!std) { document.getElementById('standardWarnings').innerHTML = ''; return; }
+
+  // Apply standard label config (size + border)
+  const stdCfg = getStandardLabelConfig(std);
+  if (stdCfg) {
+    Designer.labelW = stdCfg.w;
+    Designer.labelH = stdCfg.h;
+    _labelConfig.border = stdCfg.border;
+    _labelConfig.borderWidth = stdCfg.borderWidth;
+    _labelConfig.borderRadius = stdCfg.borderRadius;
+    _labelConfig.padding = stdCfg.padding;
+    Designer.resizeCanvas();
+    // Show and sync the label config panel
+    const panel = document.getElementById('labelConfigPanel');
+    panel.style.display = '';
+    document.getElementById('cfgLabelW').value = stdCfg.w;
+    document.getElementById('cfgLabelH').value = stdCfg.h;
+    document.getElementById('cfgLabelBorder').value = stdCfg.border;
+    document.getElementById('cfgBorderWidth').value = stdCfg.borderWidth;
+    document.getElementById('cfgBorderRadius').value = stdCfg.borderRadius;
+    document.getElementById('cfgPadding').value = stdCfg.padding;
+  }
+
+  // If designer is empty or user confirms, load preset elements
+  const presetEls = Standards.getPresetElements(std, Designer.labelW, Designer.labelH);
+  if (presetEls.length > 0) {
+    if (Designer.elements.length === 0 || confirm('Cargar elementos del estandar "' + std + '"? Se reemplazaran los elementos actuales.')) {
+      Designer.elements = presetEls;
+      Designer.selected = null;
+      Designer.render();
+      Designer.updateProperties();
+      Designer.updateTSPL();
+      showToast('Estandar "' + std + '" cargado con ' + presetEls.length + ' elementos');
+    }
+  }
+
+  validateStandard();
+}
+
+// validateStandard — lightweight validation only, safe to call on every interaction
 function validateStandard() {
   const std = document.getElementById('designerStandard').value;
   const container = document.getElementById('standardWarnings');
   if (!std) { container.innerHTML = ''; return; }
+
   const result = Standards.validate(std, Designer.elements);
   if (result.warnings.length === 0) {
     container.innerHTML = '<div class="alert alert-success alert-sm py-1 px-2" style="font-size:12px;"><i class="bi bi-check-circle me-1"></i>Cumple con estandar ' + std + '</div>';
@@ -1663,6 +2341,50 @@ function validateStandard() {
     container.innerHTML = result.warnings.map(w =>
       '<div class="alert alert-warning alert-sm py-1 px-2 mb-1" style="font-size:12px;"><i class="bi bi-exclamation-triangle me-1"></i>' + esc(w) + '</div>'
     ).join('');
+  }
+}
+
+// ===================== LABEL CONFIGURATOR =====================
+let _labelConfig = { border: 'none', borderWidth: 2, borderRadius: 0, padding: 2 };
+
+function toggleLabelConfig() {
+  const panel = document.getElementById('labelConfigPanel');
+  panel.style.display = panel.style.display === 'none' ? '' : 'none';
+  // Sync values
+  document.getElementById('cfgLabelW').value = Designer.labelW;
+  document.getElementById('cfgLabelH').value = Designer.labelH;
+  document.getElementById('cfgLabelBorder').value = _labelConfig.border;
+  document.getElementById('cfgBorderWidth').value = _labelConfig.borderWidth;
+  document.getElementById('cfgBorderRadius').value = _labelConfig.borderRadius;
+  document.getElementById('cfgPadding').value = _labelConfig.padding;
+}
+
+function applyLabelConfig() {
+  const newW = parseFloat(document.getElementById('cfgLabelW').value) || 30;
+  const newH = parseFloat(document.getElementById('cfgLabelH').value) || 22;
+  _labelConfig.border = document.getElementById('cfgLabelBorder').value;
+  _labelConfig.borderWidth = parseInt(document.getElementById('cfgBorderWidth').value) || 2;
+  _labelConfig.borderRadius = parseInt(document.getElementById('cfgBorderRadius').value) || 0;
+  _labelConfig.padding = parseFloat(document.getElementById('cfgPadding').value) || 0;
+
+  if (newW !== Designer.labelW || newH !== Designer.labelH) {
+    Designer.labelW = newW;
+    Designer.labelH = newH;
+    Designer.resizeCanvas();
+  }
+  Designer.render();
+  Designer.updateTSPL();
+}
+
+function previewLabelBorder() { applyLabelConfig(); }
+
+// Standard-specific label configs
+function getStandardLabelConfig(std) {
+  switch(std) {
+    case 'gafete': return { w: 86, h: 54, border: 'rounded', borderWidth: 2, borderRadius: 4, padding: 2 };
+    case 'gs1-128': return { w: 100, h: 50, border: 'simple', borderWidth: 1, borderRadius: 0, padding: 1 };
+    case 'iso-15223': return { w: 76, h: 51, border: 'double', borderWidth: 2, borderRadius: 0, padding: 2 };
+    default: return null;
   }
 }
 
@@ -1680,9 +2402,57 @@ function goToStep(step) {
   document.querySelectorAll('.wizard-panel').forEach((p, i) => p.classList.toggle('active', i === step - 1));
 }
 
-async function uploadExcel(e) {
+// Opens file upload — tries native file dialog first (for webview), falls back to input click
+async function openFileUpload(type) {
+  try {
+    const res = await fetch('/native-file-dialog?type=' + (type || 'excel'));
+    if (res.ok) {
+      const data = await res.json();
+      if (data.cancelled) return;
+      // Convert base64 to File object
+      const binary = atob(data.data);
+      const bytes = new Uint8Array(binary.length);
+      for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+      const ext = data.filename.split('.').pop().toLowerCase();
+      const mimeMap = { xlsx: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', xls: 'application/vnd.ms-excel', csv: 'text/csv', pdf: 'application/pdf' };
+      const file = new File([bytes], data.filename, { type: mimeMap[ext] || 'application/octet-stream' });
+      showUploadProgress(file.name);
+      if (ext === 'pdf') {
+        await handlePdfFile(file);
+      } else {
+        await processExcelFile(file);
+      }
+      hideUploadProgress();
+      return;
+    }
+  } catch(e) { /* native dialog not available, fall back */ }
+  // Fallback: standard file input
+  document.getElementById('excelFile').click();
+}
+
+function showUploadProgress(name) {
+  const el = document.getElementById('uploadProgress');
+  if (el) { el.style.display = ''; document.getElementById('uploadFileName').textContent = name; }
+}
+function hideUploadProgress() {
+  const el = document.getElementById('uploadProgress');
+  if (el) el.style.display = 'none';
+}
+
+function handleFileSelected(e) {
   const file = e.target.files[0];
   if (!file) return;
+  showUploadProgress(file.name);
+  const ext = file.name.split('.').pop().toLowerCase();
+  if (ext === 'pdf') {
+    handlePdfFile(file).finally(hideUploadProgress);
+  } else {
+    processExcelFile(file).finally(hideUploadProgress);
+  }
+  e.target.value = '';
+}
+
+async function processExcelFile(file) {
   const formData = new FormData();
   formData.append('file', file);
   try {
@@ -1690,7 +2460,6 @@ async function uploadExcel(e) {
     AppState.batchColumns = data.headers || [];
     AppState.batchRows = data.rows || [];
     document.getElementById('excelRowCount').textContent = AppState.batchRows.length;
-    // Render preview
     const table = document.getElementById('excelPreviewTable');
     const previewRows = AppState.batchRows.slice(0, 5);
     let html = '<thead class="table-light"><tr>' + AppState.batchColumns.map(c => '<th>' + esc(c) + '</th>').join('') + '</tr></thead><tbody>';
@@ -1704,58 +2473,244 @@ async function uploadExcel(e) {
   } catch(err) { showToast('Error: ' + err.message, 'error'); }
 }
 
+// Drag-and-drop for Excel/PDF
+(function() {
+  const dz = document.getElementById('excelDropZone');
+  if (!dz) return;
+  ['dragenter','dragover'].forEach(ev => dz.addEventListener(ev, e => { e.preventDefault(); e.stopPropagation(); dz.classList.add('drag-over'); }));
+  ['dragleave','drop'].forEach(ev => dz.addEventListener(ev, e => { e.preventDefault(); e.stopPropagation(); dz.classList.remove('drag-over'); }));
+  dz.addEventListener('drop', e => {
+    const file = e.dataTransfer.files[0];
+    if (!file) return;
+    showUploadProgress(file.name);
+    if (file.name.match(/\.(xlsx|xls|csv)$/i)) {
+      processExcelFile(file).finally(hideUploadProgress);
+    } else if (file.name.match(/\.pdf$/i)) {
+      handlePdfFile(file).finally(hideUploadProgress);
+    } else {
+      hideUploadProgress();
+      showToast('Formato no soportado. Usa xlsx, xls, csv o pdf.', 'warning');
+    }
+  });
+})();
+
+function handlePdfUpload(e) {
+  const file = e.target.files[0];
+  if (file) handlePdfFile(file);
+  e.target.value = '';
+}
+
+async function handlePdfFile(file) {
+  const formData = new FormData();
+  formData.append('file', file);
+  try {
+    showToast('Procesando PDF...');
+    const res = await api('POST', '/upload-pdf', formData);
+    showToast('PDF procesado: ' + (res.total_pages || 0) + ' paginas');
+    AppState.pdfUpload = { id: res.upload_id, pages: res.total_pages, filename: file.name };
+    document.getElementById('excelPreview').style.display = '';
+    document.getElementById('excelPreview').innerHTML = `
+      <div class="alert alert-info py-2">
+        <i class="bi bi-filetype-pdf me-2"></i><strong>${esc(file.name)}</strong> — ${res.total_pages} pagina(s)
+      </div>
+      <button class="btn btn-primary btn-sm" onclick="goToStep(2)">Siguiente <i class="bi bi-arrow-right"></i></button>`;
+    AppState.batchRows = Array.from({ length: res.total_pages }, (_, i) => ({ page: String(i + 1) }));
+    AppState.batchColumns = ['page'];
+  } catch(err) { showToast('Error PDF: ' + err.message, 'error'); }
+}
+
+// ===================== DESIGNER PRINT/PREVIEW WITH VARIABLES =====================
+function getDesignerVariables() {
+  const vars = new Set();
+  Designer.elements.forEach(el => {
+    const matches = (el.content || '').matchAll(/\{(.+?)\}/g);
+    for (const m of matches) vars.add(m[1]);
+  });
+  return [...vars];
+}
+
+function showVariableInputModal(action) {
+  const vars = getDesignerVariables();
+  if (vars.length === 0) {
+    // No variables — send directly
+    executeDesignerAction(action, {});
+    return;
+  }
+  const body = document.getElementById('variableInputBody');
+  // Load sample data from batch if available
+  const sampleRow = AppState.batchRows.length > 0 ? AppState.batchRows[0] : {};
+  body.innerHTML = vars.map(v => {
+    const sample = sampleRow[v] || '';
+    return `<div class="mb-2">
+      <label class="form-label fw-bold" style="font-size:13px;">{${esc(v)}}</label>
+      <input type="text" class="form-control form-control-sm var-input" data-var="${esc(v)}" value="${esc(sample)}" placeholder="Valor para ${esc(v)}">
+    </div>`;
+  }).join('');
+  const modal = new bootstrap.Modal(document.getElementById('variableInputModal'));
+  document.getElementById('btnPreviewVars').onclick = () => {
+    const data = collectVarInputs();
+    modal.hide();
+    executeDesignerAction('preview', data);
+  };
+  document.getElementById('btnPrintVars').onclick = () => {
+    const data = collectVarInputs();
+    modal.hide();
+    executeDesignerAction('print', data);
+  };
+  modal.show();
+}
+
+function collectVarInputs() {
+  const data = {};
+  document.querySelectorAll('#variableInputBody .var-input').forEach(inp => {
+    data[inp.dataset.var] = inp.value;
+  });
+  return data;
+}
+
+async function executeDesignerAction(action, varData) {
+  // Replace variables in TSPL
+  let tspl = Designer.generateTSPL();
+  for (const [key, val] of Object.entries(varData)) {
+    tspl = tspl.replace(new RegExp('\\{' + key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\}', 'g'), val);
+  }
+
+  if (action === 'preview') {
+    document.getElementById('tsplPreview').textContent = tspl;
+    showToast('Preview TSPL generado');
+    return;
+  }
+
+  // Print
+  try {
+    const res = await api('POST', '/print', {
+      printer: AppState.selectedPrinter,
+      tspl: tspl,
+    });
+    showToast('Etiqueta enviada a impresora');
+  } catch(e) { showToast('Error: ' + e.message, 'error'); }
+}
+
+// Only data-bearing field types are mappable (skip lines, rectangles, images, etc.)
+const MAPPABLE_TYPES = new Set(['text', 'multiVariableText', 'qrcode', 'barcode']);
+function isMappableField(f) {
+  return f && f.name && MAPPABLE_TYPES.has(f.type || 'text');
+}
+
+// Store loaded templates for selection by index
+let _batchTemplateList = [];
+
 async function loadAllTemplatesForBatch() {
   const grid = document.getElementById('batchTemplateGrid');
   grid.innerHTML = '<div class="col-12 text-center py-3"><div class="spinner-border spinner-border-sm text-primary"></div></div>';
-  const all = [];
+  _batchTemplateList = [];
 
-  // Local templates
+  // Local templates — extract fields from LabelField array
   try {
     const res = await api('GET', '/templates');
-    (res.templates || []).forEach(t => all.push({ ...t, source: 'local' }));
+    (res.templates || []).forEach(t => {
+      const fields = (t.fields || []).map(f => ({ name: f.name || f.Name, type: f.type || 'text' }));
+      _batchTemplateList.push({ id: t.id, name: t.name, fields, source: 'local', preset_id: t.preset_id, builtin: t.builtin });
+    });
   } catch(e) {}
 
-  // Backend templates
+  // Backend/pdfme templates — extract fields from schemas
   if (AppState.authState.configured) {
     try {
       const res = await api('GET', '/api/templates');
-      (res.templates || []).forEach(t => all.push({
-        id: t.id || t.uuid, name: t.titulo || t.name,
-        fields: t.fields || [], source: 'server',
-        thermal_printable: t.thermal_printable,
-        categoria: t.categoria,
-      }));
+      (res.templates || []).forEach(t => {
+        let fields = [];
+        // Extract variable fields from pdfme schemas — only mappable types
+        if (t.schemas && Array.isArray(t.schemas)) {
+          t.schemas.forEach(page => {
+            if (Array.isArray(page)) {
+              page.forEach(f => {
+                const entry = { name: f.name, type: f.type || 'text' };
+                if (isMappableField(entry)) fields.push(entry);
+              });
+            }
+          });
+        }
+        // Also check t.fields directly
+        if (fields.length === 0 && t.fields && Array.isArray(t.fields)) {
+          t.fields.forEach(f => {
+            const entry = { name: f.name || f.Name || f.nombre, type: f.type || 'text' };
+            if (isMappableField(entry)) fields.push(entry);
+          });
+        }
+        // Also check t.columns
+        if (fields.length === 0 && t.columns && Array.isArray(t.columns)) {
+          fields = t.columns.map(c => ({ name: c, type: 'text' }));
+        }
+        // Deduplicate by name
+        const seen = new Set();
+        fields = fields.filter(f => { if (!f.name || seen.has(f.name)) return false; seen.add(f.name); return true; });
+
+        _batchTemplateList.push({
+          id: t.id || t.uuid, name: t.titulo || t.name,
+          fields, source: 'server',
+          thermal_printable: t.thermal_printable,
+          categoria: t.categoria,
+        });
+      });
     } catch(e) {}
   }
 
-  if (all.length === 0) {
+  if (_batchTemplateList.length === 0) {
     grid.innerHTML = '<div class="col-12 text-center text-muted py-4">No se encontraron plantillas</div>';
     return;
   }
 
-  grid.innerHTML = all.map(t => {
+  grid.innerHTML = _batchTemplateList.map((t, idx) => {
     const isSelected = AppState.batchTemplate && AppState.batchTemplate.id === t.id;
     const fieldCount = t.fields ? t.fields.length : 0;
+    const fieldNames = t.fields ? t.fields.slice(0, 4).map(f => f.name).join(', ') : '';
     const sourceBadge = t.source === 'server' ? '<span class="badge bg-info text-dark">Servidor</span>' : '<span class="badge bg-secondary">Local</span>';
     return `<div class="col-md-4 col-sm-6">
-      <div class="template-card${isSelected ? ' selected' : ''}" onclick="selectBatchTemplate(${esc(JSON.stringify(t).replace(/"/g, '&quot;'))})">
-        <div class="d-flex justify-content-between align-items-start mb-2">
+      <div class="template-card${isSelected ? ' selected' : ''}" onclick="selectBatchTemplate(${idx}, this)" data-idx="${idx}">
+        <div class="d-flex justify-content-between align-items-start mb-1">
           <strong style="font-size:13px;">${esc(t.name)}</strong>
           ${sourceBadge}
         </div>
-        <small class="text-muted">${fieldCount} campos | ID: ${esc((t.id || '').substring(0, 8))}...</small>
+        <small class="text-muted">${fieldCount} campos${fieldNames ? ': ' + esc(fieldNames) : ''}</small>
+        ${t.builtin ? '<br><span class="badge bg-secondary mt-1" style="font-size:9px;">built-in</span>' : ''}
       </div>
     </div>`;
   }).join('');
 }
 
-function selectBatchTemplate(tmpl) {
-  if (typeof tmpl === 'string') tmpl = JSON.parse(tmpl);
+async function selectBatchTemplate(idx, el) {
+  const tmpl = _batchTemplateList[idx];
+  if (!tmpl) return;
+
+  // Update card selection immediately
+  document.querySelectorAll('#batchTemplateGrid .template-card').forEach(c => c.classList.remove('selected'));
+  if (el) el.closest('.template-card').classList.add('selected');
+
+  // For server templates without fields, fetch detail to get pdfme fields
+  if (tmpl.source === 'server' && (!tmpl.fields || tmpl.fields.length === 0) && tmpl.id) {
+    try {
+      const detail = await api('GET', '/api/templates?id=' + encodeURIComponent(tmpl.id));
+      if (detail.fields_typed && detail.fields_typed.length) {
+        tmpl.fields = detail.fields_typed.map(f => ({ name: f.name, type: f.type || 'text' })).filter(isMappableField);
+      } else if (detail.fields && detail.fields.length) {
+        tmpl.fields = detail.fields.map(f => typeof f === 'string' ? { name: f, type: 'text' } : { name: f.name, type: f.type || 'text' }).filter(isMappableField);
+      }
+      // Update display
+      const card = document.querySelector(`[data-idx="${idx}"]`);
+      if (card) {
+        const small = card.querySelector('small');
+        if (small && tmpl.fields) {
+          const fieldNames = tmpl.fields.slice(0, 4).map(f => f.name).join(', ');
+          small.textContent = tmpl.fields.length + ' campos' + (fieldNames ? ': ' + fieldNames : '');
+        }
+      }
+      _batchTemplateList[idx] = tmpl;
+    } catch(e) { console.warn('Could not fetch template fields:', e); }
+  }
+
   AppState.batchTemplate = tmpl;
   document.getElementById('btnNextStep3').disabled = false;
-  // Update card selection
-  document.querySelectorAll('#batchTemplateGrid .template-card').forEach(c => c.classList.remove('selected'));
-  event.target.closest('.template-card').classList.add('selected');
 }
 
 function buildMappingUI() {
@@ -1763,46 +2718,63 @@ function buildMappingUI() {
   const tmpl = AppState.batchTemplate;
   if (!tmpl) return;
 
-  // Get field names from template
   let fields = [];
   if (tmpl.fields && tmpl.fields.length) {
-    fields = tmpl.fields.map(f => f.name || f.Name || f.nombre);
-  } else {
-    // For server templates, fetch details
-    fields = ['campo1'];
+    fields = tmpl.fields.map(f => ({ name: f.name || f.Name || f.nombre, type: f.type || 'text' }));
   }
-  // Deduplicate
-  fields = [...new Set(fields.filter(f => f))];
+  if (fields.length === 0) fields = [{ name: 'campo1', type: 'text' }];
+  const seen = new Set();
+  fields = fields.filter(f => { if (!f.name || seen.has(f.name)) return false; seen.add(f.name); return true; });
 
-  const colOptions = AppState.batchColumns.map(c => `<option value="${esc(c)}">${esc(c)}</option>`).join('');
-  container.innerHTML = fields.map(field => {
-    return `<div class="row g-2 mb-2 align-items-center mapping-row" data-field="${esc(field)}">
-      <div class="col-md-3">
-        <span class="badge bg-dark">{${esc(field)}}</span>
-      </div>
-      <div class="col-md-3">
-        <select class="form-select form-select-sm mapping-mode" onchange="onMappingModeChange(this)">
-          <option value="column">Columna</option>
-          <option value="formula">Formula</option>
-          <option value="vcard">vCard</option>
-          <option value="url">URL Pattern</option>
-          <option value="static">Estatico</option>
-        </select>
-      </div>
-      <div class="col-md-6 mapping-value-col">
-        <select class="form-select form-select-sm mapping-value">${colOptions}</select>
+  const cols = AppState.batchColumns;
+  const colChips = cols.map(c => `<span class="col-chip" data-col="${esc(c)}" onclick="insertColChip(this)" title="Click para insertar">${esc(c)}</span>`).join('');
+  const colOptions = cols.map(c => `<option value="${esc(c)}">${esc(c)}</option>`).join('');
+  const sampleRow = AppState.batchRows[0] || {};
+
+  const typeIcon = (t) => t === 'qrcode' ? 'bi-qr-code' : t === 'barcode' ? 'bi-upc-scan' : t === 'multiVariableText' ? 'bi-body-text' : 'bi-fonts';
+  const defaultMode = (t) => t === 'qrcode' ? 'vcard' : 'column';
+
+  container.innerHTML = `
+    <div class="mb-2" style="font-size:11px;color:var(--text-dim);">
+      <strong>Columnas disponibles:</strong>
+      <div class="d-flex flex-wrap gap-1 mt-1">${colChips}</div>
+    </div>
+    <hr style="margin:8px 0;">
+  ` + fields.map(f => {
+    const mode = defaultMode(f.type);
+    const icon = typeIcon(f.type);
+    const sampleVal = sampleRow[f.name] || sampleRow[cols.find(c => c.toLowerCase() === f.name.toLowerCase())] || '';
+    return `<div class="mapping-row card mb-2" data-field="${esc(f.name)}" data-type="${esc(f.type)}">
+      <div class="card-body py-2 px-3">
+        <div class="d-flex justify-content-between align-items-center mb-1">
+          <div class="d-flex align-items-center gap-2">
+            <i class="bi ${icon}" style="font-size:14px;color:var(--primary);"></i>
+            <strong style="font-size:12px;">{${esc(f.name)}}</strong>
+            <span class="badge bg-light text-dark border" style="font-size:9px;">${esc(f.type)}</span>
+          </div>
+          <select class="form-select form-select-sm mapping-mode" style="width:auto;height:24px;font-size:11px;padding:0 20px 0 6px;" onchange="onMappingModeChange(this)">
+            <option value="column"${mode==='column'?' selected':''}>Columna directa</option>
+            <option value="formula"${mode==='formula'?' selected':''}>Concatenar / Formula</option>
+            <option value="vcard"${mode==='vcard'?' selected':''}>vCard</option>
+            <option value="url">URL con variables</option>
+            <option value="static">Valor fijo</option>
+          </select>
+        </div>
+        <div class="mapping-value-col">${mode === 'vcard' ? buildVcardUI(cols) : `<select class="form-select form-select-sm mapping-value">${colOptions}</select>`}</div>
+        <div class="mapping-sample mt-1" style="font-size:10px;color:var(--text-muted);"><i class="bi bi-arrow-right-short"></i>Vista previa: <span class="sample-val">${esc(sampleVal || '(sin dato)')}</span></div>
       </div>
     </div>`;
   }).join('');
 
-  // Auto-match columns by name
+  // Auto-match columns
   container.querySelectorAll('.mapping-row').forEach(row => {
     const field = row.dataset.field.toLowerCase();
     const sel = row.querySelector('.mapping-value');
-    for (const opt of sel.options) {
-      if (opt.value.toLowerCase() === field || opt.value.toLowerCase().includes(field)) {
-        opt.selected = true;
-        break;
+    if (sel && sel.tagName === 'SELECT') {
+      for (const opt of sel.options) {
+        if (opt.value.toLowerCase() === field || opt.value.toLowerCase().includes(field) || field.includes(opt.value.toLowerCase())) {
+          opt.selected = true; break;
+        }
       }
     }
   });
@@ -1810,33 +2782,86 @@ function buildMappingUI() {
   updateMappingPreview();
 }
 
+function buildVcardUI(cols) {
+  const colOpts = cols.map(c => `<option value="{${c}}">{${c}}</option>`).join('');
+  const fields = [
+    { key: 'fn', label: 'Nombre', icon: 'bi-person' },
+    { key: 'ln', label: 'Apellido', icon: 'bi-person-badge' },
+    { key: 'tel', label: 'Telefono', icon: 'bi-telephone' },
+    { key: 'email', label: 'Email', icon: 'bi-envelope' },
+    { key: 'org', label: 'Empresa', icon: 'bi-building' },
+    { key: 'title', label: 'Cargo', icon: 'bi-briefcase' },
+  ];
+  return `<div class="row g-1">${fields.map(f =>
+    `<div class="col-6">
+      <div class="input-group input-group-sm">
+        <span class="input-group-text" style="font-size:10px;padding:2px 6px;"><i class="bi ${f.icon}"></i></span>
+        <select class="form-select form-select-sm mapping-vcard-${f.key}" style="font-size:11px;" onchange="updateMappingPreview()">
+          <option value="">${f.label}...</option>${colOpts}
+        </select>
+      </div>
+    </div>`
+  ).join('')}</div>`;
+}
+
+function buildFormulaUI(cols) {
+  const chips = cols.map(c => `<span class="col-chip" data-col="${esc(c)}" onclick="insertColChip(this)" style="cursor:pointer;">${esc(c)}</span>`).join('');
+  return `<div>
+    <input type="text" class="form-control form-control-sm mapping-value" placeholder='Escribe o inserta columnas abajo' style="font-family:var(--font-mono);">
+    <div class="d-flex flex-wrap gap-1 mt-1" style="font-size:10px;">${chips}
+      <span class="col-chip" data-col=' + " " + ' onclick="insertColChip(this)" style="cursor:pointer;background:#e0e7ff;">+ espacio</span>
+      <span class="col-chip" data-col=' + ", " + ' onclick="insertColChip(this)" style="cursor:pointer;background:#e0e7ff;">+ coma</span>
+    </div>
+  </div>`;
+}
+
+function insertColChip(chip) {
+  const col = chip.dataset.col;
+  const row = chip.closest('.mapping-row');
+  if (!row) return;
+  const input = row.querySelector('.mapping-value');
+  if (!input || input.tagName !== 'INPUT') return;
+  const val = input.value;
+  const pos = input.selectionStart || val.length;
+  const insert = col.startsWith(' +') ? col : '{' + col + '}';
+  input.value = val.substring(0, pos) + insert + val.substring(pos);
+  input.focus();
+  updateMappingPreview();
+}
+
 function onMappingModeChange(select) {
   const row = select.closest('.mapping-row');
   const valueCol = row.querySelector('.mapping-value-col');
   const mode = select.value;
-  const colOptions = AppState.batchColumns.map(c => `<option value="${esc(c)}">${esc(c)}</option>`).join('');
+  const cols = AppState.batchColumns;
+  const colOptions = cols.map(c => `<option value="${esc(c)}">${esc(c)}</option>`).join('');
 
   switch (mode) {
     case 'column':
       valueCol.innerHTML = `<select class="form-select form-select-sm mapping-value">${colOptions}</select>`;
+      // Auto-match
+      const field = row.dataset.field.toLowerCase();
+      const sel = valueCol.querySelector('.mapping-value');
+      for (const opt of sel.options) {
+        if (opt.value.toLowerCase() === field || opt.value.toLowerCase().includes(field)) { opt.selected = true; break; }
+      }
       break;
     case 'formula':
-      valueCol.innerHTML = `<input type="text" class="form-control form-control-sm mapping-value" placeholder='{Col_A} + " " + {Col_B}'>`;
+      valueCol.innerHTML = buildFormulaUI(cols);
       break;
     case 'vcard':
-      valueCol.innerHTML = `
-        <input type="text" class="form-control form-control-sm mb-1 mapping-vcard-fn" placeholder="Nombre: {columna}">
-        <input type="text" class="form-control form-control-sm mb-1 mapping-vcard-ln" placeholder="Apellido: {columna}">
-        <input type="text" class="form-control form-control-sm mb-1 mapping-vcard-tel" placeholder="Tel: {columna}">
-        <input type="text" class="form-control form-control-sm mb-1 mapping-vcard-email" placeholder="Email: {columna}">
-        <input type="text" class="form-control form-control-sm mb-1 mapping-vcard-org" placeholder="Empresa: {columna}">
-        <input type="text" class="form-control form-control-sm mapping-vcard-title" placeholder="Cargo: {columna}">`;
+      valueCol.innerHTML = buildVcardUI(cols);
       break;
-    case 'url':
-      valueCol.innerHTML = `<input type="text" class="form-control form-control-sm mapping-value" placeholder="https://example.com/{Col_G}">`;
+    case 'url': {
+      const chips = cols.map(c => `<span class="col-chip" data-col="${esc(c)}" onclick="insertColChip(this)" style="cursor:pointer;">${esc(c)}</span>`).join('');
+      valueCol.innerHTML = `<div>
+        <input type="text" class="form-control form-control-sm mapping-value" placeholder="https://example.com/{columna}" style="font-family:var(--font-mono);">
+        <div class="d-flex flex-wrap gap-1 mt-1" style="font-size:10px;">${chips}</div>
+      </div>`;
       break;
+    }
     case 'static':
-      valueCol.innerHTML = `<input type="text" class="form-control form-control-sm mapping-value" placeholder="Texto fijo">`;
+      valueCol.innerHTML = `<input type="text" class="form-control form-control-sm mapping-value" placeholder="Texto fijo que se repite en todas las filas">`;
       break;
   }
   updateMappingPreview();
@@ -1895,14 +2920,20 @@ function getMappings() {
         break;
       }
       case 'vcard': {
+        const vcFn = row.querySelector('.mapping-vcard-fn');
+        const vcLn = row.querySelector('.mapping-vcard-ln');
+        const vcTel = row.querySelector('.mapping-vcard-tel');
+        const vcEmail = row.querySelector('.mapping-vcard-email');
+        const vcOrg = row.querySelector('.mapping-vcard-org');
+        const vcTitle = row.querySelector('.mapping-vcard-title');
         mappings[field] = {
           mode: 'vcard',
-          fn: row.querySelector('.mapping-vcard-fn')?.value || '',
-          ln: row.querySelector('.mapping-vcard-ln')?.value || '',
-          tel: row.querySelector('.mapping-vcard-tel')?.value || '',
-          email: row.querySelector('.mapping-vcard-email')?.value || '',
-          org: row.querySelector('.mapping-vcard-org')?.value || '',
-          title: row.querySelector('.mapping-vcard-title')?.value || '',
+          fn: vcFn ? vcFn.value : '',
+          ln: vcLn ? vcLn.value : '',
+          tel: vcTel ? vcTel.value : '',
+          email: vcEmail ? vcEmail.value : '',
+          org: vcOrg ? vcOrg.value : '',
+          title: vcTitle ? vcTitle.value : '',
         };
         break;
       }
@@ -2050,23 +3081,23 @@ async function executeBatch(action) {
         rows: mappedRows,
         mapping: {},
       };
-      const res = await fetch('/batch-pdf', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
-      });
-      if (!res.ok) throw new Error(await res.text());
-      const blob = await res.blob();
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'batch_' + mappedRows.length + '.pdf';
-      a.click();
+      const res = await api('POST', '/batch-pdf?mode=url', body);
       progressBar.style.width = '100%';
       setTimeout(() => progressEl.style.display = 'none', 500);
       resultEl.style.display = '';
-      resultEl.innerHTML = `<div class="alert alert-success"><i class="bi bi-check-circle me-2"></i>PDF generado: ${mappedRows.length} paginas</div>`;
-      showToast('PDF descargado');
+      if (res.url) {
+        resultEl.innerHTML = `<div class="alert alert-success">
+          <i class="bi bi-check-circle me-2"></i>PDF generado: ${res.pages || mappedRows.length} paginas
+          <div class="mt-2 d-flex gap-2">
+            <button class="btn btn-sm btn-primary" onclick="downloadPdf('${res.url}')"><i class="bi bi-download me-1"></i>Descargar PDF</button>
+            <button class="btn btn-sm btn-outline-primary" onclick="openPdf('${res.url}')"><i class="bi bi-box-arrow-up-right me-1"></i>Abrir</button>
+            <button class="btn btn-sm btn-outline-success" onclick="printPdf('${res.url}')"><i class="bi bi-printer me-1"></i>Imprimir</button>
+          </div>
+        </div>`;
+      } else {
+        resultEl.innerHTML = `<div class="alert alert-warning"><i class="bi bi-exclamation-triangle me-2"></i>PDF generado pero sin URL de descarga</div>`;
+      }
+      showToast('PDF generado');
     }
   } catch(e) {
     progressEl.style.display = 'none';
@@ -2074,6 +3105,55 @@ async function executeBatch(action) {
     resultEl.innerHTML = `<div class="alert alert-danger"><i class="bi bi-exclamation-triangle me-2"></i>Error: ${esc(e.message)}</div>`;
     showToast('Error: ' + e.message, 'error');
   }
+}
+
+// nativeDownload — copies file to ~/Downloads and opens it natively.
+// Works in WKWebView where <a download> and window.open don't work.
+async function nativeDownload(url, action) {
+  const filename = url.split('/').pop();
+  try {
+    const res = await fetch('/native-download?file=' + encodeURIComponent(filename) + '&action=' + (action || 'open'));
+    if (res.ok) {
+      const data = await res.json();
+      showToast('Archivo guardado en Descargas: ' + data.filename);
+      return true;
+    }
+  } catch(e) {}
+  return false;
+}
+
+async function downloadPdf(url) {
+  // Ensure download param
+  const dlUrl = url.includes('?') ? url : url + '?dl=1';
+  // Try native first (WKWebView), then browser fallback
+  if (await nativeDownload(dlUrl, 'reveal')) return;
+  // Browser fallback
+  const a = document.createElement('a');
+  a.href = dlUrl;
+  a.download = url.split('/').pop().split('?')[0];
+  a.click();
+}
+
+async function openPdf(url) {
+  // Try native first (opens in Preview.app), then browser fallback
+  if (await nativeDownload(url, 'open')) return;
+  window.open(url, '_blank');
+}
+
+async function printPdf(url) {
+  // Try native open (macOS Preview has print), then iframe fallback
+  if (await nativeDownload(url, 'open')) return;
+  let iframe = document.getElementById('pdfPrintFrame');
+  if (!iframe) {
+    iframe = document.createElement('iframe');
+    iframe.id = 'pdfPrintFrame';
+    iframe.style.cssText = 'position:fixed;top:-9999px;left:-9999px;width:1px;height:1px;';
+    document.body.appendChild(iframe);
+  }
+  iframe.src = url;
+  iframe.onload = () => {
+    try { iframe.contentWindow.print(); } catch(e) { window.open(url, '_blank'); }
+  };
 }
 
 // ===================== TAB 4: TEMPLATES =====================
@@ -2119,7 +3199,8 @@ function renderLocalTemplates() {
               <br><small class="text-muted">${(t.fields || []).length} campos | Preset: ${esc(t.preset_id || '?')}</small>
             </div>
           </div>
-          <div class="mt-2 d-flex gap-1">
+          <div class="mt-2 d-flex gap-1 flex-wrap">
+            <button class="btn btn-sm btn-outline-secondary" onclick="previewTemplate('${esc(t.id)}')" title="Vista previa"><i class="bi bi-eye"></i></button>
             <button class="btn btn-sm btn-outline-primary" onclick="useTemplateInBatch('${esc(t.id)}')" title="Usar en Batch"><i class="bi bi-grid-3x3-gap"></i></button>
             ${!t.builtin ? `<button class="btn btn-sm btn-outline-danger" onclick="deleteLocalTemplate('${esc(t.id)}')" title="Eliminar"><i class="bi bi-trash"></i></button>` : ''}
           </div>
@@ -2157,22 +3238,69 @@ function renderServerTemplates() {
 }
 
 async function previewTemplate(id) {
+  // Find template to get its fields
+  const local = AppState.localTemplates.find(t => t.id === id);
+  const server = AppState.backendTemplates.find(t => (t.id || t.uuid) === id);
+  const tmpl = local || server;
+
+  // Extract field names
+  let fields = [];
+  if (tmpl && tmpl.fields) {
+    fields = tmpl.fields.map(f => f.name || f.Name || f.nombre).filter(f => f);
+  }
+  if (fields.length === 0) fields = ['texto', 'codigo', 'nombre'];
+
+  // Sample data
+  const sampleData = {
+    texto: 'Producto de ejemplo', codigo: '1234567890', nombre: 'Juan Perez',
+    apellido: 'Garcia', email: 'juan@example.com', telefono: '5555-1234',
+    id: '001', fecha: new Date().toLocaleDateString('es'), descripcion: 'Descripcion de prueba',
+    empresa: 'Mi Empresa S.A.', cargo: 'Gerente', consecutivo: '00001',
+  };
+
   const modal = new bootstrap.Modal(document.getElementById('templatePreviewModal'));
-  document.getElementById('previewModalTitle').textContent = 'Vista Previa';
-  document.getElementById('previewModalBody').innerHTML = '<div class="spinner-border text-primary" role="status"></div>';
+  document.getElementById('previewModalTitle').textContent = 'Vista Previa — ' + (tmpl ? (tmpl.titulo || tmpl.name) : id);
+
+  // Show form first
+  let formHtml = '<div class="text-start mb-3"><small class="text-muted">Llena los campos para ver la vista previa:</small></div>';
+  formHtml += fields.map(f => {
+    const sample = sampleData[f.toLowerCase()] || f;
+    return `<div class="row g-2 mb-2 align-items-center">
+      <div class="col-4"><label class="form-label mb-0 fw-bold" style="font-size:12px;">{${esc(f)}}</label></div>
+      <div class="col-8"><input type="text" class="form-control form-control-sm preview-var" data-field="${esc(f)}" value="${esc(sample)}"></div>
+    </div>`;
+  }).join('');
+  formHtml += '<div class="text-center mt-3"><button class="btn btn-primary btn-sm" onclick="executePreviewTemplate(\'' + esc(id) + '\')"><i class="bi bi-eye me-1"></i>Generar Preview</button></div>';
+  formHtml += '<div id="previewImageContainer" class="mt-3 text-center"></div>';
+
+  document.getElementById('previewModalBody').innerHTML = formHtml;
   modal.show();
+}
+
+async function executePreviewTemplate(id) {
+  const row = {};
+  document.querySelectorAll('#previewModalBody .preview-var').forEach(inp => {
+    row[inp.dataset.field] = inp.value;
+  });
+  const container = document.getElementById('previewImageContainer');
+  container.innerHTML = '<div class="spinner-border spinner-border-sm text-primary"></div> <small class="text-muted">Generando PDF...</small>';
   try {
-    const res = await fetch('/batch-preview-image', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ template_id: id, rows: [{ texto: 'Test', codigo: '1234567890', descripcion: 'Producto de prueba' }], dpi: 203 }),
-    });
-    if (!res.ok) throw new Error(await res.text());
-    const blob = await res.blob();
-    const url = URL.createObjectURL(blob);
-    document.getElementById('previewModalBody').innerHTML = `<img src="${url}" class="img-fluid border" alt="Preview" style="max-height:400px;">`;
+    const res = await api('POST', '/batch-pdf?mode=url', { template_id: id, rows: [row], mapping: {} });
+    if (res.url) {
+      container.innerHTML = `
+        <div class="mb-2" style="border:1px solid #dee2e6;border-radius:8px;overflow:hidden;background:#f8f9fa;">
+          <iframe src="${res.url}" style="width:100%;height:400px;border:none;" title="PDF Preview"></iframe>
+        </div>
+        <div class="d-flex gap-2 justify-content-center">
+          <button class="btn btn-sm btn-primary" onclick="downloadPdf('${res.url}?dl=1')"><i class="bi bi-download me-1"></i>Descargar</button>
+          <button class="btn btn-sm btn-outline-primary" onclick="openPdf('${res.url}')"><i class="bi bi-box-arrow-up-right me-1"></i>Abrir</button>
+          <button class="btn btn-sm btn-outline-success" onclick="printPdf('${res.url}')"><i class="bi bi-printer me-1"></i>Imprimir</button>
+        </div>`;
+    } else {
+      throw new Error('No se generó el PDF');
+    }
   } catch(e) {
-    document.getElementById('previewModalBody').innerHTML = `<div class="alert alert-danger">${esc(e.message)}</div>`;
+    container.innerHTML = `<div class="alert alert-danger">${esc(e.message)}</div>`;
   }
 }
 
@@ -2219,7 +3347,7 @@ function renderConfigTab() {
   const printerSel = document.getElementById('cfgDefaultPrinter');
   printerSel.innerHTML = '<option value="">Auto (primera disponible)</option>' +
     AppState.printers.map(p =>
-      `<option value="${esc(p.Name)}" ${p.Name === cfg.default_printer ? 'selected' : ''}>${esc(p.Name)}</option>`
+      `<option value="${esc(p.name)}" ${p.name === cfg.default_printer ? 'selected' : ''}>${esc(p.name)}</option>`
     ).join('');
 
   // DPI table
@@ -2234,15 +3362,15 @@ function renderDPITable() {
   }
   el.innerHTML = `<table class="table table-sm mb-0"><tbody>` +
     AppState.printers.map(p => {
-      const dpi = AppState.printerDPI[p.Name] || AppState.dpi;
+      const dpi = AppState.printerDPI[p.name] || AppState.dpi;
       return `<tr>
-        <td>${esc(p.Name)}</td>
+        <td>${esc(p.name)}</td>
         <td>
-          <select class="form-select form-select-sm" style="width:100px;" onchange="setDPI('${esc(p.Name)}', parseInt(this.value))">
+          <select class="form-select form-select-sm" style="width:100px;" onchange="setDPI('${esc(p.name)}', parseInt(this.value))">
             ${[200, 203, 300, 600].map(d => `<option value="${d}" ${dpi === d ? 'selected' : ''}>${d}</option>`).join('')}
           </select>
         </td>
-        <td><button class="btn btn-sm btn-outline-secondary" onclick="detectDPI('${esc(p.Name)}')"><i class="bi bi-search"></i></button></td>
+        <td><button class="btn btn-sm btn-outline-secondary" onclick="detectDPI('${esc(p.name)}')"><i class="bi bi-search"></i></button></td>
       </tr>`;
     }).join('') + '</tbody></table>';
 }

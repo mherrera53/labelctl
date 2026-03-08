@@ -4,6 +4,7 @@ import (
 	"crypto/ecdsa"
 	"crypto/elliptic"
 	"crypto/rand"
+	"crypto/tls"
 	"crypto/x509"
 	"crypto/x509/pkix"
 	"encoding/pem"
@@ -11,7 +12,9 @@ import (
 	"math/big"
 	"net"
 	"os"
+	"os/exec"
 	"path/filepath"
+	"runtime"
 	"time"
 )
 
@@ -33,11 +36,16 @@ func ensureCerts(hostname string) (certFile, keyFile, caFile string, err error) 
 	certFile = filepath.Join(dir, "server.pem")
 	keyFile = filepath.Join(dir, "server-key.pem")
 
-	// Check if certs already exist and are valid
+	// Check if certs already exist and are standards-compliant
 	if _, e := os.Stat(certFile); e == nil {
 		if _, e := os.Stat(keyFile); e == nil {
-			log.Printf("[tls] Certificates found in %s", dir)
-			return certFile, keyFile, caFile, nil
+			if certIsCompliant(certFile) {
+				log.Printf("[tls] Certificates found in %s", dir)
+				return certFile, keyFile, caFile, nil
+			}
+			log.Printf("[tls] Existing certificate is non-compliant (>398 days) — regenerating")
+			// Remove old certs and marker to force regeneration + CA re-install
+			os.Remove(filepath.Join(dir, ".ca-installed"))
 		}
 	}
 
@@ -58,8 +66,10 @@ func ensureCerts(hostname string) (certFile, keyFile, caFile string, err error) 
 		NotBefore:             time.Now(),
 		NotAfter:              time.Now().Add(10 * 365 * 24 * time.Hour),
 		IsCA:                  true,
-		KeyUsage:              x509.KeyUsageCertSign | x509.KeyUsageCRLSign,
+		KeyUsage:              x509.KeyUsageCertSign | x509.KeyUsageCRLSign | x509.KeyUsageDigitalSignature,
 		BasicConstraintsValid: true,
+		MaxPathLen:            0,
+		MaxPathLenZero:        true,
 	}
 
 	caCertDER, err := x509.CreateCertificate(rand.Reader, caTemplate, caTemplate, &caKey.PublicKey, caKey)
@@ -94,7 +104,7 @@ func ensureCerts(hostname string) (certFile, keyFile, caFile string, err error) 
 		DNSNames:    []string{hostname, "localhost", "tsc-bridge", "myprinter.com"},
 		IPAddresses: []net.IP{net.ParseIP("127.0.0.1"), net.ParseIP("::1")},
 		NotBefore:   time.Now(),
-		NotAfter:    time.Now().Add(10 * 365 * 24 * time.Hour),
+		NotAfter:    time.Now().Add(397 * 24 * time.Hour), // Max 398 days for Apple/Chrome compliance
 		KeyUsage:    x509.KeyUsageDigitalSignature,
 		ExtKeyUsage: []x509.ExtKeyUsage{x509.ExtKeyUsageServerAuth},
 	}
@@ -135,4 +145,80 @@ func writeECKeyPEM(file string, key *ecdsa.PrivateKey) error {
 		return err
 	}
 	return pem.Encode(f, &pem.Block{Type: "EC PRIVATE KEY", Bytes: keyBytes})
+}
+
+// loadCertWithCA loads the server certificate + key and appends the CA cert to the chain.
+// This ensures the TLS server sends the full chain so clients can verify trust.
+func loadCertWithCA(certFile, keyFile, caFile string) (tls.Certificate, error) {
+	tlsCert, err := tls.LoadX509KeyPair(certFile, keyFile)
+	if err != nil {
+		return tlsCert, err
+	}
+	// Append CA cert to the chain
+	caPEM, err := os.ReadFile(caFile)
+	if err != nil {
+		log.Printf("[tls] Could not read CA file for chain: %v — serving without chain", err)
+		return tlsCert, nil
+	}
+	caBlock, _ := pem.Decode(caPEM)
+	if caBlock != nil {
+		tlsCert.Certificate = append(tlsCert.Certificate, caBlock.Bytes)
+	}
+	return tlsCert, nil
+}
+
+// certIsCompliant checks if an existing server certificate has <=398 day validity (Apple/Chrome requirement).
+func certIsCompliant(certFile string) bool {
+	data, err := os.ReadFile(certFile)
+	if err != nil {
+		return false
+	}
+	block, _ := pem.Decode(data)
+	if block == nil {
+		return false
+	}
+	cert, err := x509.ParseCertificate(block.Bytes)
+	if err != nil {
+		return false
+	}
+	validity := cert.NotAfter.Sub(cert.NotBefore)
+	return validity <= 399*24*time.Hour
+}
+
+// installCACert installs the CA certificate into the OS trust store.
+// On Windows: uses certutil to add to Root store (triggers UAC prompt).
+// On macOS: uses security add-trusted-cert to add to login keychain.
+// Skips silently if already installed (marker file).
+func installCACert(caFile string) {
+	marker := filepath.Join(filepath.Dir(caFile), ".ca-installed")
+	if _, err := os.Stat(marker); err == nil {
+		log.Printf("[tls] CA already installed (marker exists)")
+		return
+	}
+
+	switch runtime.GOOS {
+	case "windows":
+		// certutil -addstore Root <ca.pem> — adds to Trusted Root CAs
+		// This triggers a UAC elevation prompt on Windows
+		cmd := exec.Command("certutil", "-addstore", "Root", caFile)
+		out, err := cmd.CombinedOutput()
+		if err != nil {
+			log.Printf("[tls] Failed to install CA on Windows: %v — %s", err, string(out))
+			log.Printf("[tls] Users can manually install: certutil -addstore Root \"%s\"", caFile)
+			return
+		}
+		log.Printf("[tls] CA certificate installed in Windows trust store")
+
+	case "darwin":
+		// macOS requires manual trust or admin password — skip auto-install
+		// PNA headers handle HTTPS→HTTP access from Chrome
+		log.Printf("[tls] macOS: CA available at %s (PNA headers handle browser access)", caFile)
+
+	default:
+		log.Printf("[tls] Auto CA install not supported on %s — manually trust %s", runtime.GOOS, caFile)
+		return
+	}
+
+	// Write marker so we don't re-install on every start
+	os.WriteFile(marker, []byte("installed"), 0644)
 }

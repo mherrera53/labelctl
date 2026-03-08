@@ -43,11 +43,13 @@ if %errorlevel% neq 0 (
     echo 127.0.0.1  %HOSTNAME%>> "%HOSTS_FILE%"
 )
 
-:: --- Add firewall rules (silently allow ports 9271 and 9272) ---
+:: --- Clean old firewall rules (port 9271/9272 from v2.2.0 and earlier) ---
 netsh advfirewall firewall delete rule name="TSC Bridge HTTP" >nul 2>&1
 netsh advfirewall firewall delete rule name="TSC Bridge HTTPS" >nul 2>&1
-netsh advfirewall firewall add rule name="TSC Bridge HTTP" dir=in action=allow protocol=TCP localport=9271 >nul 2>&1
-netsh advfirewall firewall add rule name="TSC Bridge HTTPS" dir=in action=allow protocol=TCP localport=9272 >nul 2>&1
+
+:: --- Add firewall rules (ports 9638 and 9639) ---
+netsh advfirewall firewall add rule name="TSC Bridge HTTP" dir=in action=allow protocol=TCP localport=9638 >nul 2>&1
+netsh advfirewall firewall add rule name="TSC Bridge HTTPS" dir=in action=allow protocol=TCP localport=9639 >nul 2>&1
 
 :: --- Generate certs: run bridge briefly then kill ---
 if not exist "%CERT_DIR%" mkdir "%CERT_DIR%"
@@ -64,12 +66,16 @@ if exist "%CA_CERT%" (
     certutil -addstore -f "Root" "%CA_CERT%" >nul 2>&1
 )
 
-:: --- Create startup shortcut (service mode, minimized, no GUI) ---
+:: --- Remove old startup shortcut before recreating ---
+if exist "%STARTUP_DIR%\TSC Bridge.lnk" del "%STARTUP_DIR%\TSC Bridge.lnk" >nul 2>&1
+
+:: --- Create startup shortcut (headless service mode at login, no browser) ---
 >"%TEMP%\_tsc_startup.vbs" (
     echo Set oWS = WScript.CreateObject^("WScript.Shell"^)
     echo sLinkFile = "%STARTUP_DIR%\TSC Bridge.lnk"
     echo Set oLink = oWS.CreateShortcut^(sLinkFile^)
     echo oLink.TargetPath = "%INSTALL_DIR%\%BINARY_NAME%"
+    echo oLink.Arguments = "--headless"
     echo oLink.WorkingDirectory = "%INSTALL_DIR%"
     echo oLink.Description = "TSC Bridge - Servicio de impresion"
     echo oLink.WindowStyle = 7
@@ -78,14 +84,13 @@ if exist "%CA_CERT%" (
 cscript //nologo "%TEMP%\_tsc_startup.vbs" >nul 2>&1
 del "%TEMP%\_tsc_startup.vbs" >nul 2>&1
 
-:: --- Create desktop shortcut (dashboard GUI mode) ---
+:: --- Create desktop shortcut (opens embedded dashboard) ---
 set DESKTOP_DIR=%USERPROFILE%\Desktop
 >"%TEMP%\_tsc_desktop.vbs" (
     echo Set oWS = WScript.CreateObject^("WScript.Shell"^)
-    echo sLinkFile = "%DESKTOP_DIR%\TSC Bridge Dashboard.lnk"
+    echo sLinkFile = "%DESKTOP_DIR%\TSC Bridge.lnk"
     echo Set oLink = oWS.CreateShortcut^(sLinkFile^)
     echo oLink.TargetPath = "%INSTALL_DIR%\%BINARY_NAME%"
-    echo oLink.Arguments = "--dashboard"
     echo oLink.WorkingDirectory = "%INSTALL_DIR%"
     echo oLink.Description = "TSC Bridge - Panel de control"
     echo oLink.WindowStyle = 1
@@ -94,8 +99,8 @@ set DESKTOP_DIR=%USERPROFILE%\Desktop
 cscript //nologo "%TEMP%\_tsc_desktop.vbs" >nul 2>&1
 del "%TEMP%\_tsc_desktop.vbs" >nul 2>&1
 
-:: --- Start the bridge service (stays running in background) ---
-start "" "%INSTALL_DIR%\%BINARY_NAME%"
+:: --- Start the bridge service (headless, stays running in background) ---
+start "" "%INSTALL_DIR%\%BINARY_NAME%" --headless
 
 :: Done — no pause, fully unattended
 exit /b 0

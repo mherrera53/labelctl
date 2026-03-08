@@ -1,0 +1,65 @@
+name: Driver Request
+description: Request or propose a driver for a printer brand
+labels: ["driver", "enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this template to request a new driver or to volunteer to write one.
+
+  - type: input
+    id: language
+    attributes:
+      label: Printer Language
+      description: The command language the printer uses.
+      placeholder: "ZPL II, EPL2, CPCL, ESC/POS, DPL, SBPL, etc."
+    validations:
+      required: true
+
+  - type: input
+    id: brand
+    attributes:
+      label: Printer Brand
+      description: The manufacturer.
+      placeholder: "Zebra, Brother, BIXOLON, Honeywell, SATO, etc."
+    validations:
+      required: true
+
+  - type: textarea
+    id: models
+    attributes:
+      label: Printer Models
+      description: Specific models you have access to for testing.
+      placeholder: |
+        - Zebra ZD420
+        - Zebra ZT410
+    validations:
+      required: true
+
+  - type: dropdown
+    id: volunteer
+    attributes:
+      label: Are you willing to write this driver?
+      options:
+        - "Yes, I will write the driver"
+        - "I can help test but not write the driver"
+        - "No, I am requesting that someone else write it"
+    validations:
+      required: true
+
+  - type: textarea
+    id: resources
+    attributes:
+      label: Resources
+      description: |
+        Links to programming manuals, command references, or SDKs for this
+        printer language.
+      placeholder: |
+        - ZPL II Programming Guide: https://...
+        - Zebra SDK: https://...
+
+  - type: textarea
+    id: notes
+    attributes:
+      label: Additional Notes
+      description: Anything else relevant to this driver.

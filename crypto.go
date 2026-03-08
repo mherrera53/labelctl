@@ -47,9 +47,11 @@ func getMachineID() (string, error) {
 		return "", fmt.Errorf("IOPlatformUUID not found")
 
 	case "windows":
-		out, err := exec.Command("reg", "query",
+		cmd := exec.Command("reg", "query",
 			`HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Cryptography`,
-			"/v", "MachineGuid").Output()
+			"/v", "MachineGuid")
+		hideWindowCmd(cmd)
+		out, err := cmd.Output()
 		if err != nil {
 			return "", fmt.Errorf("registry: %w", err)
 		}

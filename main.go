@@ -544,6 +544,32 @@ func serviceRunning(addr string) bool {
 }
 
 func main() {
+	// CLI-only commands that exit immediately (no service, no logging)
+	if hasFlag("--generate-icon") {
+		path := getFlagValue("--generate-icon")
+		if path == "" {
+			path = "icon_1024.png"
+		}
+		data := generateAppIcon(1024)
+		os.WriteFile(path, data, 0644)
+		fmt.Printf("Icon PNG written to %s (%d bytes)\n", path, len(data))
+		os.Exit(0)
+	}
+	if hasFlag("--generate-ico") {
+		path := getFlagValue("--generate-ico")
+		if path == "" {
+			path = "tsc-bridge.ico"
+		}
+		data := generateICO([]int{16, 32, 48, 64, 128, 256})
+		os.WriteFile(path, data, 0644)
+		fmt.Printf("Icon ICO written to %s (%d bytes)\n", path, len(data))
+		os.Exit(0)
+	}
+	if hasFlag("--version") {
+		fmt.Printf("tsc-bridge v%s (%s/%s)\n", version, runtime.GOOS, runtime.GOARCH)
+		os.Exit(0)
+	}
+
 	// File logging — critical on Windows where -H windowsgui hides all output
 	setupFileLogging()
 	log.Printf("=== tsc-bridge v%s starting (os=%s, args=%v) ===", version, runtime.GOOS, os.Args)
@@ -674,6 +700,9 @@ func startServers(port string) error {
 	mux.HandleFunc("/print-preview-thumb", corsMiddleware(handlePrintPreviewThumb))
 	mux.HandleFunc("/print-job", corsMiddleware(handlePrintJob))
 	mux.HandleFunc("/upload-pdf", corsMiddleware(handleUploadPdf))
+	mux.HandleFunc("/native-file-dialog", corsMiddleware(handleNativeFileDialog))
+	mux.HandleFunc("/native-download", corsMiddleware(handleNativeDownload))
+	mux.HandleFunc("/output/", corsMiddleware(handleServeOutput))
 
 	// Auth routes
 	mux.HandleFunc("/auth/state", corsMiddleware(handleAuthState))
@@ -780,11 +809,27 @@ func portInt(s string) int {
 // hasFlag checks if a CLI flag is present in os.Args.
 func hasFlag(flag string) bool {
 	for _, arg := range os.Args[1:] {
-		if arg == flag {
+		if arg == flag || strings.HasPrefix(arg, flag+"=") {
 			return true
 		}
 	}
 	return false
+}
+
+// getFlagValue returns the value after a CLI flag (e.g. --flag value or --flag=value).
+func getFlagValue(flag string) string {
+	for j, arg := range os.Args[1:] {
+		if strings.HasPrefix(arg, flag+"=") {
+			return strings.TrimPrefix(arg, flag+"=")
+		}
+		if arg == flag && j+2 < len(os.Args) {
+			next := os.Args[j+2]
+			if !strings.HasPrefix(next, "--") {
+				return next
+			}
+		}
+	}
+	return ""
 }
 
 // --- Batch printing handlers ---
@@ -1187,6 +1232,18 @@ func handleBatchPdf(w http.ResponseWriter, r *http.Request) {
 
 	if err := RenderBulkPDF(schema, mappedRows, outputPath); err != nil {
 		jsonResponse(w, http.StatusInternalServerError, map[string]string{"error": "render PDF: " + err.Error()})
+		return
+	}
+
+	// Check if client wants a download URL instead of direct file (for webview compat)
+	if r.URL.Query().Get("mode") == "url" {
+		// Serve a URL the client can open in a new window/tab
+		filename := filepath.Base(outputPath)
+		jsonResponse(w, http.StatusOK, map[string]any{
+			"url":      "/output/" + filename,
+			"filename": fmt.Sprintf("batch_%d.pdf", len(mappedRows)),
+			"pages":    len(mappedRows),
+		})
 		return
 	}
 
@@ -1719,4 +1776,31 @@ func handleUploadPdf(w http.ResponseWriter, r *http.Request) {
 		"upload_id":   uploadID,
 		"total_pages": pageCount,
 	})
+}
+
+// handleServeOutput serves generated files (PDFs, etc.) from the output directory.
+// GET /output/{filename}
+func handleServeOutput(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		jsonResponse(w, http.StatusMethodNotAllowed, map[string]string{"error": "GET only"})
+		return
+	}
+	filename := strings.TrimPrefix(r.URL.Path, "/output/")
+	if filename == "" || strings.Contains(filename, "..") || strings.Contains(filename, "/") {
+		jsonResponse(w, http.StatusBadRequest, map[string]string{"error": "invalid filename"})
+		return
+	}
+	outputDir := filepath.Join(configDir(), "output")
+	filePath := filepath.Join(outputDir, filename)
+	if _, err := os.Stat(filePath); os.IsNotExist(err) {
+		jsonResponse(w, http.StatusNotFound, map[string]string{"error": "file not found"})
+		return
+	}
+	// Allow inline display for PDF preview (iframe/embed), download for explicit requests
+	if r.URL.Query().Get("dl") == "1" {
+		w.Header().Set("Content-Disposition", fmt.Sprintf(`attachment; filename="%s"`, filename))
+	} else {
+		w.Header().Set("Content-Disposition", fmt.Sprintf(`inline; filename="%s"`, filename))
+	}
+	http.ServeFile(w, r, filePath)
 }

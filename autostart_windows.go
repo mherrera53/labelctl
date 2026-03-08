@@ -48,6 +48,7 @@ func setAutoStart(enable bool) error {
 		lnk, binPath, binDir, iconPath, iconPath)
 
 	cmd := exec.Command("powershell", "-NoProfile", "-NonInteractive", "-Command", ps)
+	hideWindow(cmd)
 	if out, err := cmd.CombinedOutput(); err != nil {
 		return fmt.Errorf("shortcut creation failed: %v — %s", err, string(out))
 	}

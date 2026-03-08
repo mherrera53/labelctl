@@ -1,3 +1,5 @@
+//go:build !darwin && !crossbuild
+
 package main
 
 import (
@@ -9,14 +11,13 @@ import (
 )
 
 var (
-	wv            webview.WebView
-	wvMu          sync.Mutex
+	wv             webview.WebView
+	wvMu           sync.Mutex
 	wvDashboardURL string
 )
 
-// initWebview creates the native webview window on the main thread.
-// Must be called before systray.Run() so both share the same Cocoa run loop.
-// If creation fails (e.g. no CGO, missing WebKit), falls back to browser mode.
+// initWebview creates the native webview window.
+// On Windows/Linux, uses webview_go library.
 func initWebview(dashURL string) {
 	wvMu.Lock()
 	defer wvMu.Unlock()
@@ -43,7 +44,6 @@ func initWebview(dashURL string) {
 }
 
 // showDashboard opens or refocuses the native webview window.
-// Falls back to browser if webview is not available.
 func showDashboard(dashURL string) {
 	wvMu.Lock()
 	w := wv

@@ -11,10 +11,13 @@ import (
 
 // PrinterInfo describes a detected printer with metadata.
 type PrinterInfo struct {
-	Name    string `json:"name"`
-	Type    string `json:"type"`              // "usb" | "cups" | "spooler" | "network"
-	Address string `json:"address,omitempty"` // "192.168.1.50:9100" for network printers
-	Model   string `json:"model,omitempty"`   // parsed from ~!I response
+	Name      string `json:"name"`
+	Type      string `json:"type"`                        // "usb" | "cups" | "spooler" | "network" | "manual" | "raw"
+	Address   string `json:"address,omitempty"`            // "192.168.1.50:9100" for network printers
+	Model     string `json:"model,omitempty"`              // parsed from ~!I response
+	Online    bool   `json:"online"`                       // true if printer is reachable/connected
+	IsSelf    bool   `json:"is_self,omitempty"`            // true if this is our own shared printer
+	Status    string `json:"status,omitempty"`             // "idle", "offline", "disabled", etc.
 }
 
 const (
@@ -33,7 +36,9 @@ var (
 
 // tscModelKeywords identifies TSC printers from ~!I response.
 var tscModelKeywords = []string{
-	"TSC", "TDP", "TE2", "TE3", "TX2", "TX3", "TTP", "DA2", "MH", "Alpha",
+	"TSC", "TDP", "TE2", "TE3", "TX2", "TX3",
+	"TTP", "TTP-220", "TTP-225", "TTP-244", "TTP-247",
+	"DA2", "MH", "Alpha",
 }
 
 // getLocalSubnets returns all IPv4 /24 subnets on local interfaces.
@@ -79,7 +84,67 @@ func getLocalSubnets() []net.IPNet {
 
 // probeTSCPrinter connects to addr:9100, sends ~!I, and parses the response.
 // Returns the model string and whether it's a TSC printer.
+// If the port is open but doesn't respond to ~!I, it tries ~!T and ~!F as fallbacks.
 func probeTSCPrinter(addr string) (string, bool) {
+	// Try multiple TSC probe commands in order
+	probeCommands := []string{"~!I\r\n", "~!T\r\n", "~!F\r\n"}
+
+	for _, cmd := range probeCommands {
+		model, isTSC := probeTSCWithCommand(addr, cmd)
+		if isTSC {
+			return model, true
+		}
+	}
+
+	return "", false
+}
+
+// probeRawPort checks if a TCP port is open and accepts connections.
+// Returns true if the port is open (potential raw printer).
+func probeRawPort(addr string) bool {
+	conn, err := net.DialTimeout("tcp", addr, probeTimeout)
+	if err != nil {
+		return false
+	}
+	conn.Close()
+	return true
+}
+
+// isNonPrinterService sends a harmless probe and checks if the response
+// looks like a non-printer service (HTTP, SSH, FTP, etc).
+func isNonPrinterService(addr string) bool {
+	conn, err := net.DialTimeout("tcp", addr, probeTimeout)
+	if err != nil {
+		return false
+	}
+	defer conn.Close()
+	conn.SetDeadline(time.Now().Add(probeTimeout))
+
+	// Send an HTTP-like probe — real printers ignore this, HTTP servers respond
+	conn.Write([]byte("GET / HTTP/1.0\r\n\r\n"))
+
+	buf := make([]byte, 32)
+	n, _ := conn.Read(buf)
+	if n == 0 {
+		return false // no response = likely a raw printer
+	}
+
+	resp := strings.TrimSpace(string(buf[:n]))
+	for _, prefix := range falsePositivePrefixes {
+		if strings.HasPrefix(resp, prefix) {
+			return true
+		}
+	}
+	return false
+}
+
+// Non-printer response prefixes to reject (HTTP servers, etc. listening on 9100)
+var falsePositivePrefixes = []string{
+	"HTTP/", "<!DOCTYPE", "<html", "<HTML", "SSH-", "220 ",
+}
+
+// probeTSCWithCommand sends a single TSC command and checks the response.
+func probeTSCWithCommand(addr, cmd string) (string, bool) {
 	conn, err := net.DialTimeout("tcp", addr, probeTimeout)
 	if err != nil {
 		return "", false
@@ -88,8 +153,7 @@ func probeTSCPrinter(addr string) (string, bool) {
 
 	conn.SetDeadline(time.Now().Add(probeTimeout))
 
-	// Send TSC info command
-	_, err = conn.Write([]byte("~!I\r\n"))
+	_, err = conn.Write([]byte(cmd))
 	if err != nil {
 		return "", false
 	}
@@ -97,12 +161,19 @@ func probeTSCPrinter(addr string) (string, bool) {
 	buf := make([]byte, 1024)
 	n, err := conn.Read(buf)
 	if err != nil || n == 0 {
-		// Port is open but no response — might still be a raw printer
-		// but we can't confirm it's TSC
 		return "", false
 	}
 
 	response := string(buf[:n])
+
+	// Reject responses from non-printer services (HTTP servers, SSH, FTP, etc.)
+	trimResp := strings.TrimSpace(response)
+	for _, prefix := range falsePositivePrefixes {
+		if strings.HasPrefix(trimResp, prefix) {
+			return "", false
+		}
+	}
+
 	upper := strings.ToUpper(response)
 
 	for _, kw := range tscModelKeywords {
@@ -123,8 +194,9 @@ func probeTSCPrinter(addr string) (string, bool) {
 	return "", false
 }
 
-// scanSubnetForPrinters scans a /24 subnet for TSC printers on port 9100.
-func scanSubnetForPrinters(subnet net.IPNet) []PrinterInfo {
+// scanSubnetForPrinters scans a /24 subnet for printers on port 9100.
+// Detects TSC printers (via probe), raw printers (port open), and marks self-shared printers.
+func scanSubnetForPrinters(subnet net.IPNet, localIPs map[string]bool) []PrinterInfo {
 	var (
 		found []PrinterInfo
 		mu    sync.Mutex
@@ -140,10 +212,11 @@ func scanSubnetForPrinters(subnet net.IPNet) []PrinterInfo {
 	for i := 1; i <= 254; i++ {
 		ip := fmt.Sprintf("%d.%d.%d.%d", base[0], base[1], base[2], i)
 		addr := fmt.Sprintf("%s:%d", ip, networkPort)
+		isSelf := localIPs[ip]
 
 		wg.Add(1)
 		sema <- struct{}{}
-		go func(addr, ip string) {
+		go func(addr, ip string, isSelf bool) {
 			defer wg.Done()
 			defer func() { <-sema }()
 
@@ -154,27 +227,51 @@ func scanSubnetForPrinters(subnet net.IPNet) []PrinterInfo {
 			}
 			conn.Close()
 
-			// Port is open — probe for TSC
+			// Port 9100 is open — probe for TSC
 			model, isTSC := probeTSCPrinter(addr)
-			if !isTSC {
+			if isTSC {
+				name := model
+				if name == "" {
+					name = "TSC"
+				}
+				if isSelf {
+					name += " @ " + ip + " (compartida)"
+				} else {
+					name += " @ " + ip
+				}
+
+				mu.Lock()
+				found = append(found, PrinterInfo{
+					Name:    name,
+					Type:    "network",
+					Address: addr,
+					Model:   model,
+					Online:  true,
+					IsSelf:  isSelf,
+				})
+				mu.Unlock()
 				return
 			}
 
-			name := "TSC"
-			if model != "" {
-				name = model
+			// Port open but no TSC response — check if it's a non-printer service
+			if isNonPrinterService(addr) {
+				return // HTTP server, SSH, etc. — not a printer
 			}
-			name += " @ " + ip
 
+			name := "Impresora RAW @ " + ip
+			if isSelf {
+				name = "Compartida @ " + ip
+			}
 			mu.Lock()
 			found = append(found, PrinterInfo{
 				Name:    name,
-				Type:    "network",
+				Type:    "raw",
 				Address: addr,
-				Model:   model,
+				Online:  true,
+				IsSelf:  isSelf,
 			})
 			mu.Unlock()
-		}(addr, ip)
+		}(addr, ip, isSelf)
 	}
 
 	wg.Wait()
@@ -233,44 +330,79 @@ func doNetworkScan() {
 	start := time.Now()
 
 	subnets := getLocalSubnets()
+
+	// Build set of local IPs to skip during scan (avoid self-detection via share)
+	localIPs := make(map[string]bool)
+	ifaces, _ := net.Interfaces()
+	for _, iface := range ifaces {
+		if iface.Flags&net.FlagUp == 0 || iface.Flags&net.FlagLoopback != 0 {
+			continue
+		}
+		addrs, err := iface.Addrs()
+		if err != nil {
+			continue
+		}
+		for _, a := range addrs {
+			ipnet, ok := a.(*net.IPNet)
+			if !ok {
+				continue
+			}
+			if ip4 := ipnet.IP.To4(); ip4 != nil {
+				localIPs[ip4.String()] = true
+			}
+		}
+	}
+
 	var all []PrinterInfo
 
 	for _, subnet := range subnets {
-		found := scanSubnetForPrinters(subnet)
+		found := scanSubnetForPrinters(subnet, localIPs)
 		all = append(all, found...)
 	}
 
-	// Also probe manually configured printers
+	// Also probe manually configured printers — always show them even if probe fails
 	cfg := getConfig()
 	for _, addr := range cfg.ManualPrinters {
 		if !strings.Contains(addr, ":") {
 			addr = fmt.Sprintf("%s:%d", addr, networkPort)
 		}
+		ip := strings.Split(addr, ":")[0]
+
+		// Avoid duplicates from subnet scan
+		duplicate := false
+		for _, p := range all {
+			if p.Address == addr {
+				duplicate = true
+				break
+			}
+		}
+		if duplicate {
+			continue
+		}
+
 		model, isTSC := probeTSCPrinter(addr)
 		if isTSC {
-			ip := strings.Split(addr, ":")[0]
-			name := "TSC"
-			if model != "" {
-				name = model
+			name := model
+			if name == "" {
+				name = "TSC"
 			}
 			name += " @ " + ip
-
-			// Avoid duplicates from subnet scan
-			duplicate := false
-			for _, p := range all {
-				if p.Address == addr {
-					duplicate = true
-					break
-				}
-			}
-			if !duplicate {
-				all = append(all, PrinterInfo{
-					Name:    name,
-					Type:    "network",
-					Address: addr,
-					Model:   model,
-				})
-			}
+			all = append(all, PrinterInfo{
+				Name:    name,
+				Type:    "network",
+				Address: addr,
+				Model:   model,
+				Online:  true,
+			})
+		} else {
+			// Check if port is at least reachable
+			online := probeRawPort(addr)
+			all = append(all, PrinterInfo{
+				Name:    "Manual @ " + ip,
+				Type:    "manual",
+				Address: addr,
+				Online:  online,
+			})
 		}
 	}
 

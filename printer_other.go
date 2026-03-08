@@ -1,11 +1,10 @@
-//go:build !windows
+//go:build !windows && !crossbuild
 
 package main
 
 /*
-#cgo LDFLAGS: -lusb-1.0
-#cgo CFLAGS: -I/opt/homebrew/include/libusb-1.0
-#cgo LDFLAGS: -L/opt/homebrew/lib
+#cgo CFLAGS: -I/opt/homebrew/include/libusb-1.0 -I/usr/local/include/libusb-1.0
+#cgo LDFLAGS: -L/opt/homebrew/lib -L/usr/local/lib -lusb-1.0
 #include <libusb.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -119,23 +118,65 @@ const (
 	tscProductID = 0x0133 // TDP-244 Plus
 )
 
-// listLocalPrinters checks for TSC USB devices and CUPS printers.
+// C_usb_device_exists checks if the known TSC USB device is connected.
+// Exported as a Go function so other files (driver_darwin.go) can use it without importing C.
+func C_usb_device_exists() bool {
+	return C.usb_device_exists(C.int(tscVendorID), C.int(tscProductID)) == 0
+}
+
+// listLocalPrinters lists ALL printers: USB (direct) + all CUPS printers with status.
 func listLocalPrinters() ([]PrinterInfo, error) {
 	var printers []PrinterInfo
 
-	// Check if TSC device is connected via libusb
-	if C.usb_device_exists(C.int(tscVendorID), C.int(tscProductID)) == 0 {
-		printers = append(printers, PrinterInfo{
-			Name:  "TSC-TDP-244-USB",
-			Type:  "usb",
-			Model: "TDP-244 Plus",
-		})
+	// Check if TSC USB device is physically connected via libusb
+	usbConnected := C.usb_device_exists(C.int(tscVendorID), C.int(tscProductID)) == 0
+
+	// Parse CUPS printer status: "lpstat -p" gives status of each printer
+	statusMap := make(map[string]string) // name -> "idle"|"disabled"|"printing"
+	if out, err := exec.Command("lpstat", "-p").Output(); err == nil {
+		for _, line := range strings.Split(string(out), "\n") {
+			line = strings.TrimSpace(line)
+			if !strings.HasPrefix(line, "la impresora ") && !strings.HasPrefix(line, "impresora ") && !strings.HasPrefix(line, "printer ") {
+				continue
+			}
+			// Parse: "la impresora NAME está inactiva" or "printer NAME is idle"
+			// or: "impresora NAME desactivada"
+			fields := strings.Fields(line)
+			if len(fields) < 3 {
+				continue
+			}
+			// Name is the 3rd field (after "la impresora" or "printer")
+			var name string
+			if strings.HasPrefix(line, "la impresora ") || strings.HasPrefix(line, "impresora ") {
+				// Spanish: "la impresora X está inactiva" or "impresora X desactivada"
+				for _, f := range fields {
+					if f != "la" && f != "impresora" {
+						name = f
+						break
+					}
+				}
+			} else {
+				// English: "printer X is idle"
+				name = fields[1]
+			}
+			if name == "" {
+				continue
+			}
+
+			lower := strings.ToLower(line)
+			if strings.Contains(lower, "desactivad") || strings.Contains(lower, "disabled") {
+				statusMap[name] = "disabled"
+			} else if strings.Contains(lower, "imprimiendo") || strings.Contains(lower, "printing") {
+				statusMap[name] = "printing"
+			} else {
+				statusMap[name] = "idle"
+			}
+		}
 	}
 
-	// Also check CUPS for any TSC printers
+	// List ALL CUPS printers (not just TSC)
 	out, err := exec.Command("lpstat", "-a").Output()
 	if err == nil {
-		tscKeywords := []string{"tsc", "tdp", "te2", "te3"}
 		for _, line := range strings.Split(string(out), "\n") {
 			line = strings.TrimSpace(line)
 			if line == "" {
@@ -143,14 +184,44 @@ func listLocalPrinters() ([]PrinterInfo, error) {
 			}
 			name := strings.Fields(line)[0]
 			lower := strings.ToLower(name)
-			for _, kw := range tscKeywords {
+
+			status := statusMap[name]
+			online := status != "disabled"
+
+			// Determine type — TSC printers may have USB direct access
+			pType := "cups"
+			isTSC := false
+			for _, kw := range []string{"tsc", "tdp", "ttp", "te2", "te3"} {
 				if strings.Contains(lower, kw) {
-					printers = append(printers, PrinterInfo{
-						Name: name,
-						Type: "cups",
-					})
+					isTSC = true
 					break
 				}
+			}
+
+			if isTSC && usbConnected {
+				// TSC printer with USB device present — mark as USB and online
+				printers = append(printers, PrinterInfo{
+					Name:   name,
+					Type:   "usb",
+					Model:  "TDP-244 Plus",
+					Online: true,
+					Status: status,
+				})
+			} else if isTSC && !usbConnected {
+				// TSC printer in CUPS but USB not connected
+				printers = append(printers, PrinterInfo{
+					Name:   name,
+					Type:   "cups",
+					Online: false,
+					Status: "disconnected",
+				})
+			} else {
+				printers = append(printers, PrinterInfo{
+					Name:   name,
+					Type:   pType,
+					Online: online,
+					Status: status,
+				})
 			}
 		}
 	}
@@ -158,7 +229,7 @@ func listLocalPrinters() ([]PrinterInfo, error) {
 	return printers, nil
 }
 
-// rawPrint sends data directly to the printer via USB (bypassing CUPS).
+// rawPrint sends data directly to the printer. Tries USB first, falls back to CUPS.
 func rawPrint(printerName string, data []byte) error {
 	if strings.HasPrefix(printerName, "(simulated)") {
 		fmt.Printf("[simulate] Would print %d bytes to %s\n", len(data), printerName)
@@ -166,8 +237,9 @@ func rawPrint(printerName string, data []byte) error {
 		return nil
 	}
 
-	// Direct USB: bypass CUPS entirely
-	if strings.Contains(printerName, "USB") || strings.Contains(strings.ToLower(printerName), "tsc") {
+	// Try direct USB first for TSC printers
+	isTSC := strings.Contains(printerName, "USB") || strings.Contains(strings.ToLower(printerName), "tsc")
+	if isTSC {
 		cData := C.CBytes(data)
 		defer C.free(cData)
 
@@ -178,31 +250,43 @@ func rawPrint(printerName string, data []byte) error {
 			C.int(len(data)),
 		)
 
-		switch ret {
-		case -1:
-			return fmt.Errorf("libusb init failed")
-		case -2:
-			return fmt.Errorf("TSC printer not found on USB (vendor=%04x product=%04x)", tscVendorID, tscProductID)
-		case -3:
-			return fmt.Errorf("cannot claim USB interface — close other apps using the printer")
-		case -4:
-			return fmt.Errorf("USB transfer failed")
-		default:
-			if ret > 0 {
-				fmt.Printf("[print-usb] Sent %d/%d bytes directly via USB to %s\n", int(ret), len(data), printerName)
-				return nil
+		if ret > 0 {
+			fmt.Printf("[print-usb] Sent %d/%d bytes directly via USB to %s\n", int(ret), len(data), printerName)
+			return nil
+		}
+		// USB failed — fall through to CUPS
+		fmt.Printf("[print-usb] USB not available (ret=%d), falling back to CUPS for %s\n", int(ret), printerName)
+	}
+
+	// CUPS fallback: resolve the actual CUPS printer name
+	cupsName := printerName
+	// Strip "-USB" suffix if present — CUPS doesn't use it
+	cupsName = strings.TrimSuffix(cupsName, "-USB")
+
+	// If we still can't find the printer, search CUPS for any TSC printer
+	if isTSC {
+		if out, err := exec.Command("lpstat", "-a").Output(); err == nil {
+			for _, line := range strings.Split(string(out), "\n") {
+				fields := strings.Fields(strings.TrimSpace(line))
+				if len(fields) == 0 {
+					continue
+				}
+				name := fields[0]
+				lower := strings.ToLower(name)
+				if strings.Contains(lower, "tsc") || strings.Contains(lower, "tdp") || strings.Contains(lower, "ttp") {
+					cupsName = name
+					break
+				}
 			}
-			return fmt.Errorf("USB transfer returned %d", int(ret))
 		}
 	}
 
-	// Fallback: CUPS lp command
-	cmd := exec.Command("lp", "-d", printerName, "-o", "raw")
+	cmd := exec.Command("lp", "-d", cupsName, "-o", "raw")
 	cmd.Stdin = strings.NewReader(string(data))
 	output, err := cmd.CombinedOutput()
 	if err != nil {
-		return fmt.Errorf("lp failed: %v — %s", err, string(output))
+		return fmt.Errorf("lp -d %s failed: %v — %s", cupsName, err, string(output))
 	}
-	fmt.Printf("[print-cups] Sent %d bytes via lp to %s\n", len(data), printerName)
+	fmt.Printf("[print-cups] Sent %d bytes via lp to %s\n", len(data), cupsName)
 	return nil
 }

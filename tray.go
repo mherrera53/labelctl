@@ -124,7 +124,10 @@ func sendToPrinter(printerName string, data []byte) error {
 
 func onTrayReady(dashURL string, autoOpen bool) {
 	systray.SetTooltip(trayTooltipText())
-	systray.SetIcon(generateAppIcon(32))
+	// macOS menubar icons: 22px (standard), template mode for auto dark/light
+	trayIcon := generateAppIcon(22)
+	regularIcon := generateAppIcon(22)
+	systray.SetTemplateIcon(trayIcon, regularIcon)
 
 	// --- Printer info (disabled) ---
 	mPrinterInfo := systray.AddMenuItem(trayPrinterInfoText(), "Impresoras detectadas")
