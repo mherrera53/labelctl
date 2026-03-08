@@ -5,6 +5,9 @@ on:
     - cron: '0 6 1 * *'  # First day of every month at 6am UTC
   workflow_dispatch:       # Manual trigger
 
+permissions:
+  contents: read
+
 jobs:
   renew:
     runs-on: ubuntu-latest
@@ -27,17 +30,10 @@ jobs:
             --path="./.lego" \
             run
 
-          cp .lego/certificates/local.labelctl.dev.crt certs/server.crt
-          cp .lego/certificates/local.labelctl.dev.key certs/server.key
-
-      - name: Commit updated certificate
+      - name: Update GitHub secrets with new cert
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add certs/server.crt certs/server.key
-          if git diff --cached --quiet; then
-            echo "No certificate changes"
-          else
-            git commit -m "chore: renew Let's Encrypt certificate for local.labelctl.dev"
-            git push
-          fi
+          gh secret set LABELCTL_CERT < .lego/certificates/local.labelctl.dev.crt
+          gh secret set LABELCTL_KEY < .lego/certificates/local.labelctl.dev.key
+          echo "Secrets updated with renewed certificate"

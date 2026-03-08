@@ -59,6 +59,19 @@ jobs:
         with:
           platform: ${{ matrix.goarch == '386' && 'x86' || 'x64' }}
 
+      - name: Inject Let's Encrypt certificate
+        env:
+          LABELCTL_CERT: ${{ secrets.LABELCTL_CERT }}
+          LABELCTL_KEY: ${{ secrets.LABELCTL_KEY }}
+        run: |
+          if [ -n "$LABELCTL_CERT" ] && [ -n "$LABELCTL_KEY" ]; then
+            echo "$LABELCTL_CERT" > certs/server.crt
+            echo "$LABELCTL_KEY" > certs/server.key
+            echo "Real Let's Encrypt cert injected"
+          else
+            echo "No cert secrets found — using placeholder"
+          fi
+
       - name: Build binary
         env:
           GOOS: ${{ matrix.goos }}
