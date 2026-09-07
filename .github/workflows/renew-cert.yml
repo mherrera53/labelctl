@@ -12,12 +12,23 @@ jobs:
   renew:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
+
+      - name: Check PAT for updating secrets
+        env:
+          GH_PAT: ${{ secrets.GH_PAT }}
+        run: |
+          if [ -z "$GH_PAT" ]; then
+            echo "::error::Falta el secreto GH_PAT (fine-grained PAT con permiso Secrets: read/write sobre este repo). GITHUB_TOKEN no puede escribir secretos."
+            exit 1
+          fi
 
       - name: Install lego
         run: |
-          curl -sL https://github.com/go-acme/lego/releases/latest/download/lego_linux_amd64.tar.gz | tar xz
+          LEGO_VER=$(curl -sL https://api.github.com/repos/go-acme/lego/releases/latest | jq -r .tag_name)
+          curl -sL "https://github.com/go-acme/lego/releases/download/${LEGO_VER}/lego_${LEGO_VER}_linux_amd64.tar.gz" | tar xz lego
           sudo mv lego /usr/local/bin/
+          lego --version
 
       - name: Renew certificate
         env:
@@ -32,8 +43,9 @@ jobs:
 
       - name: Update GitHub secrets with new cert
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GH_PAT }}
         run: |
-          gh secret set LABELCTL_CERT < .lego/certificates/local.labelctl.dev.crt
-          gh secret set LABELCTL_KEY < .lego/certificates/local.labelctl.dev.key
+          gh secret set LABELCTL_CERT -R "$GITHUB_REPOSITORY" < .lego/certificates/local.labelctl.dev.crt
+          gh secret set LABELCTL_KEY -R "$GITHUB_REPOSITORY" < .lego/certificates/local.labelctl.dev.key
+          rm -rf .lego
           echo "Secrets updated with renewed certificate"
